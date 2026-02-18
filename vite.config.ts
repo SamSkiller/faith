@@ -9,7 +9,9 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // This maps the cloud environment variable to the code's process.env
-      'process.env.API_KEY': JSON.stringify(env.VITE_API_KEY || env.API_KEY)
+      'process.env.API_KEY': JSON.stringify(env.VITE_API_KEY || env.API_KEY),
+      'process.env.NODE_ENV': JSON.stringify(mode),
+      'process.env.VITE_API_BASE': JSON.stringify(env.VITE_API_BASE || '')
     },
     build: {
       outDir: 'dist',

@@ -1,17 +1,24 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ShoppingBag, X, Star, Trash2, Plus, Minus, Truck, Smartphone, CheckCircle2, 
-  Eye, Heart, Lock, ArrowLeft, Loader2, Sparkles, Activity, History, Edit3, 
-  Shield, Gem, Search, ArrowUpDown, DollarSign, TrendingUp, Package, 
-  ClipboardList, Users, LogOut, Settings, Crown, Fingerprint, Languages, Bell, 
-  Cloud, MessageSquare, Trash, BarChart3
+  Eye, Heart, MapPin, Lock, ArrowLeft, Loader2, Sparkles, CreditCard, 
+  LogOut, Users, BarChart3, ClipboardList, Camera, History, Edit3, Globe, 
+  Shield, Activity, RefreshCw, Cpu, Menu, Gem, Layers, Send, Search, ArrowUpDown, 
+  ChevronRight, Key, Mail, Github, User as UserIcon, Package, TrendingUp, Settings, PieChart,
+  ArrowRight, CreditCard as CardIcon, Map, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
+  Languages, Trash, Share2, ShieldAlert, Crown, Zap, Fingerprint, Cloud, MessageSquare,
+  Wifi, WifiOff
 } from 'lucide-react';
 import { PRODUCTS as INITIAL_PRODUCTS, SHIPPING_OPTIONS } from './constants';
 import { Product, CartItem, Order, User, Category, Review } from './types';
 import { initiateSTKPush } from './services/mpesaService';
 import { generateProductCopy, getStyleTips } from './services/geminiService';
-import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis, YAxis, BarChart, Bar, Cell, PieChart as RePieChart, Pie } from 'recharts';
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+const API_BASE = process.env.VITE_API_BASE || (IS_PROD 
+  ? 'https://your-faith-shop-api.onrender.com/api' 
+  : 'http://localhost:5000/api');
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070",
@@ -22,7 +29,7 @@ const HERO_IMAGES = [
 
 // --- Shared Components ---
 
-const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products }: any) => {
+const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
   const [showSearch, setShowSearch] = useState(false);
   const [isAnimate, setIsAnimate] = useState(false);
   const categories: Category[] = ['All', 'Women', 'Men', 'Accessories', 'Hot Deals'];
@@ -45,8 +52,13 @@ const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, 
 
   return (
     <header className="sticky top-0 z-[60] w-full">
-      <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 text-white py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">
+      <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 text-white py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.4em] animate-pulse relative">
         Nairobi Same-Day Luxury Delivery • Presence By Faith
+        {!isSynced && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] bg-slate-900/40 px-2 py-0.5 rounded flex items-center gap-1 font-black">
+            <WifiOff className="w-2 h-2" /> Local Mode
+          </span>
+        )}
       </div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
@@ -60,7 +72,7 @@ const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, 
           </button>
         </div>
 
-        <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
+        <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-300">
           {categories.map(cat => (
             <button 
               key={cat} 
@@ -472,11 +484,18 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
   useEffect(() => {
     const loadAI = async () => {
       setLoading(true);
-      const [c, t] = await Promise.all([
-        generateProductCopy(product.name, product.category),
-        getStyleTips(product.name)
-      ]);
-      setCopy(c); setTips(t); setLoading(false);
+      try {
+          const [c, t] = await Promise.all([
+            generateProductCopy(product.name, product.category),
+            getStyleTips(product.name)
+          ]);
+          setCopy(c); 
+          setTips(t);
+      } catch (err) {
+          console.error("AI Error:", err);
+      } finally {
+          setLoading(false);
+      }
     };
     loadAI();
   }, [product]);
@@ -825,6 +844,366 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
   );
 };
 
+// --- Main App Controller ---
+
+const MainContent = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [view, setView] = useState<'home' | 'checkout' | 'admin' | 'auth' | 'track-order' | 'success'>('home');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('All');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [heroIdx, setHeroIdx] = useState(0);
+  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showCartToast, setShowCartToast] = useState<Product | null>(null);
+  const [isSynced, setIsSynced] = useState(false);
+
+  const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
+
+  useEffect(() => {
+    const p = localStorage.getItem('faith_products_db');
+    setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
+    const o = localStorage.getItem('faith_orders_db');
+    setOrders(o ? JSON.parse(o) : []);
+    
+    const storedUsers = localStorage.getItem('faith_users_db');
+    let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+    const defaultSam = { id: 'sam-id', name: 'Sam', email: 'sam@sam', password: 'sam.', role: 'customer' as const, joinedAt: new Date().toISOString(), faithPoints: 100, wishlist: [] };
+    const defaultFaith = { id: 'admin-id', name: 'faith', email: 'faith@faith', password: 'faith.', role: 'admin' as const, joinedAt: new Date().toISOString(), faithPoints: 999, wishlist: [] };
+    
+    if (!uList.find(u => u.email === 'sam@sam')) uList.push(defaultSam);
+    if (!uList.find(u => u.email === 'faith@faith')) uList.push(defaultFaith);
+    setUsers(uList);
+    sync('faith_users_db', uList);
+
+    const s = localStorage.getItem('faith_session_active');
+    if (s) setCurrentUser(JSON.parse(s));
+    
+    const interval = setInterval(() => setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length), 7000);
+    
+    // Connectivity Heartbeat Logic
+    const checkBackendSync = async () => {
+        try {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 2000);
+            const res = await fetch(`${API_BASE}/health`, { signal: controller.signal });
+            clearTimeout(id);
+            if (res.ok) {
+                setIsSynced(true);
+                const [pRes, oRes] = await Promise.all([
+                    fetch(`${API_BASE}/products`),
+                    fetch(`${API_BASE}/orders`)
+                ]);
+                if (pRes.ok) {
+                    const data = await pRes.json();
+                    if (data.length > 0) {
+                        setProducts(data);
+                        sync('faith_products_db', data);
+                    }
+                }
+                if (oRes.ok) {
+                    const data = await oRes.json();
+                    setOrders(data);
+                    sync('faith_orders_db', data);
+                }
+            } else {
+                setIsSynced(false);
+            }
+        } catch (e) {
+            setIsSynced(false);
+        }
+    };
+    
+    checkBackendSync();
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (isDarkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [isDarkMode]);
+
+  const handleAuth = async (user: User) => {
+    if (user.isRevoked) return alert("Identity Access Revoked by Protocol.");
+    
+    // Attempt backend auth first
+    if (isSynced) {
+        try {
+            const res = await fetch(`${API_BASE}/auth/sync`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, password: user.password, name: user.name })
+            });
+            if (res.ok) {
+                const cloudUser = await res.json();
+                setCurrentUser(cloudUser);
+                sync('faith_session_active', cloudUser);
+                if (cloudUser.role === 'admin') setView('admin');
+                else setView('home');
+                return;
+            }
+        } catch (e) {}
+    }
+
+    // Local Fallback
+    const storedUsers = JSON.parse(localStorage.getItem('faith_users_db') || '[]');
+    const existing = storedUsers.find((u: User) => u.email === user.email);
+    
+    if (existing && user.password !== existing.password) {
+       return alert("Authentication failed. Invalid security key.");
+    }
+
+    let updatedUser;
+    if (!existing) {
+      const nextUsers = [...storedUsers, user];
+      setUsers(nextUsers);
+      sync('faith_users_db', nextUsers);
+      updatedUser = user;
+    } else {
+      updatedUser = { ...existing, ...user };
+      const nextUsers = storedUsers.map((u: User) => u.email === user.email ? updatedUser : u);
+      setUsers(nextUsers);
+      sync('faith_users_db', nextUsers);
+    }
+
+    setCurrentUser(updatedUser);
+    sync('faith_session_active', updatedUser);
+
+    if (updatedUser.role === 'admin') setView('admin');
+    else setView('home');
+  };
+
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+    if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (selectedCategory !== 'All') result = result.filter(p => p.category === selectedCategory);
+    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
+    return result;
+  }, [products, selectedCategory, sortBy, searchQuery]);
+
+  const wishlistProducts = useMemo(() => {
+    if (!currentUser || !currentUser.wishlist) return [];
+    return products.filter(p => currentUser.wishlist.includes(p.id));
+  }, [products, currentUser]);
+
+  const toggleWishlist = (productId: string) => {
+    if (!currentUser) return setView('auth');
+    let nextW = currentUser.wishlist || [];
+    nextW = nextW.includes(productId) ? nextW.filter(id => id !== productId) : [...nextW, productId];
+    const nextU = { ...currentUser, wishlist: nextW };
+    setCurrentUser(nextU);
+    sync('faith_session_active', nextU);
+    const nextUs = users.map(u => u.id === currentUser.id ? nextU : u);
+    setUsers(nextUs);
+    sync('faith_users_db', nextUs);
+  };
+
+  const handleAddToCart = (p: Product) => {
+    setCart(prev => {
+        const ex = prev.find(i => i.id === p.id);
+        return ex ? prev.map(i => i.id === p.id ? {...i, quantity: i.quantity + 1} : i) : [...prev, {...p, quantity: 1}];
+    });
+    setShowCartToast(p);
+    setTimeout(() => setShowCartToast(null), 3000);
+  };
+
+  const handleOrderUpdate = (id: string, data: Partial<Order>) => {
+    const next = orders.map(o => o.id === id ? { ...o, ...data } : o);
+    setOrders(next);
+    sync('faith_orders_db', next);
+  };
+
+  const handleAddReview = (productId: string, review: Review) => {
+    const nextProducts = products.map(p => {
+      if (p.id === productId) {
+        const nextReviews = [review, ...(p.reviews || [])];
+        const nextRating = nextReviews.reduce((sum, r) => sum + r.rating, 0) / nextReviews.length;
+        return { 
+          ...p, 
+          reviews: nextReviews, 
+          reviewsCount: nextReviews.length,
+          rating: Number(nextRating.toFixed(1))
+        };
+      }
+      return p;
+    });
+    setProducts(nextProducts);
+    sync('faith_products_db', nextProducts);
+    if (selectedProduct && selectedProduct.id === productId) {
+       setSelectedProduct(nextProducts.find(p => p.id === productId) || null);
+    }
+  };
+
+  const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
+    let next;
+    if (type === 'restock') {
+       next = products.map(p => ({ ...p, stock: p.stock + 10 }));
+    } else if (type === 'adjust' && id) {
+       next = products.map(p => p.id === id ? { ...p, stock: Math.max(0, p.stock + (amount as number)) } : p);
+    } else if (type === 'edit' && id && amount) {
+       next = products.map(p => p.id === id ? { ...p, ...amount } : p);
+    }
+    if (next) {
+       setProducts(next);
+       sync('faith_products_db', next);
+    }
+  };
+
+  return (
+    <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
+      <Navbar 
+        cartCount={cart.reduce((s, i) => s + i.quantity, 0)} 
+        onOpenCart={() => setIsCartOpen(true)}
+        setView={setView} activeView={view}
+        selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}
+        currentUser={currentUser} onOpenProfile={() => setIsProfileOpen(true)}
+        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        products={products}
+        isSynced={isSynced}
+      />
+
+      {showCartToast && <CartToast product={showCartToast} onClose={() => setShowCartToast(null)} />}
+
+      <main className="flex-1">
+        {view === 'home' && (
+          <div>
+            <section className="relative h-[90vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+               {HERO_IMAGES.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover hero-img transition-all duration-[3000ms] ${heroIdx === i ? 'opacity-50 scale-100' : 'opacity-0 scale-125'}`} />)}
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/40"></div>
+               <div className="relative text-center text-white px-6 pt-20 animate-future-in z-10">
+                  <span className="px-6 py-2 bg-rose-600/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/50 shadow-neon">Couture Sanctuary</span>
+                  <h1 className="text-6xl md:text-[10rem] font-serif italic font-bold mb-8 leading-none drop-shadow-2xl">Presence <br/> <span className="text-rose-400">By Faith.</span></h1>
+                  <p className="text-xl max-w-2xl mx-auto font-light text-slate-300 mb-16 italic tracking-wide">Premium Nairobi fashion for the modern visionary.</p>
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                    <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-2 shadow-2xl active:scale-95">Discover Store</button>
+                    <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/20 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white/10 backdrop-blur-sm transition-all shadow-xl active:scale-95">Order Tracking</button>
+                  </div>
+               </div>
+            </section>
+
+            <section id="shop" className="max-w-7xl mx-auto px-6 py-32 space-y-16">
+               <div className="flex flex-col md:flex-row justify-between items-end gap-10">
+                  <div className="space-y-4"><h2 className="text-6xl font-serif italic font-bold text-slate-900 dark:text-white">{selectedCategory}</h2><div className="h-1.5 w-24 bg-rose-500 rounded-full shadow-lg"></div></div>
+                  <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-3 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-full shadow-sm text-slate-400">
+                      <ArrowUpDown className="w-4 h-4" />
+                      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white">
+                        <option value="default">Sort: Default</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="rating">Top Rated</option>
+                      </select>
+                    </div>
+                  </div>
+               </div>
+               <div className="amazon-grid">
+                  {filteredProducts.map(p => (
+                    <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                      <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
+                        <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
+                        <div className="absolute top-6 right-6 flex flex-col gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
+                        </div>
+                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl active-scale flex items-center gap-2">
+                             <Eye className="w-4 h-4" /> Quick View
+                           </button>
+                        </div>
+                      </div>
+                      <div className="px-4 pb-4 flex-1 flex flex-col text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
+                        <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
+                          <span className="text-2xl font-black italic text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
+                          <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-600 transition-all active:scale-90 shadow-xl"><Plus className="w-6 h-6" /></button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+               </div>
+               {filteredProducts.length === 0 && <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">No entities detected matching this search signature.</div>}
+            </section>
+          </div>
+        )}
+
+        {view === 'admin' && (
+          <AdminVault 
+            products={products} orders={orders} users={users}
+            onAdd={(p:any) => { const n = [...products, p]; setProducts(n); sync('faith_products_db', n); }}
+            onDelete={(id:any) => { const n = products.filter(p=>p.id!==id); setProducts(n); sync('faith_products_db', n); }}
+            onUpdateUser={(id:any, data:any) => { const n = users.map(u=>u.id===id?{...u, ...data}:u); setUsers(n); sync('faith_users_db', n); }}
+            onDeleteUser={(id:any) => { const n = users.filter(u=>u.id!==id); setUsers(n); sync('faith_users_db', n); }}
+            onUpdateOrder={handleOrderUpdate}
+            onBulkUpdate={handleBulkUpdate}
+          />
+        )}
+        
+        {view === 'track-order' && <TrackOrderView orders={orders} currentUser={currentUser} />}
+        {view === 'auth' && <AuthView onAuthSuccess={handleAuth} />}
+        {view === 'checkout' && <CheckoutView cart={cart} currentUser={currentUser} onComplete={async (o: any) => { 
+          // Local Update
+          const next = [o, ...orders]; setOrders(next); sync('faith_orders_db', next);
+          const updatedProducts = products.map(p => {
+             const inOrder = o.items.find((item: any) => item.id === p.id);
+             if (inOrder) return { ...p, soldCount: (p.soldCount || 0) + inOrder.quantity, stock: Math.max(0, p.stock - inOrder.quantity) };
+             return p;
+          });
+          setProducts(updatedProducts); sync('faith_products_db', updatedProducts);
+          
+          // Backend Sync
+          if (isSynced) {
+              try {
+                  await fetch(`${API_BASE}/orders`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(o)
+                  });
+              } catch (e) {}
+          }
+          
+          setCart([]); setView('success'); 
+        }} onAuth={() => setView('auth')} />}
+        {view === 'success' && (
+          <div className="pt-64 pb-64 text-center animate-future-in">
+             <div className="rotating-border-container mx-auto w-40 h-40 mb-14 flex items-center justify-center relative">
+                <CheckCircle2 className="w-20 h-20 text-emerald-500 relative z-10 drop-shadow-neon" />
+             </div>
+             <h1 className="text-8xl font-serif italic font-bold mb-8 text-rose-600">Sync Success.</h1>
+             <p className="text-2xl text-slate-400 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. Protocol ID Trace Active.</p>
+             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                <button onClick={() => setView('track-order')} className="px-12 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl active-scale flex items-center gap-3"><Truck className="w-4 h-4" /> Trace Order Logistics</button>
+                <button onClick={() => setView('home')} className="px-12 py-6 border-2 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-100 rounded-[32px] font-black uppercase tracking-widest text-[11px] active-scale">Return to Sanctuary</button>
+             </div>
+          </div>
+        )}
+      </main>
+
+      {isCartOpen && <CartDrawer cart={cart} setCart={setCart} onClose={() => setIsCartOpen(false)} onCheckout={() => { setIsCartOpen(false); setView('checkout'); }} />}
+      {isProfileOpen && currentUser && (
+        <ProfileModal 
+          user={currentUser} onClose={() => setIsProfileOpen(false)} onLogout={() => { setCurrentUser(null); localStorage.removeItem('faith_session_active'); setView('home'); setIsProfileOpen(false); }}
+          wishlistProducts={wishlistProducts} onRemoveFromWishlist={toggleWishlist} onAddToCart={handleAddToCart}
+          onUpdateUser={(id:any, data:any) => { 
+            const nextU = {...currentUser, ...data}; setCurrentUser(nextU); sync('faith_session_active', nextU); 
+            const nextUs = users.map(u=>u.id===id?nextU:u); setUsers(nextUs); sync('faith_users_db', nextUs); 
+          }}
+          isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}
+        />
+      )}
+      {selectedProduct && <ProductModal product={selectedProduct} isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} onToggleWishlist={toggleWishlist} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onAddReview={handleAddReview} currentUser={currentUser} />}
+    </div>
+  );
+};
+
 // --- Sub Components ---
 
 const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
@@ -960,308 +1339,6 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           )}
         </main>
       </div>
-    </div>
-  );
-};
-
-// --- Main App Controller ---
-
-const MainContent = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [view, setView] = useState<'home' | 'checkout' | 'admin' | 'auth' | 'track-order' | 'success'>('home');
-  const [selectedCategory, setSelectedCategory] = useState<Category>('All');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [heroIdx, setHeroIdx] = useState(0);
-  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showCartToast, setShowCartToast] = useState<Product | null>(null);
-
-  const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
-
-  // --- NEW: Scroll Lock Logic ---
-  useEffect(() => {
-    if (isProfileOpen || selectedProduct || isCartOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isProfileOpen, selectedProduct, isCartOpen]);
-
-  useEffect(() => {
-    const p = localStorage.getItem('faith_products_db');
-    setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
-    const o = localStorage.getItem('faith_orders_db');
-    setOrders(o ? JSON.parse(o) : []);
-    
-    const storedUsers = localStorage.getItem('faith_users_db');
-    let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-    const defaultSam = { id: 'sam-id', name: 'Sam', email: 'sam@sam', password: 'sam.', role: 'customer' as const, joinedAt: new Date().toISOString(), faithPoints: 100, wishlist: [] };
-    const defaultFaith = { id: 'admin-id', name: 'faith', email: 'faith@faith', password: 'faith.', role: 'admin' as const, joinedAt: new Date().toISOString(), faithPoints: 999, wishlist: [] };
-    
-    if (!uList.find(u => u.email === 'sam@sam')) uList.push(defaultSam);
-    if (!uList.find(u => u.email === 'faith@faith')) uList.push(defaultFaith);
-    setUsers(uList);
-    sync('faith_users_db', uList);
-
-    const s = localStorage.getItem('faith_session_active');
-    if (s) setCurrentUser(JSON.parse(s));
-    
-    const interval = setInterval(() => setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length), 7000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (isDarkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  }, [isDarkMode]);
-
-  const handleAuth = (user: User) => {
-    if (user.isRevoked) return alert("Identity Access Revoked by Protocol.");
-    
-    const storedUsers = JSON.parse(localStorage.getItem('faith_users_db') || '[]');
-    const existing = storedUsers.find((u: User) => u.email === user.email);
-    
-    if (existing && user.password !== existing.password) {
-       return alert("Authentication failed. Invalid security key.");
-    }
-
-    let updatedUser;
-    if (!existing) {
-      const nextUsers = [...storedUsers, user];
-      setUsers(nextUsers);
-      sync('faith_users_db', nextUsers);
-      updatedUser = user;
-    } else {
-      updatedUser = { ...existing, ...user };
-      const nextUsers = storedUsers.map((u: User) => u.email === user.email ? updatedUser : u);
-      setUsers(nextUsers);
-      sync('faith_users_db', nextUsers);
-    }
-
-    setCurrentUser(updatedUser);
-    sync('faith_session_active', updatedUser);
-
-    if (updatedUser.role === 'admin') setView('admin');
-    else setView('home');
-  };
-
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-    if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (selectedCategory !== 'All') result = result.filter(p => p.category === selectedCategory);
-    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
-    else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
-    return result;
-  }, [products, selectedCategory, sortBy, searchQuery]);
-
-  const wishlistProducts = useMemo(() => {
-    if (!currentUser || !currentUser.wishlist) return [];
-    return products.filter(p => currentUser.wishlist.includes(p.id));
-  }, [products, currentUser]);
-
-  const toggleWishlist = (productId: string) => {
-    if (!currentUser) return setView('auth');
-    let nextW = currentUser.wishlist || [];
-    nextW = nextW.includes(productId) ? nextW.filter(id => id !== productId) : [...nextW, productId];
-    const nextU = { ...currentUser, wishlist: nextW };
-    setCurrentUser(nextU);
-    sync('faith_session_active', nextU);
-    const nextUs = users.map(u => u.id === currentUser.id ? nextU : u);
-    setUsers(nextUs);
-    sync('faith_users_db', nextUs);
-  };
-
-  const handleAddToCart = (p: Product) => {
-    setCart(prev => {
-        const ex = prev.find(i => i.id === p.id);
-        return ex ? prev.map(i => i.id === p.id ? {...i, quantity: i.quantity + 1} : i) : [...prev, {...p, quantity: 1}];
-    });
-    setShowCartToast(p);
-    setTimeout(() => setShowCartToast(null), 3000);
-  };
-
-  const handleOrderUpdate = (id: string, data: Partial<Order>) => {
-    const next = orders.map(o => o.id === id ? { ...o, ...data } : o);
-    setOrders(next);
-    sync('faith_orders_db', next);
-  };
-
-  const handleAddReview = (productId: string, review: Review) => {
-    const nextProducts = products.map(p => {
-      if (p.id === productId) {
-        const nextReviews = [review, ...(p.reviews || [])];
-        const nextRating = nextReviews.reduce((sum, r) => sum + r.rating, 0) / nextReviews.length;
-        return { 
-          ...p, 
-          reviews: nextReviews, 
-          reviewsCount: nextReviews.length,
-          rating: Number(nextRating.toFixed(1))
-        };
-      }
-      return p;
-    });
-    setProducts(nextProducts);
-    sync('faith_products_db', nextProducts);
-    if (selectedProduct && selectedProduct.id === productId) {
-       setSelectedProduct(nextProducts.find(p => p.id === productId) || null);
-    }
-  };
-
-  const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
-    let next;
-    if (type === 'restock') {
-       next = products.map(p => ({ ...p, stock: p.stock + 10 }));
-    } else if (type === 'adjust' && id) {
-       next = products.map(p => p.id === id ? { ...p, stock: Math.max(0, p.stock + (amount as number)) } : p);
-    } else if (type === 'edit' && id && amount) {
-       next = products.map(p => p.id === id ? { ...p, ...amount } : p);
-    }
-    if (next) {
-       setProducts(next);
-       sync('faith_products_db', next);
-    }
-  };
-
-  return (
-    <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
-      <Navbar 
-        cartCount={cart.reduce((s, i) => s + i.quantity, 0)} 
-        onOpenCart={() => setIsCartOpen(true)}
-        setView={setView} activeView={view}
-        selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}
-        currentUser={currentUser} onOpenProfile={() => setIsProfileOpen(true)}
-        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-        products={products}
-      />
-
-      {showCartToast && <CartToast product={showCartToast} onClose={() => setShowCartToast(null)} />}
-
-      <main className="flex-1">
-        {view === 'home' && (
-          <div>
-            <section className="relative h-[90vh] bg-slate-950 flex items-center justify-center overflow-hidden">
-               {HERO_IMAGES.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover hero-img transition-all duration-[3000ms] ${heroIdx === i ? 'opacity-50 scale-100' : 'opacity-0 scale-125'}`} />)}
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/40"></div>
-               <div className="relative text-center text-white px-6 pt-20 animate-future-in z-10">
-                  <span className="px-6 py-2 bg-rose-600/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/50 shadow-neon">Couture Sanctuary</span>
-                  <h1 className="text-6xl md:text-[10rem] font-serif italic font-bold mb-8 leading-none drop-shadow-2xl">Presence <br/> <span className="text-rose-400">By Faith.</span></h1>
-                  <p className="text-xl max-w-2xl mx-auto font-light text-slate-300 mb-16 italic tracking-wide">Premium Nairobi fashion for the modern visionary.</p>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                    <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-2 shadow-2xl active:scale-95">Discover Store</button>
-                    <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/20 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white/10 backdrop-blur-sm transition-all shadow-xl active:scale-95">Order Tracking</button>
-                  </div>
-               </div>
-            </section>
-
-            {/* Shop Section */}
-            <section id="shop" className="max-w-7xl mx-auto px-6 py-32 space-y-16">
-               <div className="flex flex-col md:flex-row justify-between items-end gap-10">
-                  <div className="space-y-4">
-                    <h2 className="text-6xl font-serif italic font-bold text-slate-900 dark:text-white">{selectedCategory}</h2>
-                    <div className="h-1.5 w-24 bg-rose-500 rounded-full shadow-lg"></div>
-                  </div>
-                  <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-3 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-full shadow-sm text-slate-400">
-                      <ArrowUpDown className="w-4 h-4" />
-                      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="text-[10px] font-black uppercase tracking-widest outline-none bg-transparent text-slate-900 dark:text-white">
-                        <option value="default">Sort: Default</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="rating">Top Rated</option>
-                      </select>
-                    </div>
-                  </div>
-               </div>
-               <div className="amazon-grid">
-                  {filteredProducts.map(p => (
-                    <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
-                      <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
-                        <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
-                        <div className="absolute top-6 right-6 flex flex-col gap-2">
-                          <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
-                        </div>
-                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                           <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl active-scale flex items-center gap-2">
-                             <Eye className="w-4 h-4" /> Quick View
-                           </button>
-                        </div>
-                      </div>
-                      <div className="px-4 pb-4 flex-1 flex flex-col text-center">
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
-                        <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
-                          <span className="text-2xl font-black italic text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
-                          <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-600 transition-all active:scale-90 shadow-xl"><Plus className="w-6 h-6" /></button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-               </div>
-               {filteredProducts.length === 0 && <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">No entities detected matching this search signature.</div>}
-            </section>
-          </div>
-        )}
-
-        {view === 'admin' && (
-          <AdminVault 
-            products={products} orders={orders} users={users}
-            onAdd={(p:any) => { const n = [...products, p]; setProducts(n); sync('faith_products_db', n); }}
-            onDelete={(id:any) => { const n = products.filter(p=>p.id!==id); setProducts(n); sync('faith_products_db', n); }}
-            onUpdateUser={(id:any, data:any) => { const n = users.map(u=>u.id===id?{...u, ...data}:u); setUsers(n); sync('faith_users_db', n); }}
-            onDeleteUser={(id:any) => { const n = users.filter(u=>u.id!==id); setUsers(n); sync('faith_users_db', n); }}
-            onUpdateOrder={handleOrderUpdate}
-            onBulkUpdate={handleBulkUpdate}
-          />
-        )}
-        
-        {view === 'track-order' && <TrackOrderView orders={orders} currentUser={currentUser} />}
-        {view === 'auth' && <AuthView onAuthSuccess={handleAuth} />}
-        {view === 'checkout' && <CheckoutView cart={cart} currentUser={currentUser} onComplete={(o: any) => { 
-          const next = [o, ...orders]; setOrders(next); sync('faith_orders_db', next);
-          const updatedProducts = products.map(p => {
-             const inOrder = o.items.find((item: any) => item.id === p.id);
-             if (inOrder) return { ...p, soldCount: (p.soldCount || 0) + inOrder.quantity, stock: Math.max(0, p.stock - inOrder.quantity) };
-             return p;
-          });
-          setProducts(updatedProducts); sync('faith_products_db', updatedProducts);
-          setCart([]); setView('success'); 
-        }} onAuth={() => setView('auth')} />}
-        {view === 'success' && (
-          <div className="pt-64 pb-64 text-center animate-future-in">
-             <div className="rotating-border-container mx-auto w-40 h-40 mb-14 flex items-center justify-center relative">
-                <CheckCircle2 className="w-20 h-20 text-emerald-500 relative z-10 drop-shadow-neon" />
-             </div>
-             <h1 className="text-8xl font-serif italic font-bold mb-8 text-rose-600">Sync Success.</h1>
-             <p className="text-2xl text-slate-400 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. Protocol ID Trace Active.</p>
-             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <button onClick={() => setView('track-order')} className="px-12 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl active-scale flex items-center gap-3"><Truck className="w-4 h-4" /> Trace Order Logistics</button>
-                <button onClick={() => setView('home')} className="px-12 py-6 border-2 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-100 rounded-[32px] font-black uppercase tracking-widest text-[11px] active-scale">Return to Sanctuary</button>
-             </div>
-          </div>
-        )}
-      </main>
-
-      {isCartOpen && <CartDrawer cart={cart} setCart={setCart} onClose={() => setIsCartOpen(false)} onCheckout={() => { setIsCartOpen(false); setView('checkout'); }} />}
-      {isProfileOpen && currentUser && (
-        <ProfileModal 
-          user={currentUser} onClose={() => setIsProfileOpen(false)} onLogout={() => { setCurrentUser(null); localStorage.removeItem('faith_session_active'); setView('home'); setIsProfileOpen(false); }}
-          wishlistProducts={wishlistProducts} onRemoveFromWishlist={toggleWishlist} onAddToCart={handleAddToCart}
-          onUpdateUser={(id:any, data:any) => { 
-            const nextU = {...currentUser, ...data}; setCurrentUser(nextU); sync('faith_session_active', nextU); 
-            const nextUs = users.map(u=>u.id===id?nextU:u); setUsers(nextUs); sync('faith_users_db', nextUs); 
-          }}
-          isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}
-        />
-      )}
-      {selectedProduct && <ProductModal product={selectedProduct} isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} onToggleWishlist={toggleWishlist} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onAddReview={handleAddReview} currentUser={currentUser} />}
     </div>
   );
 };
