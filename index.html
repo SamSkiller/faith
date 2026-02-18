@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faith Shop | Futuristic Luxury</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rose-primary: #f472b6;
+            --neon-cyan: #22d3ee;
+            --luxury-bg: #fffafa;
+            --luxury-text: #0f172a;
+        }
+        
+        .dark {
+            --luxury-bg: #020617;
+            --luxury-text: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            background-color: var(--luxury-bg);
+            color: var(--luxury-text);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-future { font-family: 'Space Grotesk', sans-serif; }
+        
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes rotate {
+            to { --angle: 360deg; }
+        }
+
+        .rotating-border-container {
+            position: relative;
+            padding: 3px;
+            border-radius: 9999px;
+            background: conic-gradient(from var(--angle), transparent, var(--rose-primary), var(--neon-cyan), transparent);
+            animation: rotate 4s linear infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bg-conic-profile {
+            background: conic-gradient(from 45deg, #f472b6, #22d3ee, #be185d, #f472b6);
+        }
+
+        .hero-img {
+            transition: opacity 1.5s ease-in-out, transform 10s linear;
+        }
+
+        .amazon-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 3rem; 
+        }
+
+        .shadow-neon {
+            box-shadow: 0 0 15px var(--rose-primary), 0 0 30px var(--neon-cyan);
+        }
+        
+        .drop-shadow-neon {
+            filter: drop-shadow(0 0 10px var(--rose-primary));
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-future-in { animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--rose-primary); border-radius: 10px; }
+
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .active-scale:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 640px) {
+            .amazon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.571.0",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+</head>
+<body class="antialiased">
+    <div id="root"></div>
+</body>
+</html>
