@@ -1,3 +1,6 @@
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ShoppingBag, X, Star, Trash2, Plus, Minus, Truck, Smartphone, CheckCircle2, 
