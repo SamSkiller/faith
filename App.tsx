@@ -1144,20 +1144,32 @@ const handleAuth = async (credentials, mode = "login") => {
           });
           setProducts(updatedProducts); sync('faith_products_db', updatedProducts);
           
-          // Backend Sync
-          if (isSynced) {
-              try {
+       if (isSynced) {
+        try {
           const token = localStorage.getItem("faith_token");
-          
+      
+          // 🔥 FORMAT ORDER HERE
+          const formattedOrder = {
+            phoneNumber: o.phoneNumber,
+            items: o.items.map((item: any) => ({
+              productId: item._id || item.id, // MUST be Mongo _id
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          };
+      
           await fetch(`${API_BASE}/orders`, {
+            method: "POST", // 🚨 you were missing this
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(o),
+            body: JSON.stringify(formattedOrder),
           });
-
-              } catch (e) {}
-          }
+      
+        } catch (e) {}
+      }
           
           setCart([]); setView('success'); 
         }} onAuth={() => setView('auth')} />}
