@@ -1,136 +1,299 @@
-
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+/* =========================
+   CONFIG
+========================= */
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/faithshop';
+const MONGODB_URI = process.env.MONGODB_URI;
+const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
 
-// --- Schemas ---
+/* =========================
+   MIDDLEWARE
+========================= */
 
-const productSchema = new mongoose.Schema({
-  id: String,
-  name: String,
-  price: Number,
-  category: String,
-  description: String,
-  image: String,
-  rating: { type: Number, default: 5 },
-  reviewsCount: { type: Number, default: 0 },
-  stock: Number,
-  soldCount: { type: Number, default: 0 },
-  isHot: Boolean,
-  isNew: Boolean,
-  reviews: [{
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*",
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
+/* =========================
+   DATABASE
+========================= */
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log("✅ Faith Database Connected"))
+  .catch((err) => {
+    console.error("❌ Database Connection Failed:", err.message);
+    process.exit(1);
+  });
+
+/* =========================
+   SCHEMAS
+========================= */
+
+const productSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    category: String,
+    description: String,
+    image: String,
+    rating: { type: Number, default: 5 },
+    reviewsCount: { type: Number, default: 0 },
+    stock: { type: Number, default: 0 },
+    soldCount: { type: Number, default: 0 },
+    isHot: Boolean,
+    isNew: Boolean,
+    reviews: [
+      {
+        userName: String,
+        rating: Number,
+        comment: String,
+        date: { type: Date, default: Date.now },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+const userSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
+    role: { type: String, default: "customer" },
+    faithPoints: { type: Number, default: 100 },
+    wishlist: [String],
+    joinedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const orderSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     userName: String,
-    rating: Number,
-    comment: String,
-    date: String
-  }]
-});
+    items: [
+      {
+        productId: mongoose.Schema.Types.ObjectId,
+        name: String,
+        quantity: Number,
+        price: Number,
+      },
+    ],
+    total: Number,
+    status: { type: String, default: "Processing" },
+    phoneNumber: String,
+    date: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
-  role: { type: String, default: 'customer' },
-  faithPoints: { type: Number, default: 100 },
-  wishlist: [String],
-  joinedAt: { type: Date, default: Date.now }
-});
+const Product = mongoose.model("Product", productSchema);
+const User = mongoose.model("User", userSchema);
+const Order = mongoose.model("Order", orderSchema);
 
-const orderSchema = new mongoose.Schema({
-  userId: String,
-  userName: String,
-  items: Array,
-  total: Number,
-  status: { type: String, default: 'Processing' },
-  phoneNumber: String,
-  date: { type: String, default: () => new Date().toLocaleString() }
-});
+/* =========================
+   AUTH MIDDLEWARE
+========================= */
 
-const Product = mongoose.model('Product', productSchema);
-const User = mongoose.model('User', userSchema);
-const Order = mongoose.model('Order', orderSchema);
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-// --- Routes ---
-
-app.get('/api/health', (req, res) => res.json({ status: 'online', database: mongoose.connection.readyState === 1 }));
-
-app.get('/api/products', async (req, res) => {
   try {
-    const products = await Product.find();
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ message: "Invalid Token" });
+  }
+};
+
+/* =========================
+   ROUTES
+========================= */
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "online",
+    database: mongoose.connection.readyState === 1,
+  });
+});
+
+/* =========================
+   PRODUCTS
+========================= */
+
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
     res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: 'Database access failed' });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
-app.post('/api/auth/sync', async (req, res) => {
-  const { email, password, name } = req.body;
+/* =========================
+   AUTH
+========================= */
+
+app.post("/api/auth/register", async (req, res) => {
   try {
-    let user = await User.findOne({ email });
-    if (user) {
-      if (password && user.password !== password) return res.status(401).json({ message: 'Invalid Key' });
-      return res.json(user);
-    }
-    user = new User({ email, password: password || 'faith_temp_key', name });
+    const { email, password, name } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "User already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      email,
+      password: hashedPassword,
+      name,
+    });
+
     await user.save();
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(500).json({ error: 'Auth sync failed' });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(201).json({ user, token });
+  } catch {
+    res.status(500).json({ error: "Registration failed" });
   }
 });
 
-app.get('/api/orders', async (req, res) => {
-  const orders = await Order.find().sort({ date: -1 });
-  res.json(orders);
-});
-
-app.post('/api/orders', async (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
-    const order = new Order(req.body);
-    await order.save();
-    for (const item of order.items) {
-      await Product.findOneAndUpdate(
-        { $or: [{ id: item.id }, { _id: item.id }] }, 
-        { $inc: { stock: -item.quantity, soldCount: item.quantity } }
-      );
-    }
-    res.status(201).json(order);
-  } catch (err) {
-    res.status(500).json({ error: 'Order processing failed' });
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({ user, token });
+  } catch {
+    res.status(500).json({ error: "Login failed" });
   }
 });
 
-// --- Initialization & Seeding ---
+/* =========================
+   ORDERS (Protected)
+========================= */
+
+app.get("/api/orders", authenticate, async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
+    res.json(orders);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
+app.post("/api/orders", authenticate, async (req, res) => {
+  try {
+    const { items, phoneNumber } = req.body;
+
+    let total = 0;
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (!product || product.stock < item.quantity) {
+        return res
+          .status(400)
+          .json({ message: `Insufficient stock for ${item.name}` });
+      }
+
+      product.stock -= item.quantity;
+      product.soldCount += item.quantity;
+      await product.save();
+
+      total += product.price * item.quantity;
+    }
+
+    const order = new Order({
+      userId: req.user.id,
+      userName: req.user.name,
+      items,
+      total,
+      phoneNumber,
+    });
+
+    await order.save();
+
+    res.status(201).json(order);
+  } catch {
+    res.status(500).json({ error: "Order processing failed" });
+  }
+});
+
+/* =========================
+   SEED INITIAL PRODUCTS
+========================= */
 
 const seedDatabase = async () => {
   const count = await Product.countDocuments();
   if (count === 0) {
-    console.log('Seeding initial luxury collection...');
-    // Initial products from constants.ts (shortened for brevity here)
-    const initialProducts = [
-      { id: '1', name: 'Silk Aurora Gown', price: 34500, category: 'Women', stock: 12, isHot: true, image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800' },
-      { id: '2', name: 'Midnight Velvet Blazer', price: 28900, category: 'Men', stock: 7, isHot: true, image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800' }
-      // Add more as needed
-    ];
-    await Product.insertMany(initialProducts);
-    console.log('Sanctuary collection seeded successfully.');
+    console.log("🌱 Seeding initial collection...");
+
+    await Product.insertMany([
+      {
+        name: "Silk Aurora Gown",
+        price: 34500,
+        category: "Women",
+        stock: 12,
+        isHot: true,
+        image:
+          "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800",
+      },
+      {
+        name: "Midnight Velvet Blazer",
+        price: 28900,
+        category: "Men",
+        stock: 7,
+        isHot: true,
+        image:
+          "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800",
+      },
+    ]);
+
+    console.log("✅ Collection seeded");
   }
 };
 
-mongoose.connect(MONGODB_URI)
-  .then(async () => {
-    console.log('Faith Database Connected.');
-    await seedDatabase();
-    app.listen(PORT, () => console.log(`Sanctuary Server active on port ${PORT}`));
-  })
-  .catch(err => console.error('Database Connection Refused. Check MONGODB_URI.'));
+seedDatabase();
+
+/* =========================
+   START SERVER
+========================= */
+
+app.listen(PORT, () => {
+  console.log(`🚀 Sanctuary Server running on port ${PORT}`);
+});
