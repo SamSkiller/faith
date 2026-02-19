@@ -933,55 +933,37 @@ const MainContent = () => {
     else document.documentElement.classList.remove('dark');
   }, [isDarkMode]);
 
-  const handleAuth = async (user: User) => {
-    if (user.isRevoked) return alert("Identity Access Revoked by Protocol.");
-    
-    // Attempt backend auth first
-    if (isSynced) {
-        try {
-            const res = await fetch(`${API_BASE}/auth/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, password: user.password, name: user.name })
-            });
-            if (res.ok) {
-                const cloudUser = await res.json();
-                setCurrentUser(cloudUser);
-                sync('faith_session_active', cloudUser);
-                if (cloudUser.role === 'admin') setView('admin');
-                else setView('home');
-                return;
-            }
-        } catch (e) {}
+const handleAuth = async (credentials, mode = "login") => {
+  try {
+    const endpoint =
+      mode === "register" ? "/auth/register" : "/auth/login";
+
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Authentication failed");
+      return;
     }
 
-    // Local Fallback
-    const storedUsers = JSON.parse(localStorage.getItem('faith_users_db') || '[]');
-    const existing = storedUsers.find((u: User) => u.email === user.email);
-    
-    if (existing && user.password !== existing.password) {
-       return alert("Authentication failed. Invalid security key.");
-    }
+    // Save token
+    localStorage.setItem("faith_token", data.token);
+    localStorage.setItem("faith_session_active", JSON.stringify(data.user));
 
-    let updatedUser;
-    if (!existing) {
-      const nextUsers = [...storedUsers, user];
-      setUsers(nextUsers);
-      sync('faith_users_db', nextUsers);
-      updatedUser = user;
-    } else {
-      updatedUser = { ...existing, ...user };
-      const nextUsers = storedUsers.map((u: User) => u.email === user.email ? updatedUser : u);
-      setUsers(nextUsers);
-      sync('faith_users_db', nextUsers);
-    }
+    setCurrentUser(data.user);
 
-    setCurrentUser(updatedUser);
-    sync('faith_session_active', updatedUser);
+    if (data.user.role === "admin") setView("admin");
+    else setView("home");
+  } catch (err) {
+    alert("Network error. Backend offline.");
+  }
+};
 
-    if (updatedUser.role === 'admin') setView('admin');
-    else setView('home');
-  };
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -1165,11 +1147,15 @@ const MainContent = () => {
           // Backend Sync
           if (isSynced) {
               try {
-                  await fetch(`${API_BASE}/orders`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(o)
-                  });
+          const token = localStorage.getItem("faith_token");
+          
+          await fetch(`${API_BASE}/orders`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(o),
+          });
+
               } catch (e) {}
           }
           
@@ -1193,7 +1179,14 @@ const MainContent = () => {
       {isCartOpen && <CartDrawer cart={cart} setCart={setCart} onClose={() => setIsCartOpen(false)} onCheckout={() => { setIsCartOpen(false); setView('checkout'); }} />}
       {isProfileOpen && currentUser && (
         <ProfileModal 
-          user={currentUser} onClose={() => setIsProfileOpen(false)} onLogout={() => { setCurrentUser(null); localStorage.removeItem('faith_session_active'); setView('home'); setIsProfileOpen(false); }}
+          user={currentUser} onClose={() => setIsProfileOpen(false)}  
+          onLogout={() => {
+            setCurrentUser(null);
+            localStorage.removeItem("faith_session_active");
+            localStorage.removeItem("faith_token");
+            setView("home");
+            setIsProfileOpen(false);
+          }}
           wishlistProducts={wishlistProducts} onRemoveFromWishlist={toggleWishlist} onAddToCart={handleAddToCart}
           onUpdateUser={(id:any, data:any) => { 
             const nextU = {...currentUser, ...data}; setCurrentUser(nextU); sync('faith_session_active', nextU); 
