@@ -1,7 +1,3 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 
-  (import.meta.env.MODE === 'production' 
-    ? "https://faith-blst.onrender.com/api" 
-    : "http://localhost:5000/api");
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
@@ -20,6 +16,10 @@ import { initiateSTKPush } from './services/mpesaService';
 import { generateProductCopy, getStyleTips } from './services/geminiService';
 import { AreaChart, Area, Tooltip, ResponsiveContainer, XAxis, YAxis, BarChart, Bar, Cell, PieChart as RePieChart, Pie } from 'recharts';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 
+  (import.meta.env.MODE === 'production' 
+    ? "https://faith-blst.onrender.com/api" 
+    : "http://localhost:5000/api");
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070",
