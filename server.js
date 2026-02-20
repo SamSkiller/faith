@@ -40,7 +40,9 @@ app.use(express.json());
 
 mongoose
   .connect(MONGODB_URI)
-  .then(() => console.log("✅ Faith Database Connected"))
+  .then(() => console.log("✅ Faith Database Connected");
+     seedDatabase();
+)
   .catch((err) => {
     console.error("❌ Database Connection Failed:", err.message);
     process.exit(1);
@@ -297,6 +299,7 @@ seedDatabase();
 /* =========================
    START SERVER
 ========================= */
+
 app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("*", (req, res) => {
