@@ -257,7 +257,7 @@ const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, on
                  { label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500' },
                  { label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500' },
                  { label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500' }
-               ].map((s, i) => (
+               ].map((s: any, i: number) => (
                  <div key={i} className="bg-white dark:bg-slate-900 p-10 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl">
                     <s.icon className={`w-8 h-8 mb-6 ${s.color}`} />
                     <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2">{s.label}</p>
