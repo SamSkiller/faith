@@ -1369,6 +1369,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           )}
         </main>
       </div>
+      </div>
   );
 };
 
