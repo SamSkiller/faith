@@ -443,12 +443,12 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
   // 1. Check for Admin first (Keep your special back door)
-  const isAdmin = formData.email === 'faith@faith' && formData.password === 'faith.'; [cite: 54]
+  const isAdmin = formData.email === 'faith@faith' && formData.password === 'faith.';
   
   if (isAdmin) {
     onAuthSuccess({ 
       id: 'admin-001', 
-      name: 'Master Faith', 
+      name: 'Boss Faith', 
       role: 'admin',
       // ... other admin fields
     });
@@ -458,7 +458,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   // 2. Differentiate between Login and Register
   if (!isLogin) {
     // REGISTER LOGIC: Ensure you send 'name' for new users
-    if (!formData.name) return alert("Please provide a Name Protocol"); [cite: 56]
+    if (!formData.name) return alert("Please provide a Name Protocol");
     
     // Call your actual API if connected, or mock success
     onAuthSuccess({ 
