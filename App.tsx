@@ -1021,19 +1021,33 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
     }
   };
 
-  const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
-    let next;
-    if (type === 'restock') {
-       next = products.map(p => ({ ...p, stock: p.stock + 10 }));
-    } else if (type === 'adjust' && id) {
-       next = products.map(p => p.id === id ? { ...p, stock: Math.max(0, p.stock + (amount as number)) } : p);
-    } else if (type === 'edit' && id && amount) {
-       next = products.map(p => p.id === id ? { ...p, ...amount } : p);
-    }
-    if (next) {
-       setProducts(next);
-       sync('faith_products_db', next);
-    }
+const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
+  let next;
+
+  if (type === 'restock') {
+    next = products.map(p => ({ ...p, stock: p.stock + 10 }));
+
+  } else if (type === 'adjust' && id) {
+    next = products.map(p =>
+      p.id === id
+        ? { ...p, stock: Math.max(0, p.stock + (amount as number)) }
+        : p
+    );
+
+  } else if (type === 'edit' && id && amount) {
+    next = products.map(p =>
+      p.id === id
+        ? { ...p, ...amount }
+        : p
+    );
+  }
+
+  if (next) {
+    setProducts(next);
+    sync('faith_products_db', next);
+  }
+
+}; // ✅ THIS WAS MISSING
 
   return (
     <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
