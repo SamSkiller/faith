@@ -957,9 +957,7 @@ const MainContent = () => {
     else document.documentElement.classList.remove('dark');
   }, [isDarkMode]);
 
-The state setView: Ensure your useState for view exists (it usually looks like const [view, setView] = useState('auth');).
 
-The state setCurrentUser: Ensure this state is updated so the rest of the app knows who is logged in.
 };
 
 
@@ -1039,7 +1037,6 @@ The state setCurrentUser: Ensure this state is updated so the rest of the app kn
        setProducts(next);
        sync('faith_products_db', next);
     }
-  };
 
   return (
     <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
