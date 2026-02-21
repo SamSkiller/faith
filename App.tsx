@@ -958,9 +958,6 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   }, [isDarkMode]);
 
 
-};
-
-
   const filteredProducts = useMemo(() => {
     let result = [...products];
     if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1342,7 +1339,6 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           )}
         </main>
       </div>
-    </div>
   );
 };
 
