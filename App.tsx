@@ -43,8 +43,8 @@ const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, 
     }
   }, [cartCount]);
 
-  const searchResults = useMemo(() => {
-    if (!searchQuery) return [];
+const searchResults = useMemo(() => {
+    if (!searchQuery || !products) return []; // Added !products check
     return products.filter((p: any) => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -874,7 +874,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
 // --- Main App Controller ---
 
 const MainContent = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<User[]>([]);
