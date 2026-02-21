@@ -957,35 +957,9 @@ const MainContent = () => {
     else document.documentElement.classList.remove('dark');
   }, [isDarkMode]);
 
-const handleAuth = async (credentials, mode = "login") => {
-  try {
-    const endpoint =
-      mode === "register" ? "/auth/register" : "/auth/login";
+The state setView: Ensure your useState for view exists (it usually looks like const [view, setView] = useState('auth');).
 
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Authentication failed");
-      return;
-    }
-
-    // Save token
-    localStorage.setItem("faith_token", data.token);
-    localStorage.setItem("faith_session_active", JSON.stringify(data.user));
-
-    setCurrentUser(data.user);
-
-    if (data.user.role === "admin") setView("admin");
-    else setView("home");
-  } catch (err) {
-    alert("Network error. Backend offline.");
-  }
+The state setCurrentUser: Ensure this state is updated so the rest of the app knows who is logged in.
 };
 
 
