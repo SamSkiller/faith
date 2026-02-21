@@ -2,7 +2,10 @@ import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 // Use Vite's environment variable syntax to prevent the white screen crash
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(API_KEY);
+if (!API_KEY) {
+  console.warn("⚠️ Gemini API Key is missing. Check your Render Environment Variables.");
+}
+const genAI = new GoogleGenerativeAI(API_KEY || "DUMMY-KEY");
 
 // Model configuration
 const MODEL_NAME = "gemini-3-flash-preview";
