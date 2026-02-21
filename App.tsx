@@ -893,6 +893,50 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
+   const handleAuth = (user: User, token?: string) => {
+
+    setCurrentUser(user);
+
+    localStorage.setItem(
+      "faith_session_active",
+      JSON.stringify(user)
+    );
+
+    if (token)
+      localStorage.setItem("faith_token", token);
+
+    setView("home");
+
+  };
+
+  return (
+
+    <div>
+
+      {view === "home" && (
+
+        <button
+          onClick={() => setView("auth")}
+        >
+          Login
+        </button>
+
+      )}
+
+      {view === "auth" && (
+
+        <AuthView
+          onAuthSuccess={handleAuth}
+        />
+
+      )}
+
+    </div>
+
+  );
+
+};
+
   useEffect(() => {
     const p = localStorage.getItem('faith_products_db');
     setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
