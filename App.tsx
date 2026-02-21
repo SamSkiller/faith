@@ -101,7 +101,7 @@ const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, 
                 {searchResults.map((p: any) => (
                   <button 
                     key={p.id} 
-                    onClick={() => { setView('home'); setSearchQuery(p.name);}}
+                    onClick={() => { setView('home'); setSearchQuery(p.name); }}
                     className="w-full flex items-center gap-3 p-2 hover:bg-rose-50 dark:hover:bg-slate-700 rounded-xl transition-all"
                   >
                     <img src={p.image} className="w-8 h-10 object-cover rounded-md" />
@@ -957,6 +957,9 @@ const MainContent = () => {
     else document.documentElement.classList.remove('dark');
   }, [isDarkMode]);
 
+The state setView: Ensure your useState for view exists (it usually looks like const [view, setView] = useState('auth');).
+
+The state setCurrentUser: Ensure this state is updated so the rest of the app knows who is logged in.
 };
 
 
@@ -1205,6 +1208,7 @@ const MainContent = () => {
       {selectedProduct && <ProductModal product={selectedProduct} isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} onToggleWishlist={toggleWishlist} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onAddReview={handleAddReview} currentUser={currentUser} />}
     </div>
   );
+};
 
 // --- Sub Components ---
 
