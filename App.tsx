@@ -959,7 +959,7 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
 
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...products] || []);
     if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
     if (selectedCategory !== 'All') result = result.filter(p => p.category === selectedCategory);
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
