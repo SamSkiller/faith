@@ -909,14 +909,7 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   };
 
-    // ✅ FIXED: useEffect INSIDE component
-  useEffect(() => {
-    const p = localStorage.getItem('faith_products_db');
-    setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
-    const o = localStorage.getItem('faith_orders_db');
-    setOrders(o ? JSON.parse(o) : []);
-
-const filteredProducts = useMemo(() => {
+  const filteredProducts = useMemo(() => {
 
   let result = [...(products || [])];
 
@@ -948,89 +941,113 @@ const filteredProducts = useMemo(() => {
   sortBy,
   searchQuery
 ]);
-
-  
-  return (
-
-    <div>
-
-      {view === "home" && (
-
-        <button
-          onClick={() => setView("auth")}
-        >
-          Login
-        </button>
-
-      )}
-
-      {view === "auth" && (
-
-        <AuthView
-          onAuthSuccess={handleAuth}
-        />
-
-      )}
-
-    </div>
-
+    // ✅ FIXED: useEffect INSIDE component
+useEffect(() => {
+  // 🔹 Load Local Data
+  const p = localStorage.getItem('faith_products_db');
+  setProducts(
+    p
+      ? JSON.parse(p)
+      : INITIAL_PRODUCTS.map(prod => ({
+          ...prod,
+          isNew: Math.random() > 0.5,
+          isHot: Math.random() > 0.7,
+          soldCount: Math.floor(Math.random() * 30),
+          reviews: []
+        }))
   );
 
-};
+  const o = localStorage.getItem('faith_orders_db');
+  setOrders(o ? JSON.parse(o) : []);
 
-    
-    const storedUsers = localStorage.getItem('faith_users_db');
-    let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-    const defaultSam = { id: 'sam-id', name: 'Sam', email: 'sam@sam', password: 'sam.', role: 'customer' as const, joinedAt: new Date().toISOString(), faithPoints: 100, wishlist: [] };
-    const defaultFaith = { id: 'admin-id', name: 'faith', email: 'faith@faith', password: 'faith.', role: 'admin' as const, joinedAt: new Date().toISOString(), faithPoints: 999, wishlist: [] };
-    
-    if (!uList.find(u => u.email === 'sam@sam')) uList.push(defaultSam);
-    if (!uList.find(u => u.email === 'faith@faith')) uList.push(defaultFaith);
-    setUsers(uList);
-    sync('faith_users_db', uList);
+  // 🔹 Users
+  const storedUsers = localStorage.getItem('faith_users_db');
+  let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
 
-    const s = localStorage.getItem('faith_session_active');
-    if (s) setCurrentUser(JSON.parse(s));
-    
-    const interval = setInterval(() => setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length), 7000);
-    
-    // Connectivity Heartbeat Logic
-    const checkBackendSync = async () => {
-        try {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 2000);
-            const res = await fetch(`${API_BASE}/health`, { signal: controller.signal });
-            clearTimeout(id);
-            if (res.ok) {
-                setIsSynced(true);
-                const [pRes, oRes] = await Promise.all([
-                    fetch(`${API_BASE}/products`),
-                    fetch(`${API_BASE}/orders`)
-                ]);
-                if (pRes.ok) {
-                    const data = await pRes.json();
-                    if (data.length > 0) {
-                        setProducts(data);
-                        sync('faith_products_db', data);
-                    }
-                }
-                if (oRes.ok) {
-                    const data = await oRes.json();
-                    setOrders(data);
-                    sync('faith_orders_db', data);
-                }
-            } else {
-                setIsSynced(false);
-            }
-        } catch (e) {
-            setIsSynced(false);
+  const defaultSam = {
+    id: 'sam-id',
+    name: 'Sam',
+    email: 'sam@sam',
+    password: 'sam.',
+    role: 'customer' as const,
+    joinedAt: new Date().toISOString(),
+    faithPoints: 100,
+    wishlist: []
+  };
+
+  const defaultFaith = {
+    id: 'admin-id',
+    name: 'faith',
+    email: 'faith@faith',
+    password: 'faith.',
+    role: 'admin' as const,
+    joinedAt: new Date().toISOString(),
+    faithPoints: 999,
+    wishlist: []
+  };
+
+  if (!uList.find(u => u.email === 'sam@sam')) uList.push(defaultSam);
+  if (!uList.find(u => u.email === 'faith@faith')) uList.push(defaultFaith);
+
+  setUsers(uList);
+  sync('faith_users_db', uList);
+
+  const session = localStorage.getItem('faith_session_active');
+  if (session) setCurrentUser(JSON.parse(session));
+
+  // 🔹 Hero interval
+  const interval = setInterval(() => {
+    setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
+  }, 7000);
+
+  // 🔹 Backend Sync
+  const checkBackendSync = async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const res = await fetch(`${API_BASE}/health`, {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        setIsSynced(false);
+        return;
+      }
+
+      setIsSynced(true);
+
+      const [pRes, oRes] = await Promise.all([
+        fetch(`${API_BASE}/products`),
+        fetch(`${API_BASE}/orders`)
+      ]);
+
+      if (pRes.ok) {
+        const data = await pRes.json();
+        if (data.length > 0) {
+          setProducts(data);
+          sync('faith_products_db', data);
         }
-    };
-    
-    checkBackendSync();
-    
-    return () => clearInterval(interval);
-  }, []);
+      }
+
+      if (oRes.ok) {
+        const data = await oRes.json();
+        setOrders(data);
+        sync('faith_orders_db', data);
+      }
+
+    } catch {
+      setIsSynced(false);
+    }
+  };
+
+  checkBackendSync();
+
+  return () => clearInterval(interval);
+
+}, []);
 
   useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
