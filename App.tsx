@@ -1205,7 +1205,6 @@ const MainContent = () => {
       {selectedProduct && <ProductModal product={selectedProduct} isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} onToggleWishlist={toggleWishlist} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onAddReview={handleAddReview} currentUser={currentUser} />}
     </div>
   );
-};
 
 // --- Sub Components ---
 
