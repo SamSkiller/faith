@@ -439,20 +439,46 @@ const AuthView = ({ onAuthSuccess }: any) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const isAdmin = formData.email === 'faith@faith' && formData.password === 'faith.';
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // 1. Check for Admin first (Keep your special back door)
+  const isAdmin = formData.email === 'faith@faith' && formData.password === 'faith.'; [cite: 54]
+  
+  if (isAdmin) {
+    onAuthSuccess({ 
+      id: 'admin-001', 
+      name: 'Master Faith', 
+      role: 'admin',
+      // ... other admin fields
+    });
+    return;
+  }
+
+  // 2. Differentiate between Login and Register
+  if (!isLogin) {
+    // REGISTER LOGIC: Ensure you send 'name' for new users
+    if (!formData.name) return alert("Please provide a Name Protocol"); [cite: 56]
+    
+    // Call your actual API if connected, or mock success
     onAuthSuccess({ 
       id: Math.random().toString(36).substr(2, 9), 
-      name: isAdmin ? 'Master Faith' : (formData.name || formData.email.split('@')[0]), 
+      name: formData.name, 
       email: formData.email, 
-      password: formData.password,
-      role: isAdmin ? 'admin' : 'customer', 
-      joinedAt: new Date().toISOString(), 
-      faithPoints: 100, 
-      wishlist: [] 
+      role: 'customer',
+      faithPoints: 100 
     });
-  };
+  } else {
+    // LOGIN LOGIC
+    // If you are using a local mock, it might fail here if the user wasn't saved.
+    onAuthSuccess({ 
+      id: Math.random().toString(36).substr(2, 9), 
+      name: formData.email.split('@')[0], 
+      email: formData.email, 
+      role: 'customer' 
+    });
+  }
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
