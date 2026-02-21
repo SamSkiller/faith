@@ -893,7 +893,7 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
-   const handleAuth = (user: User, token?: string) => {
+  const handleAuth = (user: User, token?: string) => {
 
     setCurrentUser(user);
 
@@ -909,6 +909,47 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   };
 
+    // ✅ FIXED: useEffect INSIDE component
+  useEffect(() => {
+    const p = localStorage.getItem('faith_products_db');
+    setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
+    const o = localStorage.getItem('faith_orders_db');
+    setOrders(o ? JSON.parse(o) : []);
+
+const filteredProducts = useMemo(() => {
+
+  let result = [...(products || [])];
+
+  if (searchQuery)
+    result = result.filter(p =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  if (selectedCategory !== 'All')
+    result = result.filter(p =>
+      p.category === selectedCategory
+    );
+
+  if (sortBy === 'price-asc')
+    result.sort((a, b) => a.price - b.price);
+
+  else if (sortBy === 'price-desc')
+    result.sort((a, b) => b.price - a.price);
+
+  else if (sortBy === 'rating')
+    result.sort((a, b) => b.rating - a.rating);
+
+  return result;
+
+}, [
+  products,
+  selectedCategory,
+  sortBy,
+  searchQuery
+]);
+
+  
   return (
 
     <div>
@@ -937,11 +978,6 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
 };
 
-  useEffect(() => {
-    const p = localStorage.getItem('faith_products_db');
-    setProducts(p ? JSON.parse(p) : INITIAL_PRODUCTS.map(prod => ({...prod, isNew: Math.random() > 0.5, isHot: Math.random() > 0.7, soldCount: Math.floor(Math.random() * 30), reviews: []})));
-    const o = localStorage.getItem('faith_orders_db');
-    setOrders(o ? JSON.parse(o) : []);
     
     const storedUsers = localStorage.getItem('faith_users_db');
     let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
@@ -1002,31 +1038,7 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   }, [isDarkMode]);
 
 
-const filteredProducts = useMemo(() => {
 
-  let result = [...(products || [])];
-
-  if (searchQuery)
-    result = result.filter(p =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-  if (selectedCategory !== 'All')
-    result = result.filter(p => p.category === selectedCategory);
-
-  if (sortBy === 'price-asc')
-    result.sort((a, b) => a.price - b.price);
-
-  else if (sortBy === 'price-desc')
-    result.sort((a, b) => b.price - a.price);
-
-  else if (sortBy === 'rating')
-    result.sort((a, b) => b.rating - a.rating);
-
-  return result;
-
-}, [products, selectedCategory, sortBy, searchQuery]);
 
   const wishlistProducts = useMemo(() => {
     if (!currentUser || !currentUser.wishlist) return [];
