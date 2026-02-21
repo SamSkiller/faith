@@ -958,15 +958,31 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   }, [isDarkMode]);
 
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products] || []);
-    if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (selectedCategory !== 'All') result = result.filter(p => p.category === selectedCategory);
-    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
-    else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
-    return result;
-  }, [products, selectedCategory, sortBy, searchQuery]);
+const filteredProducts = useMemo(() => {
+
+  let result = [...(products || [])];
+
+  if (searchQuery)
+    result = result.filter(p =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  if (selectedCategory !== 'All')
+    result = result.filter(p => p.category === selectedCategory);
+
+  if (sortBy === 'price-asc')
+    result.sort((a, b) => a.price - b.price);
+
+  else if (sortBy === 'price-desc')
+    result.sort((a, b) => b.price - a.price);
+
+  else if (sortBy === 'rating')
+    result.sort((a, b) => b.rating - a.rating);
+
+  return result;
+
+}, [products, selectedCategory, sortBy, searchQuery]);
 
   const wishlistProducts = useMemo(() => {
     if (!currentUser || !currentUser.wishlist) return [];
