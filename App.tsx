@@ -93,7 +93,7 @@ const searchResults = useMemo(() => {
                 onFocus={() => setShowSearch(true)}
                 onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                 placeholder="Search sanctuary..." 
-                className="bg-transparent border-none outline-none text-[10px] w-full font-bold text-slate-900 dark:text-white"
+                className="bg-transparent border-none outline-none text-[10px] w-full font-bold text-slate-900 dark:text-white placeholder:text-slate-500"
               />
             </div>
             {showSearch && searchResults.length > 0 && (
@@ -117,7 +117,7 @@ const searchResults = useMemo(() => {
         </div>
         
         <div className="flex items-center gap-4 md:gap-6">
-          <button onClick={onOpenCart} className={`relative p-2 text-slate-400 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
+          <button onClick={onOpenCart} className={`relative p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
             <ShoppingBag className="w-6 h-6" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-black border-2 border-white">
@@ -309,7 +309,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-x-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
+              <div className="overflow-x-auto"> 
                <table className="w-full text-left">
                   <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr>
@@ -348,6 +349,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                      ))}
                   </tbody>
                </table>
+               </div>
             </div>
          </div>
        )}
@@ -702,32 +704,29 @@ const TrackOrderView = ({ orders, currentUser }: any) => {
              const currentIdx = stages.indexOf(order.status);
              return (
                <div key={order._id || order.id} className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-200 dark:border-slate-800 shadow-xl relative overflow-hidden">
-                  <div className="flex flex-col md:flex-row justify-between gap-10 relative z-10 mb-8">
-                     <div className="space-y-4">
-                        <span className="px-4 py-1.5 bg-slate-900 dark:bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">Protocol #{(order._id || order.id).slice(-6)}</span>
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white">{order.items.length} Acquisition Payload(s)</h4>
+                  <div className="flex flex-col md:flex-row justify-between mb-10">
+                     <div>
+                        <span className="px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full">Protocol #{(order._id || order.id).slice(-6)}</span>
+                        <h4 className="text-2xl font-bold mt-4 text-slate-900 dark:text-white">{order.items.length} Payload(s)</h4>
                      </div>
                      <div className="text-right">
-                        <p className="text-[10px] font-black uppercase text-rose-500 mb-1">Settlement Total</p>
-                        <p className="text-4xl font-black italic text-slate-900 dark:text-white">Ksh {order.total.toLocaleString()}</p>
+                        <p className="text-4xl font-black italic text-rose-600">Ksh {order.total.toLocaleString()}</p>
                      </div>
                   </div>
 
-                  {/* Colorful Loading Bar */}
-                  <div className="relative w-full pt-4">
-                    <div className="flex justify-between mb-4">
-                       {stages.map((s, i) => (
-                         <span key={s} className={`text-[9px] font-black uppercase tracking-tighter ${i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{s}</span>
-                       ))}
-                    </div>
-                    <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
-                       {stages.map((_, i) => (
-                         <div key={i} className={`h-full flex-1 transition-all duration-1000 ${i <= currentIdx ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-transparent'}`} />
-                       ))}
-                    </div>
+                  {/* Stage Progress Bar */}
+                  <div className="flex justify-between mb-4">
+                     {stages.map((s, i) => (
+                       <span key={s} className={`text-[9px] font-black uppercase ${i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{s}</span>
+                     ))}
+                  </div>
+                  <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
+                     {stages.map((_, i) => (
+                       <div key={i} className={`h-full flex-1 transition-all duration-1000 ${i <= currentIdx ? 'bg-emerald-500 shadow-neon' : 'bg-transparent'}`} />
+                     ))}
                   </div>
                </div>
-             );
+             )
            })}
          </div>
        )}
@@ -884,30 +883,20 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
-const handleAuth = (user: User, token?: string) => {
-    // 1. Normalize the ID (MongoDB _id becomes standard id)
-    // This prevents errors in wishlist and profile tracking
+  const handleAuth = (user: User, token?: string) => {
+    // Standardize the ID format
     const normalizedUser = { 
       ...user, 
       id: (user as any)._id || user.id 
     };
 
-    // 2. Set the current user in state
     setCurrentUser(normalizedUser);
-
-    // 3. Persist the session to localStorage for page refreshes
-    localStorage.setItem(
-      "faith_session_active",
-      JSON.stringify(normalizedUser)
-    );
-
-    // 4. Store the Security Token (JWT) for API Authorization
-    if (token) {
-      localStorage.setItem("faith_token", token);
-    }
-
-    // 5. Redirect back to the Sanctuary home view
+    localStorage.setItem("faith_session_active", JSON.stringify(normalizedUser));
+    if (token) localStorage.setItem("faith_token", token);
+    
     setView("home");
+    // Refresh data immediately after login
+    checkBackendSync();
   };
 
   const filteredProducts = useMemo(() => {
@@ -961,35 +950,43 @@ useEffect(() => {
 
   // 🔹 Backend Sync
 const checkBackendSync = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) { setIsSynced(false); return; }
-    setIsSynced(true);
+    try {
+      const res = await fetch(`${API_BASE}/health`);
+      if (!res.ok) { setIsSynced(false); return; }
+      setIsSynced(true);
 
-    const [pRes, oRes] = await Promise.all([
-      fetch(`${API_BASE}/products`),
-      fetch(`${API_BASE}/orders/my`, { // Use /my to get only user's orders
-         headers: { 'Authorization': `Bearer ${localStorage.getItem('faith_token')}` }
-      })
-    ]);
+      const token = localStorage.getItem('faith_token');
 
-    if (pRes.ok) {
-    const token = localStorage.getItem('faith_token');
-    const session = localStorage.getItem('faith_session_active');
-    const user = session ? JSON.parse(session) : null;
+      // 1. Fetch Products
+      const pRes = await fetch(`${API_BASE}/products`);
+      if (pRes.ok) {
+        const data = await pRes.json();
+        setProducts(data.map((p: any) => ({ ...p, id: p._id })));
+      }
 
-    if (user?.role === 'admin' && token) {
-      const uRes = await fetch(`${API_BASE}/users`, { // You'll need this route in server.js
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (uRes.ok) setUsers(await uRes.json());
+      if (!token) return;
+
+      // 2. Fetch Orders (Admins get all, Users get theirs)
+      const isAdmin = currentUser?.role === 'admin';
+      const orderEndpoint = isAdmin ? `${API_BASE}/orders` : `${API_BASE}/orders/my`;
       
-      const allOrdersRes = await fetch(`${API_BASE}/orders`, { // Get ALL orders, not just /my
+      const oRes = await fetch(orderEndpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (allOrdersRes.ok) setOrders(await allOrdersRes.json());
-    } catch { setIsSynced(false); }
-};
+      if (oRes.ok) setOrders(await oRes.json());
+
+      // 3. Admin: Fetch Users
+      if (isAdmin) {
+        const uRes = await fetch(`${API_BASE}/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (uRes.ok) setUsers(await uRes.json());
+      }
+    } catch (e) {
+      setIsSynced(false);
+      console.error("Sync Error:", e);
+    }
+  };
 
   checkBackendSync();
 
@@ -1359,13 +1356,27 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
         <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-12 flex flex-col">
 <div className="text-center mb-10">
   <div className="rotating-border-container mx-auto w-32 h-32 mb-6 p-1 relative group cursor-pointer"
-       onClick={async () => {
-         const url = prompt("Transmit New Profile Image URL:");
-         if (url) {
-           onUpdateUser(user.id || user._id, { profilePic: url });
-           alert("Identity Image Updated.");
-         }
-       }}>
+onClick={async () => {
+  const url = prompt("Transmit New Profile Image URL:");
+  if (url) {
+    const res = await fetch(`${API_BASE}/users/profile-photo`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+      },
+      body: JSON.stringify({ profilePic: url })
+    });
+    if (res.ok) {
+      // 1. Update the local modal state
+      onUpdateUser(user.id || user._id, { profilePic: url });
+      // 2. Update the session for the Navbar
+      const updatedUser = { ...user, profilePic: url };
+      localStorage.setItem("faith_session_active", JSON.stringify(updatedUser));
+      alert("Identity Visual Resynced.");
+    }
+  }
+}}>
     <div className="w-full h-full rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
       {user.profilePic ? (
         <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
