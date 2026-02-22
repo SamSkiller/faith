@@ -441,28 +441,33 @@ const AuthView = ({ onAuthSuccess }: any) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const endpoint = isLogin ? "/auth/login" : "/auth/register";
-    
-    try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const endpoint = isLogin ? "/auth/login" : "/auth/register";
+  
+  let authData = null;
 
-      if (res.ok) {
-        // Success: pass user and token to handleAuth
-        onAuthSuccess(data.user, data.token);
-      } else {
-        alert(data.message || "Credential verification failed.");
-      }
-    } catch (err) {
-      alert("Sanctuary server is offline. Check connection.");
+  // ONLY catch network/server errors here
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    
+    authData = await res.json();
+
+    if (!res.ok) {
+      return alert(authData.message || "Identity verification failed.");
     }
-  };
+  } catch (err) {
+    return alert("Sanctuary server is offline. Check connection.");
+  }
+
+  if (authData) {
+    onAuthSuccess(authData.user, authData.token);
+  }
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
@@ -950,43 +955,38 @@ useEffect(() => {
 
   // 🔹 Backend Sync
 const checkBackendSync = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/health`);
-      if (!res.ok) { setIsSynced(false); return; }
-      setIsSynced(true);
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (!res.ok) { setIsSynced(false); return; }
+    setIsSynced(true);
 
-      const token = localStorage.getItem('faith_token');
+    const token = localStorage.getItem('faith_token');
+    if (!token) return;
 
-      // 1. Fetch Products
-      const pRes = await fetch(`${API_BASE}/products`);
-      if (pRes.ok) {
-        const data = await pRes.json();
-        setProducts(data.map((p: any) => ({ ...p, id: p._id })));
-      }
+    // Fetch Products
+    fetch(`${API_BASE}/products`)
+      .then(r => r.json())
+      .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
+      .catch(e => console.log("Product sync delayed"));
 
-      if (!token) return;
+    // Fetch Orders - Use a separate catch for this
+    fetch(`${API_BASE}/orders/my`, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setOrders(data))
+      .catch(e => console.log("Order sync delayed"));
 
-      // 2. Fetch Orders (Admins get all, Users get theirs)
-      const isAdmin = currentUser?.role === 'admin';
-      const orderEndpoint = isAdmin ? `${API_BASE}/orders` : `${API_BASE}/orders/my`;
-      
-      const oRes = await fetch(orderEndpoint, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (oRes.ok) setOrders(await oRes.json());
-
-      // 3. Admin: Fetch Users
-      if (isAdmin) {
-        const uRes = await fetch(`${API_BASE}/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (uRes.ok) setUsers(await uRes.json());
-      }
-    } catch (e) {
-      setIsSynced(false);
-      console.error("Sync Error:", e);
+    // Admin Data - Use a separate catch for this
+    const user = currentUser; // Make sure this is updated
+    if (user?.role === 'admin') {
+      fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setUsers(data))
+        .catch(e => console.log("User list sync delayed"));
     }
-  };
+  } catch (e) {
+    setIsSynced(false);
+  }
+};
 
   checkBackendSync();
 
