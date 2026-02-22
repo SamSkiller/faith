@@ -309,7 +309,7 @@ const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, on
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-x-auto">
                <table className="w-full text-left">
                   <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr>
@@ -439,61 +439,43 @@ const AuthView = ({ onAuthSuccess }: any) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // 1. Check for Admin first (Keep your special back door)
-  const isAdmin = formData.email === 'faith@faith' && formData.password === 'faith.';
-  
-  if (isAdmin) {
-    onAuthSuccess({ 
-      id: 'admin-001', 
-      name: 'Boss Faith', 
-      role: 'admin',
-      // ... other admin fields
-    });
-    return;
-  }
-
-  // 2. Differentiate between Login and Register
-  if (!isLogin) {
-    // REGISTER LOGIC: Ensure you send 'name' for new users
-    if (!formData.name) return alert("Please provide a Name Protocol");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const endpoint = isLogin ? "/auth/login" : "/auth/register";
     
-    // Call your actual API if connected, or mock success
-    onAuthSuccess({ 
-      id: Math.random().toString(36).substr(2, 9), 
-      name: formData.name, 
-      email: formData.email, 
-      role: 'customer',
-      faithPoints: 100 
-    });
-  } else {
-    // LOGIN LOGIC
-    // If you are using a local mock, it might fail here if the user wasn't saved.
-    onAuthSuccess({ 
-      id: Math.random().toString(36).substr(2, 9), 
-      name: formData.email.split('@')[0], 
-      email: formData.email, 
-      role: 'customer' 
-    });
-  }
-};
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // Success: pass user and token to handleAuth
+        onAuthSuccess(data.user, data.token);
+      } else {
+        alert(data.message || "Credential verification failed.");
+      }
+    } catch (err) {
+      alert("Sanctuary server is offline. Check connection.");
+    }
+  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-12 rounded-[64px] shadow-2xl border border-slate-50 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-12 rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl"></div>
         <div className="w-20 h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-8 h-8" /></div>
         <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-4">{isLogin ? 'Access Identity' : 'Register Identity'}</h2>
-        <p className="text-slate-400 text-sm italic mb-10">Sync your persona with the sanctuary.</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm italic mb-10 font-medium">Sync your persona with the sanctuary.</p>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && <input required className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white" placeholder="Name Protocol" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
-          <input required type="email" className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white" placeholder="Email Channel" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-          <input required type="password" className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white" placeholder="Security Key" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Name Protocol" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Email Channel" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Security Key" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
           <button type="submit" className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95">Verify & Initialize</button>
         </form>
-        <button onClick={() => setIsLogin(!isLogin)} className="mt-10 text-[10px] font-black uppercase text-slate-400 hover:text-rose-600 transition-colors tracking-widest">{isLogin ? "New visionary? Create identity" : "Existing citizen? Access sanctuary"}</button>
+        <button onClick={() => setIsLogin(!isLogin)} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors tracking-widest">{isLogin ? "New visionary? Create identity" : "Existing citizen? Access sanctuary"}</button>
       </div>
     </div>
   );
@@ -708,41 +690,50 @@ const CartToast = ({ product, onClose }: { product: Product, onClose: () => void
 );
 
 const TrackOrderView = ({ orders, currentUser }: any) => {
-  const userOrders = orders.filter((o: any) => o.userId === currentUser?.id);
+  const userOrders = orders.filter((o: any) => o.userId === currentUser?._id || o.userId === currentUser?.id);
+  const stages = ['Processing', 'Shipped', 'Delivered'];
+
   return (
     <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
        <h2 className="text-6xl font-serif italic font-bold text-slate-900 dark:text-white mb-16">Logistics Trace</h2>
-       {userOrders.length === 0 ? <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[64px] italic text-slate-300">No active transmissions.</div> : (
+       {userOrders.length === 0 ? <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[64px] italic text-slate-500 font-bold">No active transmissions.</div> : (
          <div className="grid gap-10">
-           {userOrders.map((order: any) => (
-             <div key={order.id} className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-xl flex flex-col md:flex-row justify-between gap-10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 blur-3xl rounded-full"></div>
-                <div className="space-y-6 relative z-10">
-                   <div className="flex items-center gap-4">
-                      <span className="px-4 py-1.5 bg-slate-900 dark:bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">#{order.id}</span>
-                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                        order.status === 'Processing' ? 'bg-amber-100 text-amber-600' : 
-                        order.status === 'Shipped' ? 'bg-sky-100 text-sky-600' : 
-                        order.status === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-                      }`}>{order.status}</span>
-                   </div>
-                   <h4 className="text-2xl font-bold text-slate-900 dark:text-white">{order.items.length} Acquisition Payload{order.items.length > 1 ? 's' : ''}</h4>
-                   <div className="flex -space-x-4">
-                     {order.items.map((i: any, idx: number) => <img key={idx} src={i.image} className="w-12 h-16 rounded-xl object-cover border-4 border-white dark:border-slate-900 shadow-lg" />)}
-                   </div>
-                </div>
-                <div className="text-right flex flex-col justify-end relative z-10">
-                   <p className="text-[10px] font-black uppercase text-rose-500 mb-1">Settlement Total</p>
-                   <p className="text-4xl font-black italic text-slate-900 dark:text-white">Ksh {order.total.toLocaleString()}</p>
-                </div>
-             </div>
-           ))}
+           {userOrders.map((order: any) => {
+             const currentIdx = stages.indexOf(order.status);
+             return (
+               <div key={order._id || order.id} className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-200 dark:border-slate-800 shadow-xl relative overflow-hidden">
+                  <div className="flex flex-col md:flex-row justify-between gap-10 relative z-10 mb-8">
+                     <div className="space-y-4">
+                        <span className="px-4 py-1.5 bg-slate-900 dark:bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">Protocol #{(order._id || order.id).slice(-6)}</span>
+                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white">{order.items.length} Acquisition Payload(s)</h4>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-[10px] font-black uppercase text-rose-500 mb-1">Settlement Total</p>
+                        <p className="text-4xl font-black italic text-slate-900 dark:text-white">Ksh {order.total.toLocaleString()}</p>
+                     </div>
+                  </div>
+
+                  {/* Colorful Loading Bar */}
+                  <div className="relative w-full pt-4">
+                    <div className="flex justify-between mb-4">
+                       {stages.map((s, i) => (
+                         <span key={s} className={`text-[9px] font-black uppercase tracking-tighter ${i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{s}</span>
+                       ))}
+                    </div>
+                    <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
+                       {stages.map((_, i) => (
+                         <div key={i} className={`h-full flex-1 transition-all duration-1000 ${i <= currentIdx ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-transparent'}`} />
+                       ))}
+                    </div>
+                  </div>
+               </div>
+             );
+           })}
          </div>
        )}
     </div>
   );
 };
-
 const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
   const [shipping, setShipping] = useState(SHIPPING_OPTIONS[0]);
   const [phoneNumber, setPhoneNumber] = useState(currentUser?.phoneNumber || '');
@@ -995,53 +986,36 @@ useEffect(() => {
   const session = localStorage.getItem('faith_session_active');
   if (session) setCurrentUser(JSON.parse(session));
 
+    localStorage.removeItem('faith_products_db');
+  localStorage.removeItem('faith_orders_db');
+
   // 🔹 Hero interval
   const interval = setInterval(() => {
     setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
   }, 7000);
 
   // 🔹 Backend Sync
-  const checkBackendSync = async () => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+const checkBackendSync = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (!res.ok) { setIsSynced(false); return; }
+    setIsSynced(true);
 
-      const res = await fetch(`${API_BASE}/health`, {
-        signal: controller.signal
-      });
+    const [pRes, oRes] = await Promise.all([
+      fetch(`${API_BASE}/products`),
+      fetch(`${API_BASE}/orders/my`, { // Use /my to get only user's orders
+         headers: { 'Authorization': `Bearer ${localStorage.getItem('faith_token')}` }
+      })
+    ]);
 
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        setIsSynced(false);
-        return;
-      }
-
-      setIsSynced(true);
-
-      const [pRes, oRes] = await Promise.all([
-        fetch(`${API_BASE}/products`),
-        fetch(`${API_BASE}/orders`)
-      ]);
-
-      if (pRes.ok) {
-        const data = await pRes.json();
-        if (data.length > 0) {
-          setProducts(data);
-          sync('faith_products_db', data);
-        }
-      }
-
-      if (oRes.ok) {
-        const data = await oRes.json();
-        setOrders(data);
-        sync('faith_orders_db', data);
-      }
-
-    } catch {
-      setIsSynced(false);
+    if (pRes.ok) {
+      const data = await pRes.json();
+      // Normalize _id to id so your UI (p.id) doesn't break
+      setProducts(data.map((p: any) => ({ ...p, id: p._id })));
     }
-  };
+    if (oRes.ok) setOrders(await oRes.json());
+  } catch { setIsSynced(false); }
+};
 
   checkBackendSync();
 
@@ -1136,7 +1110,7 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
     sync('faith_products_db', next);
   }
 
-}; // ✅ THIS WAS MISSING
+}; 
 
   return (
     <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
@@ -1215,78 +1189,143 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
           </div>
         )}
 
+{/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
           <AdminVault 
-            products={products} orders={orders} users={users}
-            onAdd={(p:any) => { const n = [...products, p]; setProducts(n); sync('faith_products_db', n); }}
-            onDelete={(id:any) => { const n = products.filter(p=>p.id!==id); setProducts(n); sync('faith_products_db', n); }}
-            onUpdateUser={(id:any, data:any) => { const n = users.map(u=>u.id===id?{...u, ...data}:u); setUsers(n); sync('faith_users_db', n); }}
-            onDeleteUser={(id:any) => { const n = users.filter(u=>u.id!==id); setUsers(n); sync('faith_users_db', n); }}
+            products={products} 
+            orders={orders} 
+            users={users}
+            onAdd={async (p: any) => {
+              // Connect to MongoDB: POST /api/products (You'll need this route in server.js)
+              const res = await fetch(`${API_BASE}/products`, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                },
+                body: JSON.stringify(p)
+              });
+              if(res.ok) {
+                const newProd = await res.json();
+                setProducts([...products, { ...newProd, id: newProd._id }]);
+              }
+            }}
+            onDelete={async (id: any) => {
+              const res = await fetch(`${API_BASE}/products/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('faith_token')}` }
+              });
+              if(res.ok) setProducts(products.filter(p => p.id !== id));
+            }}
+            onUpdateUser={async (id: any, data: any) => {
+              // This connects to your existing profile update logic
+              const res = await fetch(`${API_BASE}/users/${id}`, { // Ensure this route exists or use your profile-photo route logic
+                method: 'PUT',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                },
+                body: JSON.stringify(data)
+              });
+              if(res.ok) setUsers(users.map(u => u.id === id ? { ...u, ...data } : u));
+            }}
+            onDeleteUser={(id: any) => setUsers(users.filter(u => u.id !== id))}
             onUpdateOrder={handleOrderUpdate}
             onBulkUpdate={handleBulkUpdate}
           />
         )}
         
+        {/* --- ORDER TRACKING --- */}
         {view === 'track-order' && <TrackOrderView orders={orders} currentUser={currentUser} />}
+        
+        {/* --- AUTHENTICATION --- */}
         {view === 'auth' && <AuthView onAuthSuccess={handleAuth} />}
-        {view === 'checkout' && <CheckoutView cart={cart} currentUser={currentUser} onComplete={async (o: any) => { 
-          // Local Update
-          const next = [o, ...orders]; setOrders(next); sync('faith_orders_db', next);
-          const updatedProducts = products.map(p => {
-             const inOrder = o.items.find((item: any) => item.id === p.id);
-             if (inOrder) return { ...p, soldCount: (p.soldCount || 0) + inOrder.quantity, stock: Math.max(0, p.stock - inOrder.quantity) };
-             return p;
-          });
-          setProducts(updatedProducts); sync('faith_products_db', updatedProducts);
-          
-       if (isSynced) {
-        try {
-          const token = localStorage.getItem("faith_token");
-      
-          // 🔥 FORMAT ORDER HERE
-          const formattedOrder = {
-            phoneNumber: o.phoneNumber,
-            items: o.items.map((item: any) => ({
-              productId: item._id || item.id, // MUST be Mongo _id
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          };
-      
-          await fetch(`${API_BASE}/orders`, {
-            method: "POST", // 🚨 you were missing this
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(formattedOrder),
-          });
-      
-        } catch (e) {}
-      }
-          
-          setCart([]); setView('success'); 
-        }} onAuth={() => setView('auth')} />}
+        
+        {/* --- CHECKOUT PROTOCOL --- */}
+        {view === 'checkout' && (
+          <CheckoutView 
+            cart={cart} 
+            currentUser={currentUser} 
+            onComplete={async (o: any) => { 
+              // 1. We no longer save to localStorage mock DBs here.
+              // 2. Format the order for MongoDB
+              const formattedOrder = {
+                phoneNumber: o.phoneNumber,
+                total: o.total,
+                items: o.items.map((item: any) => ({
+                  productId: item.id || item._id, 
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                })),
+              };
+
+              try {
+                const token = localStorage.getItem("faith_token");
+                const res = await fetch(`${API_BASE}/orders`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                  },
+                  body: JSON.stringify(formattedOrder),
+                });
+
+                if (res.ok) {
+                  const savedOrder = await res.json();
+                  setOrders([savedOrder, ...orders]);
+                  // Refresh products to show updated stock from DB
+                  const pRes = await fetch(`${API_BASE}/products`);
+                  if (pRes.ok) setProducts(await pRes.json());
+                  
+                  setCart([]); 
+                  setView('success'); 
+                } else {
+                  alert("Order processing failed on server.");
+                }
+              } catch (e) {
+                alert("Network error: Could not transmit order.");
+              }
+            }} 
+            onAuth={() => setView('auth')} 
+          />
+        )}
+
+        {/* --- SUCCESS STATE (FIXED CONTRAST) --- */}
         {view === 'success' && (
-          <div className="pt-64 pb-64 text-center animate-future-in">
+          <div className="pt-64 pb-64 text-center animate-future-in bg-white dark:bg-slate-950">
              <div className="rotating-border-container mx-auto w-40 h-40 mb-14 flex items-center justify-center relative">
                 <CheckCircle2 className="w-20 h-20 text-emerald-500 relative z-10 drop-shadow-neon" />
              </div>
              <h1 className="text-8xl font-serif italic font-bold mb-8 text-rose-600">Sync Success.</h1>
-             <p className="text-2xl text-slate-400 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. Protocol ID Trace Active.</p>
+             {/* Changed text-slate-400 to text-slate-900 for light mode visibility */}
+             <p className="text-2xl text-slate-900 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. Protocol ID Trace Active.</p>
              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <button onClick={() => setView('track-order')} className="px-12 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl active-scale flex items-center gap-3"><Truck className="w-4 h-4" /> Trace Order Logistics</button>
-                <button onClick={() => setView('home')} className="px-12 py-6 border-2 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-100 rounded-[32px] font-black uppercase tracking-widest text-[11px] active-scale">Return to Sanctuary</button>
+                <button onClick={() => setView('track-order')} className="px-12 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl active-scale flex items-center gap-3">
+                  <Truck className="w-4 h-4" /> Trace Order Logistics
+                </button>
+                <button onClick={() => setView('home')} className="px-12 py-6 border-2 border-slate-900 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-[32px] font-black uppercase tracking-widest text-[11px] active-scale">
+                  Return to Sanctuary
+                </button>
              </div>
           </div>
         )}
       </main>
 
-      {isCartOpen && <CartDrawer cart={cart} setCart={setCart} onClose={() => setIsCartOpen(false)} onCheckout={() => { setIsCartOpen(false); setView('checkout'); }} />}
+      {/* --- DRAWER & MODALS --- */}
+      {isCartOpen && (
+        <CartDrawer 
+          cart={cart} 
+          setCart={setCart} 
+          onClose={() => setIsCartOpen(false)} 
+          onCheckout={() => { setIsCartOpen(false); setView('checkout'); }} 
+        />
+      )}
+
       {isProfileOpen && currentUser && (
         <ProfileModal 
-          user={currentUser} onClose={() => setIsProfileOpen(false)}  
+          user={currentUser} 
+          onClose={() => setIsProfileOpen(false)}  
           onLogout={() => {
             setCurrentUser(null);
             localStorage.removeItem("faith_session_active");
@@ -1294,15 +1333,41 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
             setView("home");
             setIsProfileOpen(false);
           }}
-          wishlistProducts={wishlistProducts} onRemoveFromWishlist={toggleWishlist} onAddToCart={handleAddToCart}
-          onUpdateUser={(id:any, data:any) => { 
-            const nextU = {...currentUser, ...data}; setCurrentUser(nextU); sync('faith_session_active', nextU); 
-            const nextUs = users.map(u=>u.id===id?nextU:u); setUsers(nextUs); sync('faith_users_db', nextUs); 
+          wishlistProducts={wishlistProducts} 
+          onRemoveFromWishlist={toggleWishlist} 
+          onAddToCart={handleAddToCart}
+          onUpdateUser={async (id: any, data: any) => { 
+            // Sync with MongoDB directly
+            const res = await fetch(`${API_BASE}/users/profile-photo`, {
+              method: 'PUT',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+              },
+              body: JSON.stringify(data)
+            });
+            if(res.ok) {
+              const nextU = { ...currentUser, ...data };
+              setCurrentUser(nextU);
+              localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
+            }
           }}
-          isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}
+          isDarkMode={isDarkMode} 
+          setIsDarkMode={setIsDarkMode}
         />
       )}
-      {selectedProduct && <ProductModal product={selectedProduct} isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} onToggleWishlist={toggleWishlist} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onAddReview={handleAddReview} currentUser={currentUser} />}
+
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct} 
+          isWishlisted={currentUser?.wishlist?.includes(selectedProduct.id)} 
+          onToggleWishlist={toggleWishlist} 
+          onClose={() => setSelectedProduct(null)} 
+          onAddToCart={handleAddToCart} 
+          onAddReview={handleAddReview} 
+          currentUser={currentUser} 
+        />
+      )}
     </div>
   );
 };
@@ -1318,15 +1383,29 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-2xl" onClick={onClose}></div>
       <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 m-auto h-[85vh] rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/20 transition-colors">
         <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-12 flex flex-col">
-          <div className="text-center mb-10">
-            <div className="rotating-border-container mx-auto w-32 h-32 mb-6 p-1 relative">
-              <div className="w-full h-full rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center font-black text-slate-900 dark:text-white text-4xl shadow-neon">
-                {user.profilePic ? <img src={user.profilePic} className="w-full h-full object-cover" /> : user.name.charAt(0)}
-              </div>
-            </div>
-            <h3 className="text-2xl font-serif italic font-bold">{user.name}</h3>
-            <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-2">Verified {user.role}</p>
-          </div>
+<div className="text-center mb-10">
+  <div className="rotating-border-container mx-auto w-32 h-32 mb-6 p-1 relative group cursor-pointer"
+       onClick={async () => {
+         const url = prompt("Transmit New Profile Image URL:");
+         if (url) {
+           onUpdateUser(user.id || user._id, { profilePic: url });
+           alert("Identity Image Updated.");
+         }
+       }}>
+    <div className="w-full h-full rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
+      {user.profilePic ? (
+        <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
+      ) : (
+        <div className="text-slate-900 dark:text-white font-black text-4xl">{user.name.charAt(0)}</div>
+      )}
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+        <Camera className="w-8 h-8 text-white" />
+      </div>
+    </div>
+  </div>
+  <h3 className="text-2xl font-serif italic font-bold text-slate-900 dark:text-white">{user.name}</h3>
+  <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-2">Verified {user.role}</p>
+</div>
           
           <nav className="space-y-2 flex-1 overflow-y-auto scrollbar-hide">
              <button onClick={() => setActiveTab('profile')} className={`w-full text-left px-8 py-4 rounded-[24px] font-black uppercase text-[10px] flex items-center gap-5 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Activity className="w-4 h-4" /> My Dashboard</button>
