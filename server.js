@@ -137,6 +137,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "online", database: mongoose.connection.readyState === 1 });
 });
 
+// --- PRODUCTS ---
 app.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -146,6 +147,30 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+// ADD THIS: Create a new product (Admin Only)
+app.post("/api/products", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json(product);
+  } catch (err) {
+    res.status(400).json({ message: "Failed to create product", error: err.message });
+  }
+});
+
+// ADD THIS: Delete a product (Admin Only)
+app.delete("/api/products/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Product deleted" });
+  } catch {
+    res.status(500).json({ message: "Delete failed" });
+  }
+});
+
+// --- AUTH ---
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -153,7 +178,12 @@ app.post("/api/auth/register", async (req, res) => {
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, name });
+    const user = new User({ 
+      email, 
+      password: hashedPassword, 
+      name,
+      role: email === "faith@faith" ? "admin" : "customer" // Auto-admin for your email
+    });
     await user.save();
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
@@ -167,10 +197,10 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ message: "User not found in Sanctuary" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ message: "Incorrect security key" });
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
     res.json({ user, token });
@@ -180,115 +210,75 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 app.get("/api/auth/me", authenticate, async (req, res) => {
-
   try {
-
     const user = await User.findById(req.user.id).select("-password");
-
     res.json(user);
-
   } catch {
-
     res.status(500).json({ message: "Failed to fetch user" });
-
   }
+});
 
+// --- USERS ---
+// ADD THIS: Get all users (Admin Only)
+app.get("/api/users", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch {
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
 });
 
 app.put("/api/users/profile-photo", authenticate, async (req, res) => {
-
   try {
-
     const { profilePic } = req.body;
-
-    const user = await User.findByIdAndUpdate(
-
-      req.user.id,
-
-      { profilePic },
-
-      { new: true }
-
-    );
-
+    const user = await User.findByIdAndUpdate(req.user.id, { profilePic }, { new: true });
     res.json(user);
-
   } catch {
-
     res.status(500).json({ message: "Failed to update photo" });
-
   }
-
 });
 
+// --- ORDERS ---
 app.post("/api/orders", authenticate, async (req, res) => {
-
   try {
-
-    const order = new Order({
-
-      ...req.body,
-
-      userId: req.user.id
-
-    });
-
+    const order = new Order({ ...req.body, userId: req.user.id });
     await order.save();
-
     res.status(201).json(order);
-
   } catch {
-
     res.status(500).json({ message: "Order failed" });
-
   }
+});
 
+// ADD THIS: Get ALL orders (Admin Only)
+app.get("/api/orders", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch {
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
 });
 
 app.get("/api/orders/my", authenticate, async (req, res) => {
-
   try {
-
-    const orders = await Order.find({
-
-      userId: req.user.id
-
-    }).sort({ createdAt: -1 });
-
+    const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
-
   } catch {
-
     res.status(500).json({ message: "Failed to fetch orders" });
-
   }
-
 });
 
 app.put("/api/orders/:id", authenticate, async (req, res) => {
-
   try {
-
-    const order = await Order.findByIdAndUpdate(
-
-      req.params.id,
-
-      { status: req.body.status },
-
-      { new: true }
-
-    );
-
+    const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
     res.json(order);
-
   } catch {
-
     res.status(500).json({ message: "Update failed" });
-
   }
-
 });
-
 
 
 /* =========================
