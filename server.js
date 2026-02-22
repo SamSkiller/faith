@@ -70,13 +70,29 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const userSchema = new mongoose.Schema({
+
   name: String,
+
   email: { type: String, unique: true, required: true },
+
   password: { type: String, required: true },
+
   role: { type: String, default: "customer" },
-  faithPoints: { type: Number, default: 100 },
+
+  faithPoints: { type: Number, default: 0 },
+
   wishlist: [String],
-  joinedAt: { type: Date, default: Date.now },
+
+  profilePic: {
+    type: String,
+    default: ""
+  },
+
+  joinedAt: {
+    type: Date,
+    default: Date.now
+  },
+
 }, { timestamps: true });
 
 const orderSchema = new mongoose.Schema({
@@ -162,6 +178,118 @@ app.post("/api/auth/login", async (req, res) => {
     res.status(500).json({ error: "Login failed" });
   }
 });
+
+app.get("/api/auth/me", authenticate, async (req, res) => {
+
+  try {
+
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.json(user);
+
+  } catch {
+
+    res.status(500).json({ message: "Failed to fetch user" });
+
+  }
+
+});
+
+app.put("/api/users/profile-photo", authenticate, async (req, res) => {
+
+  try {
+
+    const { profilePic } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+
+      req.user.id,
+
+      { profilePic },
+
+      { new: true }
+
+    );
+
+    res.json(user);
+
+  } catch {
+
+    res.status(500).json({ message: "Failed to update photo" });
+
+  }
+
+});
+
+app.post("/api/orders", authenticate, async (req, res) => {
+
+  try {
+
+    const order = new Order({
+
+      ...req.body,
+
+      userId: req.user.id
+
+    });
+
+    await order.save();
+
+    res.status(201).json(order);
+
+  } catch {
+
+    res.status(500).json({ message: "Order failed" });
+
+  }
+
+});
+
+app.get("/api/orders/my", authenticate, async (req, res) => {
+
+  try {
+
+    const orders = await Order.find({
+
+      userId: req.user.id
+
+    }).sort({ createdAt: -1 });
+
+    res.json(orders);
+
+  } catch {
+
+    res.status(500).json({ message: "Failed to fetch orders" });
+
+  }
+
+});
+
+app.put("/api/orders/:id", authenticate, async (req, res) => {
+
+  try {
+
+    const order = await Order.findByIdAndUpdate(
+
+      req.params.id,
+
+      { status: req.body.status },
+
+      { new: true }
+
+    );
+
+    res.json(order);
+
+  } catch {
+
+    res.status(500).json({ message: "Update failed" });
+
+  }
+
+});
+
+
 
 /* =========================
    SEED INITIAL PRODUCTS
