@@ -86,7 +86,7 @@ const searchResults = useMemo(() => {
           
           <div className="relative group">
             <div className={`flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-full transition-all border border-transparent ${showSearch ? 'w-64 border-rose-200 ring-2 ring-rose-100' : 'w-48'}`}>
-              <Search className="w-4 h-4 text-slate-400" />
+              <Search className="w-4 h-4 text-slate-600 dark:text-slate-400" />
               <input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,15 +180,15 @@ const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, on
     { name: 'Sun', sales: 3490 }
   ], []);
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProduct) {
       onBulkUpdate('edit', editingProduct.id, editingProduct);
       setEditingProduct(null);
     } else {
+
       onAdd({ 
         ...newProduct, 
-        id: Math.random().toString(36).substr(2, 9), 
         rating: 5, 
         reviewsCount: 0,
         image: newProduct.image || 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800'
@@ -260,7 +260,7 @@ const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, on
                ].map((s: any, i: number) => (
                  <div key={i} className="bg-white dark:bg-slate-900 p-10 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl">
                     <s.icon className={`w-8 h-8 mb-6 ${s.color}`} />
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2">{s.label}</p>
+                    <p className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-widest mb-2">{s.label}</p>
                     <h4 className="text-3xl font-black italic text-slate-900 dark:text-white">{s.val}</h4>
                  </div>
                ))}
@@ -884,20 +884,30 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
-  const handleAuth = (user: User, token?: string) => {
+const handleAuth = (user: User, token?: string) => {
+    // 1. Normalize the ID (MongoDB _id becomes standard id)
+    // This prevents errors in wishlist and profile tracking
+    const normalizedUser = { 
+      ...user, 
+      id: (user as any)._id || user.id 
+    };
 
-    setCurrentUser(user);
+    // 2. Set the current user in state
+    setCurrentUser(normalizedUser);
 
+    // 3. Persist the session to localStorage for page refreshes
     localStorage.setItem(
       "faith_session_active",
-      JSON.stringify(user)
+      JSON.stringify(normalizedUser)
     );
 
-    if (token)
+    // 4. Store the Security Token (JWT) for API Authorization
+    if (token) {
       localStorage.setItem("faith_token", token);
+    }
 
+    // 5. Redirect back to the Sanctuary home view
     setView("home");
-
   };
 
   const filteredProducts = useMemo(() => {
@@ -932,63 +942,18 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   sortBy,
   searchQuery
 ]);
-    // ✅ FIXED: useEffect INSIDE component
+
 useEffect(() => {
-  // 🔹 Load Local Data
-  const p = localStorage.getItem('faith_products_db');
-  setProducts(
-    p
-      ? JSON.parse(p)
-      : INITIAL_PRODUCTS.map(prod => ({
-          ...prod,
-          isNew: Math.random() > 0.5,
-          isHot: Math.random() > 0.7,
-          soldCount: Math.floor(Math.random() * 30),
-          reviews: []
-        }))
-  );
-
-  const o = localStorage.getItem('faith_orders_db');
-  setOrders(o ? JSON.parse(o) : []);
-
-  // 🔹 Users
-  const storedUsers = localStorage.getItem('faith_users_db');
-  let uList: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-
-  const defaultSam = {
-    id: 'sam-id',
-    name: 'Sam',
-    email: 'sam@sam',
-    password: 'sam.',
-    role: 'customer' as const,
-    joinedAt: new Date().toISOString(),
-    faithPoints: 100,
-    wishlist: []
-  };
-
-  const defaultFaith = {
-    id: 'admin-id',
-    name: 'faith',
-    email: 'faith@faith',
-    password: 'faith.',
-    role: 'admin' as const,
-    joinedAt: new Date().toISOString(),
-    faithPoints: 999,
-    wishlist: []
-  };
-
-  if (!uList.find(u => u.email === 'sam@sam')) uList.push(defaultSam);
-  if (!uList.find(u => u.email === 'faith@faith')) uList.push(defaultFaith);
-
-  setUsers(uList);
-  sync('faith_users_db', uList);
 
   const session = localStorage.getItem('faith_session_active');
   if (session) setCurrentUser(JSON.parse(session));
 
     localStorage.removeItem('faith_products_db');
-  localStorage.removeItem('faith_orders_db');
+    localStorage.removeItem('faith_orders_db');
+    localStorage.removeItem('faith_users_db');
 
+  setProducts(INITIAL_PRODUCTS);
+  
   // 🔹 Hero interval
   const interval = setInterval(() => {
     setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
@@ -1009,12 +974,21 @@ const checkBackendSync = async () => {
     ]);
 
     if (pRes.ok) {
-      const data = await pRes.json();
-      // Normalize _id to id so your UI (p.id) doesn't break
-      setProducts(data.map((p: any) => ({ ...p, id: p._id })));
-    }
-    if (oRes.ok) setOrders(await oRes.json());
-  } catch { setIsSynced(false); }
+    const token = localStorage.getItem('faith_token');
+    const session = localStorage.getItem('faith_session_active');
+    const user = session ? JSON.parse(session) : null;
+
+    if (user?.role === 'admin' && token) {
+      const uRes = await fetch(`${API_BASE}/users`, { // You'll need this route in server.js
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (uRes.ok) setUsers(await uRes.json());
+      
+      const allOrdersRes = await fetch(`${API_BASE}/orders`, { // Get ALL orders, not just /my
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (allOrdersRes.ok) setOrders(await allOrdersRes.json());
+    } catch { setIsSynced(false); }
 };
 
   checkBackendSync();
