@@ -1362,9 +1362,6 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
 
 // --- Sub Components ---
 
-const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
-  const [editData, setEditData] = useState({ name: user.name, phoneNumber: user.phoneNumber || '', address: user.address || '', profilePic: user.profilePic || '', password: user.password || '' });
 
 const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
