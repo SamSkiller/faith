@@ -235,7 +235,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 </div>
              </div>
           </div>
-          <div className="flex p-2 bg-slate-100 dark:bg-slate-800 rounded-[32px] border border-slate-200 dark:border-slate-700">
+          <div className="flex flex-wrap sm:flex-nowrap p-2 bg-slate-100 dark:bg-slate-800 rounded-[32px] border border-slate-200 dark:border-slate-700 gap-2 overflow-x-auto scrollbar-hide">
              {[
                { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                { id: 'products', label: 'Products', icon: Package },
@@ -367,11 +367,12 @@ const handleSaveProduct = (e: React.FormEvent) => {
          </div>
        )}
 
-       {tab === 'orders' && (
+      {tab === 'orders' && (
          <div className="space-y-8 animate-fade-in">
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Logistics Protocol Status</h3>
             <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
-               <table className="w-full text-left">
+               <div className="overflow-x-auto w-full"> {/* ADDED SCROLL WRAPPER */}
+                 <table className="w-full text-left min-w-[700px]"> {/* ADDED MIN-WIDTH */}
                   <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr><th className="px-8 py-6">Protocol ID</th><th className="px-8 py-6">Citizen Trace</th><th className="px-8 py-6">Settlement</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Command</th></tr>
                   </thead>
@@ -410,6 +411,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   </tbody>
                </table>
                {orders.length === 0 && <div className="p-40 text-center italic text-slate-300">Operational History Vacant</div>}
+            </div>
             </div>
          </div>
        )}
@@ -547,102 +549,124 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
     setReviewRating(5);
   };
 
-  return (
-    <div className="fixed inset-0 z-[130] flex animate-fade-in">
+ return (
+    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 animate-fade-in">
+      {/* Background Overlay */}
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-2xl" onClick={onClose}></div>
-      <div className="relative w-full max-w-6xl m-auto bg-white dark:bg-slate-900 h-[85vh] rounded-[64px] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/10">
-        <div className="w-full md:w-1/2 relative h-1/2 md:h-full">
+      
+      {/* Modal Container */}
+      <div className="relative w-full max-w-6xl m-auto bg-white dark:bg-slate-900 h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[64px] shadow-2xl overflow-hidden flex flex-row border border-white/10">
+        
+        {/* DESKTOP Image (Hidden on mobile) */}
+        <div className="hidden md:block w-1/2 relative h-full">
           <img src={product.image} className="w-full h-full object-cover" />
-          <button onClick={onClose} className="absolute top-8 left-8 p-4 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 md:hidden"><ArrowLeft className="w-6 h-6" /></button>
         </div>
-        <div className="flex-1 p-8 md:p-16 overflow-y-auto scrollbar-hide flex flex-col">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
-            <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
-          </div>
-          <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
-          <div className="flex items-center gap-6 mb-8">
-            <span className="text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
-            <div className="flex items-center gap-1 text-amber-400">
-               {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
-               <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
-            </div>
-          </div>
+
+        {/* SCROLLING CONTENT AREA (Takes full width on mobile) */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide flex flex-col relative w-full">
           
-          <div className="space-y-12">
-            <div>
-              <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Narrative Spectrum</h4>
-              <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">{loading ? 'Synthesizing narrative...' : copy}</p>
-            </div>
+          {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
+          <div className="block md:hidden w-full relative h-[45vh] shrink-0">
+            <img src={product.image} className="w-full h-full object-cover" />
+            <button onClick={onClose} className="absolute top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-10">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </div>
 
-            <div className="space-y-4">
-               <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Directives</h4>
-               {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
-                 <div key={i} className="flex items-center gap-4 p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
-                   <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                   <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
-                 </div>
-               ))}
+          {/* Text Content */}
+          <div className="p-6 md:p-16 flex-1">
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
+              <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
             </div>
+            <h2 className="text-4xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
+            
+            <div className="flex items-center gap-6 mb-8">
+              <span className="text-3xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
+              <div className="flex items-center gap-1 text-amber-400">
+                 {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
+                 <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
+              </div>
+            </div>
+            
+            <div className="space-y-12">
+              <div>
+                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Narrative Spectrum</h4>
+                <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">{loading ? 'Synthesizing narrative...' : copy}</p>
+              </div>
 
-            <div className="space-y-8 pt-8 border-t border-slate-50 dark:border-slate-800">
-               <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><MessageSquare className="w-3 h-3 text-sky-500" /> Soul Reflections</h4>
-               
-               <div className="space-y-6">
-                 {product.reviews?.length ? product.reviews.map((r: any) => (
-                   <div key={r.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800">
-                      <div className="flex justify-between items-start mb-4">
-                         <div>
-                            <p className="font-bold text-slate-900 dark:text-white text-sm">{r.userName}</p>
-                            <p className="text-[10px] text-slate-400 mt-1">{r.date}</p>
-                         </div>
-                         <div className="flex gap-0.5 text-amber-400">
-                            {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
-                         </div>
-                      </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
+              <div className="space-y-4">
+                 <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Directives</h4>
+                 {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
+                   <div key={i} className="flex items-center gap-4 p-4 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
+                     <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
                    </div>
-                 )) : (
-                   <p className="text-sm text-slate-400 dark:text-slate-500 italic">No reflections transmitted yet.</p>
-                 )}
-               </div>
+                 ))}
+              </div>
 
-               <div className="bg-white dark:bg-slate-900 p-8 rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-10">
-                  <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Transmit Reflection</h5>
-                  <form onSubmit={handleReviewSubmit} className="space-y-6">
-                     <div className="flex items-center gap-4">
-                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Resonance:</span>
-                        <div className="flex gap-2">
-                           {[1,2,3,4,5].map(s => (
-                             <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
-                               <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
-                             </button>
-                           ))}
+              <div className="space-y-8 pt-8 border-t border-slate-50 dark:border-slate-800">
+                 <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><MessageSquare className="w-3 h-3 text-sky-500" /> Soul Reflections</h4>
+                 <div className="space-y-6">
+                   {product.reviews?.length ? product.reviews.map((r: any) => (
+                     <div key={r.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800">
+                        <div className="flex justify-between items-start mb-4">
+                           <div>
+                              <p className="font-bold text-slate-900 dark:text-white text-sm">{r.userName}</p>
+                              <p className="text-[10px] text-slate-400 mt-1">{r.date}</p>
+                           </div>
+                           <div className="flex gap-0.5 text-amber-400">
+                              {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
+                           </div>
                         </div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
                      </div>
-                     <textarea 
-                        required
-                        placeholder="Your narrative reflection..."
-                        className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-sm text-slate-900 dark:text-white min-h-[100px]"
-                        value={reviewComment}
-                        onChange={(e) => setReviewComment(e.target.value)}
-                     />
-                     <button type="submit" className="w-full py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all">Submit Reflection</button>
-                  </form>
-               </div>
+                   )) : (
+                     <p className="text-sm text-slate-400 dark:text-slate-500 italic">No reflections transmitted yet.</p>
+                   )}
+                 </div>
+
+                 <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-10">
+                    <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Transmit Reflection</h5>
+                    <form onSubmit={handleReviewSubmit} className="space-y-6">
+                       <div className="flex items-center gap-4">
+                          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Resonance:</span>
+                          <div className="flex gap-2">
+                             {[1,2,3,4,5].map(s => (
+                               <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
+                                 <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+                               </button>
+                             ))}
+                          </div>
+                       </div>
+                       <textarea 
+                          required
+                          placeholder="Your narrative reflection..."
+                          className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-sm text-slate-900 dark:text-white min-h-[100px]"
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                       />
+                       <button type="submit" className="w-full py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all">Submit Reflection</button>
+                    </form>
+                 </div>
+              </div>
             </div>
           </div>
 
-          <div className="pt-12 mt-12 border-t border-slate-50 dark:border-slate-800 flex gap-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-4">
-            <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-700 transition-all flex items-center justify-center gap-4 active-scale"><ShoppingBag className="w-5 h-5" /> Acquire Presence</button>
-            <button onClick={() => onToggleWishlist(product.id)} className={`p-7 rounded-[32px] border-2 transition-all active-scale ${isWishlisted ? 'border-rose-500 text-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}><Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} /></button>
+          {/* STICKY FOOTER: This guarantees it's always at the bottom of the visible screen */}
+          <div className="sticky bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 md:p-8 border-t border-slate-100 dark:border-slate-800 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-20">
+            <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-5 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl hover:bg-rose-700 transition-all flex items-center justify-center gap-3 active-scale">
+               <ShoppingBag className="w-5 h-5" /> Acquire Presence
+            </button>
+            <button onClick={() => onToggleWishlist(product.id)} className={`p-5 md:p-7 rounded-[24px] md:rounded-[32px] border-2 transition-all active-scale ${isWishlisted ? 'border-rose-500 text-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}>
+               <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+            </button>
           </div>
+
         </div>
       </div>
     </div>
   );
-};
-
 // --- Helper Components ---
 
 const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => (
@@ -900,6 +924,10 @@ const MainContent = () => {
   const [isSynced, setIsSynced] = useState(false);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
+
+    useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+   }, [view, selectedProduct]);
 
   // 1. DEFINED HERE: Now both handleAuth and useEffect can access it!
   const checkBackendSync = async () => {
