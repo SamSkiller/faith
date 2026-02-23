@@ -249,32 +249,45 @@ const handleSaveProduct = (e: React.FormEvent) => {
           </div>
        </div>
 
-       {tab === 'analytics' && (
-         <div className="space-y-10 animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+{tab === 'analytics' && (
+         <div className="space-y-6 md:space-y-10 animate-fade-in w-full overflow-hidden">
+            {/* Stats Grid - Now responsive for mobile (1 col), tablet (2 cols), and desktop (4 cols) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                {[
                  { label: 'Total Revenue', val: `Ksh ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500' },
                  { label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500' },
                  { label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500' },
                  { label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500' }
                ].map((s: any, i: number) => (
-                 <div key={i} className="bg-white dark:bg-slate-900 p-10 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl">
-                    <s.icon className={`w-8 h-8 mb-6 ${s.color}`} />
-                    <p className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-widest mb-2">{s.label}</p>
-                    <h4 className="text-3xl font-black italic text-slate-900 dark:text-white">{s.val}</h4>
+                 <div key={i} className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-100 dark:border-slate-800 shadow-xl flex flex-col justify-center">
+                    <s.icon className={`w-6 h-6 md:w-8 md:h-8 mb-4 md:mb-6 ${s.color}`} />
+                    <p className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-widest mb-1 md:mb-2">{s.label}</p>
+                    <h4 className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate">{s.val}</h4>
                  </div>
                ))}
             </div>
             
-            <div className="bg-white dark:bg-slate-900 p-12 rounded-[64px] border border-slate-50 dark:border-slate-800 shadow-xl h-[400px]">
-               <h3 className="text-xl font-bold mb-10 text-slate-900 dark:text-white flex items-center gap-3"><Activity className="w-6 h-6 text-rose-500" /> Capital Trend Session</h3>
-               <div className="h-64">
+            {/* Chart Container - Padding and height adjusted for mobile */}
+            <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full">
+               <h3 className="text-lg md:text-xl font-bold mb-6 md:mb-10 text-slate-900 dark:text-white flex items-center gap-2 md:gap-3">
+                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Capital Trend Session
+               </h3>
+               <div className="flex-1 w-full min-h-[200px]">
                  <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={salesTrend}>
-                       <defs><linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#e11d48" stopOpacity={0.3}/><stop offset="95%" stopColor="#e11d48" stopOpacity={0}/></linearGradient></defs>
+                       <defs>
+                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#e11d48" stopOpacity={0.3}/>
+                           <stop offset="95%" stopColor="#e11d48" stopOpacity={0}/>
+                         </linearGradient>
+                       </defs>
                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} axisLine={false} tickLine={false} />
                        <YAxis hide />
-                       <Tooltip />
+                       <Tooltip 
+                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                         labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                         itemStyle={{ color: '#e11d48', fontWeight: 'bold' }}
+                       />
                        <Area type="monotone" dataKey="sales" stroke="#e11d48" strokeWidth={4} fillOpacity={1} fill="url(#colorSales)" />
                     </AreaChart>
                  </ResponsiveContainer>
@@ -282,7 +295,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
             </div>
          </div>
        )}
-
+      
        {tab === 'products' && (
          <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center mb-8">
@@ -914,10 +927,14 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  if (selectedCategory !== 'All')
-    result = result.filter(p =>
-      p.category === selectedCategory
-    );
+if (selectedCategory !== 'All') {
+    if (selectedCategory === 'Hot Deals') {
+      // Show products explicitly categorized as "Hot Deals" OR flagged as isHot
+      result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
+    } else {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+  }
 
   if (sortBy === 'price-asc')
     result.sort((a, b) => a.price - b.price);
@@ -1352,7 +1369,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
   return (
     <div className="fixed inset-0 z-[120] flex animate-fade-in">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-2xl" onClick={onClose}></div>
-      <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 m-auto h-[85vh] rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/20 transition-colors">
+     <div className="relative w-[95%] max-w-5xl bg-white dark:bg-slate-900 m-auto h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/20 transition-colors">
         <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-12 flex flex-col">
 <div className="text-center mb-10">
   <div className="rotating-border-container mx-auto w-32 h-32 mb-6 p-1 relative group cursor-pointer"
@@ -1401,8 +1418,13 @@ onClick={async () => {
              
              <div className="space-y-1">
                 <div className="flex items-center justify-between px-8 py-3 bg-white/5 rounded-2xl">
-                   <span className="text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
-                   <button onClick={() => setIsDarkMode(!isDarkMode)} className={`w-10 h-5 rounded-full transition-all relative ${isDarkMode ? 'bg-rose-600' : 'bg-slate-700'}`}><div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? 'left-5.5' : 'left-0.5'}`}></div></button>
+                   <span className="text-[10px] font-black uppercase text-slate-300">1. Dark Mode</span>
+                   <button 
+                        onClick={() => setIsDarkMode(!isDarkMode)} 
+                        className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-300'}`}
+                      >
+                        <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </button>
                 </div>
                 <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Crown className="w-4 h-4 text-amber-500" /> 2. Luxury Tier: {user.role === 'admin' ? 'Gold' : 'Citizen'}</div>
                 <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Fingerprint className="w-4 h-4 text-sky-500" /> 3. Bio-Metric Key</div>
@@ -1415,15 +1437,18 @@ onClick={async () => {
           <button onClick={onLogout} className="mt-6 py-4 bg-white/5 hover:bg-rose-500 rounded-3xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Logout</button>
         </aside>
 
-        <main className="flex-1 p-12 overflow-y-auto scrollbar-hide">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white">
-              {activeTab === 'profile' && 'Citizen Overview'}
-              {activeTab === 'wishlist' && 'Luxury Favorites'}
-              {activeTab === 'settings' && 'Identity Control'}
-            </h2>
-            <button onClick={onClose} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-6 h-6" /></button>
-          </div>
+        <main className="flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide relative">
+  {/* Sticky Close Button for Mobile */}
+  <div className="sticky top-0 z-50 flex justify-between items-center mb-8 md:mb-12 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md pb-4 pt-2">
+    <h2 className="text-2xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white">
+      {activeTab === 'profile' && 'Citizen Overview'}
+      {activeTab === 'wishlist' && 'Luxury Favorites'}
+      {activeTab === 'settings' && 'Identity Control'}
+    </h2>
+    <button onClick={onClose} className="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-all text-slate-600 dark:text-slate-400 shadow-md">
+      <X className="w-5 h-5 md:w-6 md:h-6" />
+    </button>
+  </div>
           
           {activeTab === 'profile' && (
             <div className="space-y-10 animate-fade-in">
@@ -1460,26 +1485,26 @@ onClick={async () => {
                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Full Name</label>
-                     <input className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-200 text-slate-900 dark:text-white" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Sync Number</label>
-                     <input className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-200 text-slate-900 dark:text-white" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                </div>
                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Security Key (Password)</label>
-                     <input type="password" className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-200 text-slate-900 dark:text-white" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
+                     className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Profile Photo Link</label>
-                     <input className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-200 text-slate-900 dark:text-white" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
                   </div>
                </div>
                <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Drop-off Zone</label>
-                  <input className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-200 text-slate-900 dark:text-white" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
+                  <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
                <button onClick={() => { onUpdateUser(user.id, editData); alert('Identity Resynced.'); }} className="w-full py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-[40px] font-black uppercase tracking-widest text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-10">Commit Identity Changes</button>
             </div>
