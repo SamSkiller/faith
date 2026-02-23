@@ -1366,114 +1366,136 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
   const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
   const [editData, setEditData] = useState({ name: user.name, phoneNumber: user.phoneNumber || '', address: user.address || '', profilePic: user.profilePic || '', password: user.password || '' });
 
+const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
+  const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
+  const [editData, setEditData] = useState({ name: user.name, phoneNumber: user.phoneNumber || '', address: user.address || '', profilePic: user.profilePic || '', password: user.password || '' });
+
   return (
-    <div className="fixed inset-0 z-[120] flex animate-fade-in">
-      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-2xl" onClick={onClose}></div>
-     <div className="relative w-[95%] max-w-5xl bg-white dark:bg-slate-900 m-auto h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/20 transition-colors">
-        <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-12 flex flex-col">
-<div className="text-center mb-10">
-  <div className="rotating-border-container mx-auto w-32 h-32 mb-6 p-1 relative group cursor-pointer"
-onClick={async () => {
-  const url = prompt("Transmit New Profile Image URL:");
-  if (url) {
-    const res = await fetch(`${API_BASE}/users/profile-photo`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-      },
-      body: JSON.stringify({ profilePic: url })
-    });
-    if (res.ok) {
-      // 1. Update the local modal state
-      onUpdateUser(user.id || user._id, { profilePic: url });
-      // 2. Update the session for the Navbar
-      const updatedUser = { ...user, profilePic: url };
-      localStorage.setItem("faith_session_active", JSON.stringify(updatedUser));
-      alert("Identity Visual Resynced.");
-    }
-  }
-}}>
-    <div className="w-full h-full rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
-      {user.profilePic ? (
-        <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
-      ) : (
-        <div className="text-slate-900 dark:text-white font-black text-4xl">{user.name.charAt(0)}</div>
-      )}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-        <Camera className="w-8 h-8 text-white" />
-      </div>
-    </div>
-  </div>
-  <h3 className="text-2xl font-serif italic font-bold text-slate-900 dark:text-white">{user.name}</h3>
-  <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-2">Verified {user.role}</p>
-</div>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 animate-fade-in">
+      {/* Blurred Background Overlay */}
+      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}></div>
+      
+      {/* Main Modal Container - Responsive Height & Border Radius */}
+      <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 h-full max-h-[90vh] rounded-[32px] md:rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10 transition-colors">
+        
+        {/* GLOBAL CLOSE BUTTON - Always visible on top right */}
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 md:top-8 md:right-8 z-50 p-3 md:p-4 bg-white/80 hover:bg-rose-100 dark:bg-slate-800/80 dark:hover:bg-slate-700 backdrop-blur-md rounded-full transition-all text-slate-900 dark:text-white shadow-xl active:scale-90"
+        >
+          <X className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+
+        {/* SIDEBAR - Scrollable on mobile if it gets too tall */}
+        <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-6 md:p-12 flex flex-col shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full border-b md:border-b-0 md:border-r border-slate-800">
+          <div className="text-center mb-6 md:mb-10 mt-4 md:mt-0">
+            <div className="rotating-border-container mx-auto w-20 h-20 md:w-32 md:h-32 mb-4 md:mb-6 p-1 relative group cursor-pointer"
+              onClick={async () => {
+                const url = prompt("Transmit New Profile Image URL:");
+                if (url) {
+                  const res = await fetch(`${API_BASE}/users/profile-photo`, {
+                    method: 'PUT',
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                    },
+                    body: JSON.stringify({ profilePic: url })
+                  });
+                  if (res.ok) {
+                    onUpdateUser(user.id || user._id, { profilePic: url });
+                    const updatedUser = { ...user, profilePic: url };
+                    localStorage.setItem("faith_session_active", JSON.stringify(updatedUser));
+                    alert("Identity Visual Resynced.");
+                  }
+                }
+              }}>
+              <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
+                {user.profilePic ? (
+                  <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
+                ) : (
+                  <div className="text-white font-black text-3xl md:text-4xl">{user.name.charAt(0)}</div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                  <Camera className="w-6 h-6 md:w-8 md:h-8 text-white" />
+                </div>
+              </div>
+            </div>
+            <h3 className="text-xl md:text-2xl font-serif italic font-bold text-white">{user.name}</h3>
+            <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-2">Verified {user.role}</p>
+          </div>
           
-          <nav className="space-y-2 flex-1 overflow-y-auto scrollbar-hide">
-             <button onClick={() => setActiveTab('profile')} className={`w-full text-left px-8 py-4 rounded-[24px] font-black uppercase text-[10px] flex items-center gap-5 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Activity className="w-4 h-4" /> My Dashboard</button>
-             <button onClick={() => setActiveTab('wishlist')} className={`w-full text-left px-8 py-4 rounded-[24px] font-black uppercase text-[10px] flex items-center gap-5 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Heart className="w-4 h-4" /> My Favorites</button>
-             <button onClick={() => setActiveTab('settings')} className={`w-full text-left px-8 py-4 rounded-[24px] font-black uppercase text-[10px] flex items-center gap-5 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Sync Settings</button>
+          <nav className="space-y-2 flex-1">
+             <button onClick={() => setActiveTab('profile')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Activity className="w-4 h-4" /> My Dashboard</button>
+             <button onClick={() => setActiveTab('wishlist')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Heart className="w-4 h-4" /> My Favorites</button>
+             <button onClick={() => setActiveTab('settings')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Sync Settings</button>
              
-             <div className="h-px bg-white/10 my-6"></div>
+             <div className="h-px bg-white/10 my-4 md:my-6"></div>
              
              <div className="space-y-1">
-                <div className="flex items-center justify-between px-8 py-3 bg-white/5 rounded-2xl">
-                   <span className="text-[10px] font-black uppercase text-slate-300">1. Dark Mode</span>
+                {/* FIXED DARK MODE TOGGLE ANIMATION */}
+                <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl">
+                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
                    <button 
-                        onClick={() => setIsDarkMode(!isDarkMode)} 
-                        className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-300'}`}
-                      >
-                        <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                    </button>
+                     onClick={() => setIsDarkMode(!isDarkMode)} 
+                     className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}
+                   >
+                     <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                   </button>
                 </div>
-                <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Crown className="w-4 h-4 text-amber-500" /> 2. Luxury Tier: {user.role === 'admin' ? 'Gold' : 'Citizen'}</div>
-                <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Fingerprint className="w-4 h-4 text-sky-500" /> 3. Bio-Metric Key</div>
-                <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Languages className="w-4 h-4 text-emerald-500" /> 4. Global Dialect: EN</div>
-                <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Bell className="w-4 h-4 text-rose-400" /> 5. Sync Alerts (3)</div>
-                <div className="px-8 py-3 flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 cursor-default"><Cloud className="w-4 h-4 text-indigo-400" /> 6. Cloud Archive</div>
+                <div className="px-6 md:px-8 py-3 flex items-center gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-400 cursor-default"><Crown className="w-4 h-4 text-amber-500" /> 2. Luxury Tier: {user.role === 'admin' ? 'Gold' : 'Citizen'}</div>
+                
+                {/* DISABLED "COMING SOON" OPTIONS */}
+                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
+                  <div className="flex items-center gap-4"><Fingerprint className="w-4 h-4" /> 3. Bio-Metric Key</div>
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
+                </div>
+                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
+                  <div className="flex items-center gap-4"><Languages className="w-4 h-4" /> 4. Global Dialect</div>
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
+                </div>
+                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
+                  <div className="flex items-center gap-4"><Cloud className="w-4 h-4" /> 5. Cloud Archive</div>
+                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
+                </div>
              </div>
           </nav>
 
-          <button onClick={onLogout} className="mt-6 py-4 bg-white/5 hover:bg-rose-500 rounded-3xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Logout</button>
+          <button onClick={onLogout} className="mt-6 py-4 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-3xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95"><LogOut className="w-4 h-4" /> Disconnect</button>
         </aside>
 
+        {/* MAIN CONTENT AREA */}
         <main className="flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide relative">
-  {/* Sticky Close Button for Mobile */}
-  <div className="sticky top-0 z-50 flex justify-between items-center mb-8 md:mb-12 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md pb-4 pt-2">
-    <h2 className="text-2xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white">
-      {activeTab === 'profile' && 'Citizen Overview'}
-      {activeTab === 'wishlist' && 'Luxury Favorites'}
-      {activeTab === 'settings' && 'Identity Control'}
-    </h2>
-    <button onClick={onClose} className="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-all text-slate-600 dark:text-slate-400 shadow-md">
-      <X className="w-5 h-5 md:w-6 md:h-6" />
-    </button>
-  </div>
+          
+          <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-12 mt-2 md:mt-0">
+            {activeTab === 'profile' && 'Citizen Overview'}
+            {activeTab === 'wishlist' && 'Luxury Favorites'}
+            {activeTab === 'settings' && 'Identity Control'}
+          </h2>
           
           {activeTab === 'profile' && (
-            <div className="space-y-10 animate-fade-in">
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-10 rounded-[48px] border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Faith Points</p>
-                    <div className="flex items-center gap-3">
-                       <Gem className="w-10 h-10 text-rose-500" />
-                       <span className="text-5xl font-black italic text-slate-900 dark:text-white">{user.faithPoints}</span>
+            <div className="space-y-6 md:space-y-10 animate-fade-in">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                  <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Faith Points</p>
+                    <div className="flex items-center gap-2 md:gap-3">
+                       <Gem className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
+                       <span className="text-4xl md:text-5xl font-black italic text-slate-900 dark:text-white">{user.faithPoints}</span>
                     </div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-10 rounded-[48px] border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Favorited</p>
-                    <div className="flex items-center gap-3">
-                       <Heart className="w-10 h-10 text-rose-500" />
-                       <span className="text-5xl font-black italic text-slate-900 dark:text-white">{wishlistProducts.length}</span>
+                  <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Favorited</p>
+                    <div className="flex items-center gap-2 md:gap-3">
+                       <Heart className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
+                       <span className="text-4xl md:text-5xl font-black italic text-slate-900 dark:text-white">{wishlistProducts.length}</span>
                     </div>
                   </div>
                </div>
-               <div className="bg-rose-50/30 dark:bg-rose-900/10 p-12 rounded-[56px] border border-rose-100 dark:border-rose-900/30">
-                  <div className="flex items-center gap-8">
-                    <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl flex items-center justify-center text-rose-600 shadow-xl border border-rose-100 dark:border-rose-900/50"><History className="w-10 h-10" /></div>
+               <div className="bg-rose-50 dark:bg-rose-900/10 p-6 md:p-12 rounded-[32px] md:rounded-[56px] border border-rose-100 dark:border-rose-900/30">
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl flex items-center justify-center text-rose-600 shadow-xl border border-rose-100 dark:border-rose-900/50 shrink-0"><History className="w-8 h-8 md:w-10 md:h-10" /></div>
                     <div>
-                      <h4 className="text-2xl font-bold text-slate-900 dark:text-white">Active Since</h4>
-                      <p className="text-slate-500 dark:text-slate-400 italic mt-1">{new Date(user.joinedAt).toLocaleDateString()} — Identity Verified</p>
+                      <h4 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Active Since</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 italic mt-1">{new Date(user.joinedAt).toLocaleDateString()} — Identity Verified</p>
                     </div>
                   </div>
                </div>
@@ -1481,48 +1503,49 @@ onClick={async () => {
           )}
 
           {activeTab === 'settings' && (
-            <div className="space-y-8 animate-fade-in">
-               <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-6 md:space-y-8 animate-fade-in pb-10">
+               {/* FIXED TEXT COLORS: bg-slate-100 for light mode, bg-slate-800 for dark mode, text always visible */}
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Full Name</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Full Name</label>
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Sync Number</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Sync Number</label>
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                </div>
-               <div className="grid grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Security Key (Password)</label>
-                     className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Security Key (Password)</label>
+                     <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Profile Photo Link</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Profile Photo Link</label>
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
                   </div>
                </div>
                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-4">Drop-off Zone</label>
-                  <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-xl md:rounded-[24px] font-bold outline-none border-2 border-slate-200 dark:border-transparent focus:border-rose-400 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Drop-off Zone</label>
+                  <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
-               <button onClick={() => { onUpdateUser(user.id, editData); alert('Identity Resynced.'); }} className="w-full py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-[40px] font-black uppercase tracking-widest text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-10">Commit Identity Changes</button>
+               <button onClick={() => { onUpdateUser(user.id, editData); alert('Identity Resynced.'); }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">Commit Identity Changes</button>
             </div>
           )}
 
           {activeTab === 'wishlist' && (
-            <div className="space-y-6 animate-fade-in">
-               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-300 italic text-2xl dark:text-slate-500">Sanctuary is vacant.</div> : (
+            <div className="space-y-4 md:space-y-6 animate-fade-in pb-10">
+               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-400 italic text-xl md:text-2xl">Sanctuary is vacant.</div> : (
                  wishlistProducts.map((p: Product) => (
-                   <div key={p.id} className="flex items-center gap-10 group bg-slate-50 dark:bg-slate-800/30 p-8 rounded-[48px] hover:bg-rose-50/50 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-rose-100">
-                      <img src={p.image} className="w-24 h-32 rounded-[32px] object-cover shadow-2xl group-hover:scale-110 transition-transform duration-700" />
-                      <div className="flex-1">
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white">{p.name}</h4>
+                   <div key={p.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-6 group bg-slate-50 dark:bg-slate-800/30 p-6 md:p-8 rounded-[32px] md:rounded-[48px] hover:bg-rose-50 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-transparent hover:border-rose-100">
+                      <img src={p.image} className="w-full sm:w-24 h-48 sm:h-32 rounded-[24px] md:rounded-[32px] object-cover shadow-xl sm:group-hover:scale-110 transition-transform duration-700" />
+                      <div className="flex-1 text-center sm:text-left">
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{p.name}</h4>
                         <p className="text-sm font-black italic text-rose-600 mt-2 tracking-widest">Ksh {p.price.toLocaleString()}</p>
                       </div>
-                      <div className="flex gap-3">
-                        <button onClick={() => onAddToCart(p)} className="p-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] hover:bg-rose-700 transition-all shadow-xl active:scale-90"><ShoppingBag className="w-6 h-6" /></button>
-                        <button onClick={() => onRemoveFromWishlist(p.id)} className="p-6 bg-white dark:bg-slate-800 text-slate-300 hover:text-rose-600 rounded-[24px] shadow-sm transition-all active:scale-90"><Trash2 className="w-6 h-6" /></button>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <button onClick={() => onAddToCart(p)} className="flex-1 sm:flex-none p-4 md:p-6 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[24px] hover:bg-rose-700 transition-all shadow-xl active:scale-90 flex justify-center"><ShoppingBag className="w-5 h-5 md:w-6 md:h-6" /></button>
+                        <button onClick={() => onRemoveFromWishlist(p.id)} className="flex-1 sm:flex-none p-4 md:p-6 bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-2xl md:rounded-[24px] shadow-md transition-all active:scale-90 flex justify-center"><Trash2 className="w-5 h-5 md:w-6 md:h-6" /></button>
                       </div>
                    </div>
                  ))
@@ -1531,7 +1554,7 @@ onClick={async () => {
           )}
         </main>
       </div>
-      </div>
+    </div>
   );
 };
 
