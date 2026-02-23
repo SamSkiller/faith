@@ -562,111 +562,116 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
           <img src={product.image} className="w-full h-full object-cover" />
         </div>
 
-        {/* SCROLLING CONTENT AREA (Takes full width on mobile) */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide flex flex-col relative w-full">
+        {/* RIGHT SIDE (Takes full width on mobile, separates scroll content from fixed footer) */}
+        <div className="flex-1 flex flex-col w-full h-full relative overflow-hidden">
           
-          {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
-          <div className="block md:hidden w-full relative h-[45vh] shrink-0">
-            <img src={product.image} className="w-full h-full object-cover" />
-            <button onClick={onClose} className="absolute top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-10">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Text Content */}
-          <div className="p-6 md:p-16 flex-1">
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
-              <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
+          {/* SCROLLING CONTENT AREA */}
+          <div className="flex-1 overflow-y-auto scrollbar-hide flex flex-col w-full">
             
-            <div className="flex items-center gap-6 mb-8">
-              <span className="text-3xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
-              <div className="flex items-center gap-1 text-amber-400">
-                 {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
-                 <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
-              </div>
+            {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
+            <div className="block md:hidden w-full relative h-[45vh] shrink-0">
+              <img src={product.image} className="w-full h-full object-cover" />
+              <button onClick={onClose} className="absolute top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-10">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
             </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Narrative Spectrum</h4>
-                <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">{loading ? 'Synthesizing narrative...' : copy}</p>
-              </div>
 
-              <div className="space-y-4">
-                 <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Directives</h4>
-                 {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
-                   <div key={i} className="flex items-center gap-4 p-4 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
-                     <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
-                   </div>
-                 ))}
+            {/* Text Content */}
+            <div className="p-6 md:p-16 flex-1">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
+                <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
               </div>
+              <h2 className="text-4xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
+              
+              <div className="flex items-center gap-6 mb-8">
+                <span className="text-3xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
+                <div className="flex items-center gap-1 text-amber-400">
+                   {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
+                   <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
+                </div>
+              </div>
+              
+              <div className="space-y-12">
+                <div>
+                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Narrative Spectrum</h4>
+                  <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">{loading ? 'Synthesizing narrative...' : copy}</p>
+                </div>
 
-              <div className="space-y-8 pt-8 border-t border-slate-50 dark:border-slate-800">
-                 <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><MessageSquare className="w-3 h-3 text-sky-500" /> Soul Reflections</h4>
-                 <div className="space-y-6">
-                   {product.reviews?.length ? product.reviews.map((r: any) => (
-                     <div key={r.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800">
-                        <div className="flex justify-between items-start mb-4">
-                           <div>
-                              <p className="font-bold text-slate-900 dark:text-white text-sm">{r.userName}</p>
-                              <p className="text-[10px] text-slate-400 mt-1">{r.date}</p>
-                           </div>
-                           <div className="flex gap-0.5 text-amber-400">
-                              {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
-                           </div>
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
+                <div className="space-y-4">
+                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Directives</h4>
+                   {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
+                     <div key={i} className="flex items-center gap-4 p-4 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
+                       <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                       <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
                      </div>
-                   )) : (
-                     <p className="text-sm text-slate-400 dark:text-slate-500 italic">No reflections transmitted yet.</p>
-                   )}
-                 </div>
+                   ))}
+                </div>
 
-                 <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-10">
-                    <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Transmit Reflection</h5>
-                    <form onSubmit={handleReviewSubmit} className="space-y-6">
-                       <div className="flex items-center gap-4">
-                          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Resonance:</span>
-                          <div className="flex gap-2">
-                             {[1,2,3,4,5].map(s => (
-                               <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
-                                 <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
-                               </button>
-                             ))}
+                <div className="space-y-8 pt-8 border-t border-slate-50 dark:border-slate-800">
+                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><MessageSquare className="w-3 h-3 text-sky-500" /> Soul Reflections</h4>
+                   <div className="space-y-6">
+                     {product.reviews?.length ? product.reviews.map((r: any) => (
+                       <div key={r.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800">
+                          <div className="flex justify-between items-start mb-4">
+                             <div>
+                                <p className="font-bold text-slate-900 dark:text-white text-sm">{r.userName}</p>
+                                <p className="text-[10px] text-slate-400 mt-1">{r.date}</p>
+                             </div>
+                             <div className="flex gap-0.5 text-amber-400">
+                                {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
+                             </div>
                           </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
                        </div>
-                       <textarea 
-                          required
-                          placeholder="Your narrative reflection..."
-                          className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-sm text-slate-900 dark:text-white min-h-[100px]"
-                          value={reviewComment}
-                          onChange={(e) => setReviewComment(e.target.value)}
-                       />
-                       <button type="submit" className="w-full py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all">Submit Reflection</button>
-                    </form>
-                 </div>
+                     )) : (
+                       <p className="text-sm text-slate-400 dark:text-slate-500 italic">No reflections transmitted yet.</p>
+                     )}
+                   </div>
+
+                   <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-10">
+                      <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Transmit Reflection</h5>
+                      <form onSubmit={handleReviewSubmit} className="space-y-6">
+                         <div className="flex items-center gap-4">
+                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Resonance:</span>
+                            <div className="flex gap-2">
+                               {[1,2,3,4,5].map(s => (
+                                 <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
+                                   <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+                                 </button>
+                               ))}
+                            </div>
+                         </div>
+                         <textarea 
+                            required
+                            placeholder="Your narrative reflection..."
+                            className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-sm text-slate-900 dark:text-white min-h-[100px]"
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                         />
+                         <button type="submit" className="w-full py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all">Submit Reflection</button>
+                      </form>
+                   </div>
+                </div>
               </div>
             </div>
+            
+            {/* FIXED FOOTER (Never overlaps content) */}
+            <div className="bg-white dark:bg-slate-900 p-4 md:p-8 border-t border-slate-100 dark:border-slate-800 flex gap-4 shrink-0 z-20">
+              <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-5 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl hover:bg-rose-700 transition-all flex items-center justify-center gap-3 active-scale">
+                 <ShoppingBag className="w-5 h-5" /> Acquire Presence
+              </button>
+              <button onClick={() => onToggleWishlist(product.id)} className={`p-5 md:p-7 rounded-[24px] md:rounded-[32px] border-2 transition-all active-scale ${isWishlisted ? 'border-rose-500 text-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}>
+                 <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+            
           </div>
-
-          {/* STICKY FOOTER: This guarantees it's always at the bottom of the visible screen */}
-          <div className="sticky bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 md:p-8 border-t border-slate-100 dark:border-slate-800 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] z-20">
-            <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-5 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl hover:bg-rose-700 transition-all flex items-center justify-center gap-3 active-scale">
-               <ShoppingBag className="w-5 h-5" /> Acquire Presence
-            </button>
-            <button onClick={() => onToggleWishlist(product.id)} className={`p-5 md:p-7 rounded-[24px] md:rounded-[32px] border-2 transition-all active-scale ${isWishlisted ? 'border-rose-500 text-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}>
-               <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
-            </button>
-          </div>
-
         </div>
       </div>
     </div>
   );
+};
 // --- Helper Components ---
 
 const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => (
