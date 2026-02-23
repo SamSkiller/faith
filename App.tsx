@@ -1584,12 +1584,10 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
              <div className="h-px bg-white/10 my-4 md:my-6"></div>
              
              <div className="space-y-1">
-                {/* FIXED DARK MODE TOGGLE ANIMATION */}
-              <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl cursor-pointer" onClick={() => setIsDarkMode(!isDarkMode)}>
+            {/* FIXED DARK MODE TOGGLE ANIMATION */}
+                <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl cursor-pointer" onClick={() => setIsDarkMode(!isDarkMode)}>
                    <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
-                   <button className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}> 
-                     className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}
-                   >
+                   <button className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}>
                      <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
                    </button>
                 </div>
