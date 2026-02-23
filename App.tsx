@@ -697,7 +697,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => (
                     <button onClick={() => setCart(cart.filter((c: any) => c.id !== i.id))} className="text-slate-300 hover:text-rose-600 transition-colors"><Trash className="w-4 h-4" /></button>
                   </div>
                   <p className="text-[10px] font-black uppercase text-rose-500 mb-6 tracking-widest">{i.category}</p>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-wrap gap-4 justify-between items-center mt-2">
                     <div className="flex items-center gap-4 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm">
                        <button onClick={() => setCart(cart.map((c: any) => c.id === i.id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c))}><Minus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
                        <span className="text-sm font-black text-slate-900 dark:text-white">{i.quantity}</span>
@@ -1402,8 +1402,8 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           <X className="w-5 h-5 md:w-6 md:h-6" />
         </button>
 
-        {/* SIDEBAR - Scrollable on mobile if it gets too tall */}
-        <aside className="w-full md:w-96 bg-slate-900 dark:bg-slate-950 text-white p-6 md:p-12 flex flex-col shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full border-b md:border-b-0 md:border-r border-slate-800">
+        {/* SIDEBAR - Dynamically adjusts width to stop squishing */}
+        <aside className="w-full md:w-72 lg:w-96 bg-slate-900 dark:bg-slate-950 text-white p-6 md:p-8 lg:p-12 flex flex-col shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full border-b md:border-b-0 md:border-r border-slate-800">
           <div className="text-center mb-6 md:mb-10 mt-4 md:mt-0">
             <div className="rotating-border-container mx-auto w-20 h-20 md:w-32 md:h-32 mb-4 md:mb-6 p-1 relative group cursor-pointer"
               onClick={async () => {
@@ -1479,8 +1479,8 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           <button onClick={onLogout} className="mt-6 py-4 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-3xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95"><LogOut className="w-4 h-4" /> Disconnect</button>
         </aside>
 
-        {/* MAIN CONTENT AREA */}
-        <main className="flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide relative">
+       {/* MAIN CONTENT AREA */}
+        <main className="flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide relative">
           
           <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-12 mt-2 md:mt-0">
             {activeTab === 'profile' && 'Citizen Overview'}
