@@ -25,15 +25,29 @@ const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070",
   "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070",
   "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070",
-  "https://images.unsplash.com/photo-1445205170230-053b830c6050?q=80&w=2070"
+  "https://unsplash.com/photos/assorted-color-clothes-hanging-on-rod-GNJbBgPP2VU",
+  "https://unsplash.com/photos/a-woman-in-a-blue-and-green-one-piece-swimsuit-8o1P2eYk0H4",
+  "https://unsplash.com/photos/white-zip-up-jacket-hanging-on-brown-wooden-clothes-hanger-kJXGTOY1wLQ",
+  "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
+  "https://unsplash.com/photos/two-women-standing-next-to-each-other-in-front-of-a-rack-of-clothes-uQhobNLeIqY",
+  "https://unsplash.com/photos/womens-seven-assorted-color-footwear-on-surface-ugZxwLQuZec",
+  "https://unsplash.com/photos/a-rack-of-clothes-and-a-pair-of-shoes-UezE_kVjtc8"
 ];
+
+// E-Commerce Nested Category Hierarchy 
+const CATEGORY_HIERARCHY = {
+  'Women': ['Dresses', 'Tops', 'Bottoms', 'Shoes'],
+  'Men': ['Shirts', 'Pants', 'Suits', 'Shoes'],
+  'Accessories': ['Bags', 'Jewelry', 'Watches'],
+  'Hot Deals': []
+};
 
 // --- Shared Components ---
 
 const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
-  const [showSearch, setShowSearch] = useState(false);
+const [showSearch, setShowSearch] = useState(false);
   const [isAnimate, setIsAnimate] = useState(false);
-  const categories: Category[] = ['All', 'Women', 'Men', 'Accessories', 'Hot Deals'];
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   useEffect(() => {
     if (cartCount > 0) {
@@ -63,9 +77,13 @@ const searchResults = useMemo(() => {
       </div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
-        <div className="flex items-center gap-6">
+<div className="flex items-center gap-4">
+          <button className="lg:hidden text-slate-600 dark:text-slate-300 p-2 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-full transition-colors" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu className="w-6 h-6" />
+          </button>
+          
           <button 
-            onClick={() => { setView('home'); setSelectedCategory('All'); }} 
+             onClick={() => { setView('home'); setSelectedCategory('All'); }} 
             className="group flex flex-col items-start leading-none transition-transform hover:scale-105 active:scale-95"
           >
             <span className="text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
@@ -74,14 +92,34 @@ const searchResults = useMemo(() => {
         </div>
 
         <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-300">
-          {categories.map(cat => (
-            <button 
-              key={cat} 
-              onClick={() => { setView('home'); setSelectedCategory(cat); }}
-              className={`hover:text-rose-600 transition-all font-black uppercase ${selectedCategory === cat && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : ''}`}
-            >
-              {cat}
-            </button>
+<button onClick={() => { setView('home'); setSelectedCategory('All'); }} className={`hover:text-rose-600 transition-all ${selectedCategory === 'All' && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : ''}`}>
+            All
+          </button>
+          {Object.keys(CATEGORY_HIERARCHY).map((parentCat) => (
+             <div key={parentCat} className="relative group py-4">
+                <button 
+                  onClick={() => { setView('home'); setSelectedCategory(parentCat); }} 
+                  className={`hover:text-rose-600 transition-all ${selectedCategory.startsWith(parentCat) && activeView === 'home' ? 'text-rose-600' : ''}`}
+                >
+                  {parentCat}
+                </button>
+                {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].length > 0 && (
+                  <div className="absolute top-[80%] left-1/2 -translate-x-1/2 pt-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 z-50">
+                    <div className="bg-white dark:bg-slate-900 shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-800 p-4 flex flex-col min-w-[180px] gap-1 relative overflow-hidden">
+                       <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 blur-xl rounded-full"></div>
+                       {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
+                          <button 
+                            key={sub} 
+                            onClick={() => { setView('home'); setSelectedCategory(`${parentCat} - ${sub}`); }} 
+                            className="text-left px-4 py-3 hover:bg-rose-50 dark:hover:bg-slate-800/80 rounded-xl transition-all text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600"
+                          >
+                            {sub}
+                          </button>
+                       ))}
+                    </div>
+                  </div>
+                )}
+             </div>
           ))}
           
           <div className="relative group">
@@ -154,6 +192,62 @@ const searchResults = useMemo(() => {
           )}
         </div>
       </nav>
+
+      {/* Mobile Sidebar Drawer */}
+      {isMobileMenuOpen && (
+         <div className="fixed inset-0 z-[100] flex animate-fade-in-left lg:hidden">
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+            <div className="relative w-72 bg-white dark:bg-slate-900 h-full overflow-y-auto p-6 flex flex-col border-r border-slate-100 dark:border-slate-800">
+               <div className="flex justify-between items-center mb-10">
+                  <span className="text-3xl font-serif font-bold text-rose-600 italic">Faith</span>
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
+                    <X className="w-6 h-6 text-slate-500" />
+                  </button>
+               </div>
+               
+               <div className="relative mb-8">
+                 <input 
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                   placeholder="Search sanctuary..." 
+                   className="w-full bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border-none outline-none text-xs font-bold text-slate-900 dark:text-white"
+                 />
+                 <Search className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
+               </div>
+
+               <div className="flex flex-col gap-6 flex-1">
+                  <button 
+                    onClick={() => { setView('home'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }} 
+                    className={`text-left text-xs font-black uppercase tracking-widest ${selectedCategory === 'All' ? 'text-rose-600' : 'text-slate-500 hover:text-rose-500'}`}
+                  >
+                    All Collection
+                  </button>
+
+                  {Object.keys(CATEGORY_HIERARCHY).map(parentCat => (
+                     <div key={parentCat} className="flex flex-col gap-4 border-t border-slate-50 dark:border-slate-800 pt-6">
+                        <button 
+                          onClick={() => { setView('home'); setSelectedCategory(parentCat); setIsMobileMenuOpen(false); }} 
+                          className={`text-left text-sm font-black uppercase tracking-widest ${selectedCategory.startsWith(parentCat) ? 'text-rose-600' : 'text-slate-900 dark:text-white'}`}
+                        >
+                          {parentCat}
+                        </button>
+                        <div className="grid grid-cols-2 gap-3">
+                           {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
+                              <button 
+                                key={sub} 
+                                onClick={() => { setView('home'); setSelectedCategory(`${parentCat} - ${sub}`); setIsMobileMenuOpen(false); }} 
+                                className={`text-left px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[10px] font-bold uppercase tracking-wider ${selectedCategory === `${parentCat} - ${sub}` ? 'text-rose-500 ring-1 ring-rose-200 bg-rose-50' : 'text-slate-500'}`}
+                              >
+                                {sub}
+                              </button>
+                           ))}
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+      )}
     </header>
   );
 };
@@ -163,7 +257,7 @@ const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, on
   const [tab, setTab] = useState<'analytics' | 'products' | 'orders' | 'users'>('analytics');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', price: 0, category: 'Women' as Category, stock: 10, image: '', description: '' });
+const [newProduct, setNewProduct] = useState({ name: '', price: 0, category: 'Women' as any, stock: 10, image: '', description: '', isHot: false });
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
@@ -312,11 +406,29 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     <input required className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
                     <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Value (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
                     <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool Quantity" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
-                    <select className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value as any}) : setNewProduct({...newProduct, category: e.target.value as any})}>
-                       <option value="Women">Women</option><option value="Men">Men</option><option value="Accessories">Accessories</option><option value="Hot Deals">Hot Deals</option>
+                      <select className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white outline-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
+                       <optgroup label="General / Top Level">
+                         <option value="Women">Women (All)</option>
+                         <option value="Men">Men (All)</option>
+                         <option value="Accessories">Accessories (All)</option>
+                         <option value="Hot Deals">Hot Deals (Standalone)</option>
+                       </optgroup>
+                       {Object.keys(CATEGORY_HIERARCHY).map(parentCat => CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].length > 0 && (
+                          <optgroup key={parentCat} label={`${parentCat} Specifics`}>
+                            {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
+                               <option key={`${parentCat} - ${sub}`} value={`${parentCat} - ${sub}`}>{parentCat} - {sub}</option>
+                            ))}
+                          </optgroup>
+                       ))}
                     </select>
                     <input className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Image URL (Unsplash preferred)" value={editingProduct ? editingProduct.image : newProduct.image} onChange={e => editingProduct ? setEditingProduct({...editingProduct, image: e.target.value}) : setNewProduct({...newProduct, image: e.target.value})} />
-                    <textarea className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Seductive Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                   <textarea className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Seductive Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                    
+                    <label className="md:col-span-2 flex items-center gap-3 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white cursor-pointer select-none border border-transparent hover:border-rose-100 transition-colors">
+                       <input type="checkbox" checked={editingProduct ? editingProduct.isHot : newProduct.isHot} onChange={e => editingProduct ? setEditingProduct({...editingProduct, isHot: e.target.checked}) : setNewProduct({...newProduct, isHot: e.target.checked})} className="w-6 h-6 rounded-lg accent-rose-600" />
+                       Mark as "Hot Deal" 🔥 (Shows glowing badge)
+                    </label>
+
                     <button className="md:col-span-2 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] hover:shadow-neon transition-all">Commit Configuration</button>
                  </form>
               </div>
@@ -349,7 +461,10 @@ const handleSaveProduct = (e: React.FormEvent) => {
                              <img src={p.image} className="w-12 h-16 rounded-xl object-cover shadow-lg" />
                              <span className="font-bold text-slate-900 dark:text-white">{p.name}</span>
                           </td>
-                          <td className="px-8 py-6"><span className="text-[10px] font-black uppercase text-rose-500">{p.category}</span></td>
+                           <td className="px-8 py-6">
+                             <span className="text-[10px] font-black uppercase text-rose-500">{p.category}</span>
+                             {p.isHot && <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-[8px] font-black uppercase tracking-wider">Hot</span>}
+                          </td>
                           <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</td>
                           <td className="px-8 py-6 font-black text-slate-900 dark:text-white">{p.stock}</td>
                           <td className="px-8 py-6 text-right">
@@ -1450,7 +1565,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
              <div className="space-y-1">
                 {/* FIXED DARK MODE TOGGLE ANIMATION */}
                 <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl">
-                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
+                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Mode</span>
                    <button 
                      onClick={() => setIsDarkMode(!isDarkMode)} 
                      className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}
@@ -1499,7 +1614,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                     </div>
                   </div>
                   <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
-                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Favorited</p>
+                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Favorites</p>
                     <div className="flex items-center gap-2 md:gap-3">
                        <Heart className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
                        <span className="text-4xl md:text-5xl font-black italic text-slate-900 dark:text-white">{wishlistProducts.length}</span>
