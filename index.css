@@ -1,3 +1,108 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Slightly deeper rose and cyan for better contrast */
+    --rose-primary: #e11d48; 
+    --neon-cyan: #06b6d4;
+    
+    /* 
+      FIXED LIGHT MODE BACKGROUND 
+      Changed from #fffafa (snow white) to #f8fafc (slate-50).
+      Now, pure white cards and text will contrast nicely instead of blending in!
+    */
+    --luxury-bg: #f8fafc; 
+    --luxury-text: #0f172a;
+  }
+
+  .dark {
+    --luxury-bg: #0b1120; /* Deep futuristic slate */
+    --luxury-text: #f8fafc;
+  }
+
+  body {
+    @apply bg-[var(--luxury-bg)] text-[var(--luxury-text)] transition-colors duration-700 overflow-x-hidden;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .font-serif { 
+    font-family: 'Playfair Display', serif; 
+  }
+  
+  .font-future { 
+    font-family: 'Space Grotesk', sans-serif; 
+  }
+
+  /* Glassmorphism utility */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg;
+  }
+
+  .dark .glass {
+    @apply bg-slate-900/70 border-slate-700/50 shadow-none;
+  }
+
+  /* Futuristic Neon Glow */
+  .shadow-neon {
+    box-shadow: 0 0 20px rgba(225, 29, 72, 0.3), 0 0 40px rgba(6, 182, 212, 0.15);
+  }
+
+  /* 
+    RESPONSIVE PRODUCT GRID FIX
+    Makes product images smaller and fit perfectly on mobile screens
+  */
+  .amazon-grid {
+    @apply grid gap-6 md:gap-10;
+    /* Desktop: Normal size */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .amazon-grid {
+      /* Mobile: Smaller cards, 2 per row if possible, or 1 nice centered one */
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      @apply gap-4;
+    }
+  }
+
+  /* Universal Active click animation */
+  .active-scale {
+    @apply transition-transform active:scale-95 duration-200;
+  }
+}
+
+/* =========================================
+   CUSTOM ANIMATIONS 
+========================================= */
+
+/* Rotating Border for Avatars (Conic Gradient) */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate {
+  to { --angle: 360deg; }
+}
+
+.rotating-border-container {
+  position: relative;
+  padding: 3px;
+  border-radius: 9999px;
+  background: conic-gradient(from var(--angle), transparent, var(--rose-primary), var(--neon-cyan), transparent);
+  animation: rotate 4s linear infinite;
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
