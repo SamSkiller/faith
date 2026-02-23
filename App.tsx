@@ -906,10 +906,10 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
     setLoading(true);
     try {
       const res = await initiateSTKPush(phoneNumber, total);
-      if (res.success) {
+if (res.success) {
         onComplete({ 
-          id: Math.random().toString(36).substr(2, 9).toUpperCase(), 
-          userId: currentUser.id, 
+           id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+           userId: currentUser.id || currentUser._id,, 
           items: cart, 
           total, 
           shippingMethod: shipping.name, 
@@ -1037,9 +1037,14 @@ const MainContent = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [heroIdx, setHeroIdx] = useState(0);
-  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
+const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Persisted Dark Mode configuration
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('faith_theme') === 'dark';
+  });
+  
   const [showCartToast, setShowCartToast] = useState<Product | null>(null);
   const [isSynced, setIsSynced] = useState(false);
 
@@ -1066,7 +1071,9 @@ const MainContent = () => {
         .catch(e => console.log("Product sync delayed"));
 
       // Fetch Orders
-      fetch(`${API_BASE}/orders/my`, { headers: { 'Authorization': `Bearer ${token}` } })
+// Fix: Let Admins view ALL orders, not just /my
+      const orderEndpoint = user?.role === 'admin' ? '/orders' : '/orders/my';
+      fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(r => r.ok ? r.json() : [])
         .then(data => setOrders(data))
         .catch(e => console.log("Order sync delayed"));
@@ -1110,11 +1117,12 @@ const MainContent = () => {
         p.category.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-    if (selectedCategory !== 'All') {
+if (selectedCategory !== 'All') {
       if (selectedCategory === 'Hot Deals') {
         result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
       } else {
-        result = result.filter(p => p.category === selectedCategory);
+        // Matches sub-categories exactly OR matches parent category group
+        result = result.filter(p => p.category === selectedCategory || p.category?.startsWith(`${selectedCategory} -`));
       }
     }
 
@@ -1146,9 +1154,15 @@ const MainContent = () => {
     return () => clearInterval(interval);
   }, []);
 
+// Sync Dark Mode state to DOM and Storage
   useEffect(() => {
-    if (isDarkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    if (isDarkMode) {
+       document.documentElement.classList.add('dark');
+       localStorage.setItem('faith_theme', 'dark');
+    } else {
+       document.documentElement.classList.remove('dark');
+       localStorage.setItem('faith_theme', 'light');
+    }
   }, [isDarkMode]);
 
 
@@ -1285,7 +1299,14 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
                <div className="amazon-grid">
                   {filteredProducts.map(p => (
                     <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
-                      <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
+                     <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
+                        
+                        {p.isHot && (
+                           <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-rose-600/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-neon flex items-center gap-1.5">
+                              <Sparkles className="w-3 h-3" /> Hot Deal
+                           </div>
+                        )}
+
                         <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
                         <div className="absolute top-6 right-6 flex flex-col gap-2">
                           <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
@@ -1564,10 +1585,9 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
              
              <div className="space-y-1">
                 {/* FIXED DARK MODE TOGGLE ANIMATION */}
-                <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl">
-                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Mode</span>
-                   <button 
-                     onClick={() => setIsDarkMode(!isDarkMode)} 
+              <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl cursor-pointer" onClick={() => setIsDarkMode(!isDarkMode)}>
+                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
+                   <button className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}> 
                      className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}
                    >
                      <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
