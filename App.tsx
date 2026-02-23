@@ -491,29 +491,30 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr><th className="px-8 py-6">Protocol ID</th><th className="px-8 py-6">Citizen Trace</th><th className="px-8 py-6">Settlement</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Command</th></tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                      {orders.map((o: any) => (
-                       <tr key={o.id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all">
-                          <td className="px-8 py-6 font-black text-rose-600">#{o.id}</td>
+                       <tr key={o._id || o.id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all">
+                          <td className="px-8 py-6 font-black text-rose-600">#{(o._id || o.id || 'XXXXXX').slice(-6).toUpperCase()}</td>
                           <td className="px-8 py-6">
                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-[10px]">{o.phoneNumber.slice(-2)}</div>
-                                <div><p className="font-bold text-slate-900 dark:text-white">{o.phoneNumber}</p><p className="text-[10px] text-slate-400 font-bold">{o.date}</p></div>
+                                <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-[10px]">{o.phoneNumber ? o.phoneNumber.slice(-2) : '??'}</div>
+                                <div><p className="font-bold text-slate-900 dark:text-white">{o.phoneNumber}</p><p className="text-[10px] text-slate-400 font-bold">{o.date || new Date().toLocaleDateString()}</p></div>
                              </div>
                           </td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {o.total.toLocaleString()}</td>
+                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString() || 0}</td>
                           <td className="px-8 py-6">
                              <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
                                o.status === 'Processing' ? 'bg-amber-100 text-amber-600' : 
                                o.status === 'Shipped' ? 'bg-sky-100 text-sky-600' : 
                                o.status === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-                             }`}>{o.status}</span>
+                             }`}>{o.status || 'Processing'}</span>
                           </td>
                           <td className="px-8 py-6 text-right">
                              <select 
-                                value={o.status} 
-                                onChange={(e) => onUpdateOrder(o.id, { status: e.target.value })}
+                                value={o.status || 'Processing'} 
+                                onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
                                 className="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-[9px] font-black uppercase outline-none border-none text-slate-900 dark:text-white"
+                             >
                              >
                                 <option value="Processing">Processing</option>
                                 <option value="Shipped">Shipped</option>
@@ -1070,18 +1071,19 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
         .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
         .catch(e => console.log("Product sync delayed"));
 
-      // Fetch Orders
-// Fix: Let Admins view ALL orders, not just /my
-      const orderEndpoint = user?.role === 'admin' ? '/orders' : '/orders/my';
+// 1. Get user session FIRST so we know if they are an admin
+      const session = localStorage.getItem('faith_session_active');
+      const localUser = session ? JSON.parse(session) : null;
+
+      // 2. Fetch Orders based on role (Admin sees all, normal user sees /my)
+      const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(r => r.ok ? r.json() : [])
         .then(data => setOrders(data))
         .catch(e => console.log("Order sync delayed"));
 
-      // Admin Data
-      const session = localStorage.getItem('faith_session_active');
-      const user = session ? JSON.parse(session) : null;
-      if (user?.role === 'admin') {
+      // 3. Admin Data (Users)
+      if (localUser?.role === 'admin') {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.ok ? r.json() : [])
           .then(data => setUsers(data))
@@ -1194,10 +1196,25 @@ if (selectedCategory !== 'All') {
     setTimeout(() => setShowCartToast(null), 3000);
   };
 
-  const handleOrderUpdate = (id: string, data: Partial<Order>) => {
-    const next = orders.map(o => o.id === id ? { ...o, ...data } : o);
+const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
+    // 1. Update instantly on screen
+    const next = orders.map((o: any) => (o._id === id || o.id === id) ? { ...o, ...data } : o);
     setOrders(next);
     sync('faith_orders_db', next);
+
+    // 2. Sync change to Backend Database
+    try {
+      await fetch(`${API_BASE}/orders/${id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+        },
+        body: JSON.stringify(data)
+      });
+    } catch (e) {
+      console.log("Failed to sync order update to server");
+    }
   };
 
   const handleAddReview = (productId: string, review: Review) => {
