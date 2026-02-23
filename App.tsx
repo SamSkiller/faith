@@ -909,7 +909,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
 if (res.success) {
         onComplete({ 
            id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-           userId: currentUser.id || currentUser._id,, 
+           userId: currentUser.id || currentUser._id,
           items: cart, 
           total, 
           shippingMethod: shipping.name, 
