@@ -882,7 +882,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
 // --- Main App Controller ---
 
 const MainContent = () => {
-const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -901,6 +901,42 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
+  // 1. DEFINED HERE: Now both handleAuth and useEffect can access it!
+  const checkBackendSync = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/health`);
+      if (!res.ok) { setIsSynced(false); return; }
+      setIsSynced(true);
+
+      const token = localStorage.getItem('faith_token');
+      if (!token) return;
+
+      // Fetch Products
+      fetch(`${API_BASE}/products`)
+        .then(r => r.json())
+        .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
+        .catch(e => console.log("Product sync delayed"));
+
+      // Fetch Orders
+      fetch(`${API_BASE}/orders/my`, { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : [])
+        .then(data => setOrders(data))
+        .catch(e => console.log("Order sync delayed"));
+
+      // Admin Data
+      const session = localStorage.getItem('faith_session_active');
+      const user = session ? JSON.parse(session) : null;
+      if (user?.role === 'admin') {
+        fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : [])
+          .then(data => setUsers(data))
+          .catch(e => console.log("User list sync delayed"));
+      }
+    } catch (e) {
+      setIsSynced(false);
+    }
+  };
+
   const handleAuth = (user: User, token?: string) => {
     // Standardize the ID format
     const normalizedUser = { 
@@ -913,103 +949,54 @@ const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
     if (token) localStorage.setItem("faith_token", token);
     
     setView("home");
-    // Refresh data immediately after login
+    // 2. THIS WILL NOW WORK WITHOUT CRASHING!
     checkBackendSync();
   };
 
   const filteredProducts = useMemo(() => {
+    let result = [...(products || [])];
 
-  let result = [...(products || [])];
+    if (searchQuery)
+      result = result.filter(p =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
-  if (searchQuery)
-    result = result.filter(p =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-if (selectedCategory !== 'All') {
-    if (selectedCategory === 'Hot Deals') {
-      // Show products explicitly categorized as "Hot Deals" OR flagged as isHot
-      result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
-    } else {
-      result = result.filter(p => p.category === selectedCategory);
+    if (selectedCategory !== 'All') {
+      if (selectedCategory === 'Hot Deals') {
+        result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
+      } else {
+        result = result.filter(p => p.category === selectedCategory);
+      }
     }
-  }
 
-  if (sortBy === 'price-asc')
-    result.sort((a, b) => a.price - b.price);
+    if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
 
-  else if (sortBy === 'price-desc')
-    result.sort((a, b) => b.price - a.price);
+    return result;
+  }, [products, selectedCategory, sortBy, searchQuery]);
 
-  else if (sortBy === 'rating')
-    result.sort((a, b) => b.rating - a.rating);
-
-  return result;
-
-}, [
-  products,
-  selectedCategory,
-  sortBy,
-  searchQuery
-]);
-
-useEffect(() => {
-
-  const session = localStorage.getItem('faith_session_active');
-  if (session) setCurrentUser(JSON.parse(session));
+  useEffect(() => {
+    const session = localStorage.getItem('faith_session_active');
+    if (session) setCurrentUser(JSON.parse(session));
 
     localStorage.removeItem('faith_products_db');
     localStorage.removeItem('faith_orders_db');
     localStorage.removeItem('faith_users_db');
 
-  setProducts(INITIAL_PRODUCTS);
-  
-  // 🔹 Hero interval
-  const interval = setInterval(() => {
-    setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
-  }, 7000);
+    setProducts(INITIAL_PRODUCTS);
+    
+    // 🔹 Hero interval
+    const interval = setInterval(() => {
+      setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
+    }, 7000);
 
-  // 🔹 Backend Sync
-const checkBackendSync = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/health`);
-    if (!res.ok) { setIsSynced(false); return; }
-    setIsSynced(true);
+    // 3. THIS ALSO WORKS!
+    checkBackendSync();
 
-    const token = localStorage.getItem('faith_token');
-    if (!token) return;
-
-    // Fetch Products
-    fetch(`${API_BASE}/products`)
-      .then(r => r.json())
-      .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
-      .catch(e => console.log("Product sync delayed"));
-
-    // Fetch Orders - Use a separate catch for this
-    fetch(`${API_BASE}/orders/my`, { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setOrders(data))
-      .catch(e => console.log("Order sync delayed"));
-
-    // Admin Data - Use a separate catch for this
-    const user = currentUser; // Make sure this is updated
-    if (user?.role === 'admin') {
-      fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : [])
-        .then(data => setUsers(data))
-        .catch(e => console.log("User list sync delayed"));
-    }
-  } catch (e) {
-    setIsSynced(false);
-  }
-};
-
-  checkBackendSync();
-
-  return () => clearInterval(interval);
-
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
@@ -1361,7 +1348,6 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
 };
 
 // --- Sub Components ---
-
 
 const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
