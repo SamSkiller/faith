@@ -24,10 +24,13 @@
     transition: background-color 0.5s ease, color 0.5s ease;
     font-family: 'Inter', sans-serif;
 
+    /* FIXED TYPO HERE */
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscal
+    -moz-osx-font-smoothing: grayscale;
   }
-    input, select, textarea, button {
+
+  /* Force browsers to drop native styling for inputs/selects */
+  input, select, textarea, button {
     font-family: inherit;
     -webkit-appearance: none;
     -moz-appearance: none;
