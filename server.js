@@ -49,6 +49,20 @@ mongoose
 /* =========================
    SCHEMAS
 ========================= */
+// Add address to user
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true },
+  role: { type: String, default: "customer" },
+  faithPoints: { type: Number, default: 0 },
+  wishlist: [String],
+  profilePic: { type: String, default: "" },
+  address: { type: String, default: "" },
+  joinedAt: { type: Date, default: Date.now },
+}, { timestamps: true });
+
+// Add userId to reviews (to enforce 1 review per user)
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
@@ -58,43 +72,17 @@ const productSchema = new mongoose.Schema({
   rating: { type: Number, default: 5 },
   reviewsCount: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },
-  soldCount: { type: Number, default: 0 },
   isHot: Boolean,
-  isNew: Boolean,
   reviews: [{
+    userId: String, // NEW: Track who commented
     userName: String,
     rating: Number,
-    comment: String,
+    comment: String, // Changed from 'reflection'
     date: { type: Date, default: Date.now },
   }],
 }, { timestamps: true });
 
-const userSchema = new mongoose.Schema({
-
-  name: String,
-
-  email: { type: String, unique: true, required: true },
-
-  password: { type: String, required: true },
-
-  role: { type: String, default: "customer" },
-
-  faithPoints: { type: Number, default: 0 },
-
-  wishlist: [String],
-
-  profilePic: {
-    type: String,
-    default: ""
-  },
-
-  joinedAt: {
-    type: Date,
-    default: Date.now
-  },
-
-}, { timestamps: true });
-
+// Add delivery data to orders
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   userName: String,
@@ -107,6 +95,8 @@ const orderSchema = new mongoose.Schema({
   total: Number,
   status: { type: String, default: "Processing" },
   phoneNumber: String,
+  deliveryMethod: String, // NEW
+  deliveryDays: Number,   // NEW: e.g. 1, 3, 5
   date: { type: Date, default: Date.now },
 }, { timestamps: true });
 
@@ -299,6 +289,35 @@ app.put("/api/orders/:id", authenticate, async (req, res) => {
     res.json(order);
   } catch {
     res.status(500).json({ message: "Update failed" });
+  }
+});
+
+app.post("/api/products/:id/reviews", authenticate, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const product = await Product.findById(req.params.id);
+    
+    // Check if user already reviewed
+    const existingReview = product.reviews.find(r => r.userId === req.user.id);
+    
+    if (existingReview) {
+      // Edit existing review
+      existingReview.rating = rating;
+      existingReview.comment = comment;
+    } else {
+      // Add new review
+      product.reviews.push({ userId: req.user.id, userName: req.user.name, rating, comment });
+    }
+    
+    // Recalculate average rating
+    const totalRating = product.reviews.reduce((acc, item) => item.rating + acc, 0);
+    product.rating = totalRating / product.reviews.length;
+    product.reviewsCount = product.reviews.length;
+    
+    await product.save();
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to post comment" });
   }
 });
 
