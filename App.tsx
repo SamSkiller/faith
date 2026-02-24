@@ -1672,19 +1672,25 @@ onUpdateUser={async (id: any, data: any) => {
           onRemoveFromWishlist={toggleWishlist} 
           onAddToCart={handleAddToCart}
           onUpdateUser={async (id: any, data: any) => { 
-            // Sync with MongoDB directly
-            const res = await fetch(`${API_BASE}/users/profile-photo`, {
-              method: 'PUT',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-              },
-              body: JSON.stringify(data)
-            });
-            if(res.ok) {
-              const nextU = { ...currentUser, ...data };
-              setCurrentUser(nextU);
-              localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
+            try {
+              const res = await fetch(`${API_BASE}/users/${id}`, {
+                method: 'PUT',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                },
+                body: JSON.stringify(data)
+              });
+              if(res.ok) {
+                const updatedUser = await res.json();
+                const nextU = { ...currentUser, ...updatedUser, id: updatedUser._id };
+                setCurrentUser(nextU);
+                localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
+              } else {
+                alert("Failed to sync profile changes.");
+              }
+            } catch (e) {
+              console.error(e);
             }
           }}
           isDarkMode={isDarkMode} 
@@ -1740,52 +1746,26 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           <div className="text-center mb-6 md:mb-10 mt-4 md:mt-0">
             <div className="rotating-border-container mx-auto w-20 h-20 md:w-32 md:h-32 mb-4 md:mb-6 p-1 relative group cursor-pointer"
               onClick={() => document.getElementById('profilePicInput').click()}>
-              <input 
+             <input 
                   type="file" 
                   id="profilePicInput" 
                   className="hidden" 
                   accept="image/*" 
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  alert("Uploading Identity Visual to Cloud Archive... Please wait.");
-                  const url = await uploadToCloudinary(file);
-                  
-                  if (url) {
-                    // Just call the prop! It will automatically sync with the DB now.
-                    onUpdateUser(user.id || user._id, { profilePic: url });
-                    alert("✅ Identity Visual Resynced Successfully.");
-                  } else {
-                    alert("❌ Upload failed. Check network connection.");
-                  }
-                }
-              }}
-                    if (res.ok) {
-                      onUpdateUser={async (id: any, data: any) => {
-            try {
-              const res = await fetch(`${API_BASE}/users/${id}`, {
-                method: 'PUT',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-                },
-                body: JSON.stringify(data)
-              });
-              if(res.ok) {
-                const updatedUser = await res.json();
-                const nextU = { ...currentUser, ...updatedUser, id: updatedUser._id };
-                setCurrentUser(nextU);
-                localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
-              } else {
-                alert("Failed to sync profile changes.");
-              }
-            } catch (e) {
-              console.error(e);
-            }
-          }}
-          isDarkMode={isDarkMode} 
-          setIsDarkMode={setIsDarkMode}
-        />
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      alert("Uploading Identity Visual to Cloud Archive... Please wait.");
+                      const url = await uploadToCloudinary(file);
+                      
+                      if (url) {
+                        onUpdateUser(user.id || user._id, { profilePic: url });
+                        alert("✅ Identity Visual Resynced Successfully.");
+                      } else {
+                        alert("❌ Upload failed. Check network connection.");
+                      }
+                    }
+                  }}
+              />
               
               <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
                 {user.profilePic ? (
