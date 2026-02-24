@@ -954,7 +954,8 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
     </div>
   </div>
 );
-
+};
+  
 const CartToast = ({ product, onClose }: { product: Product, onClose: () => void }) => (
   <div className="fixed bottom-10 right-10 z-[200] animate-future-in bg-white dark:bg-slate-900 p-6 rounded-[32px] shadow-2xl border border-rose-100 dark:border-slate-800 flex items-center gap-6 max-w-sm">
     <div className="w-16 h-20 rounded-2xl overflow-hidden shadow-lg shrink-0">
