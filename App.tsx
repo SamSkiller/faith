@@ -25,13 +25,13 @@ const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070",
   "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070",
   "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070",
-  "https://unsplash.com/photos/assorted-color-clothes-hanging-on-rod-GNJbBgPP2VU",
-  "https://unsplash.com/photos/a-woman-in-a-blue-and-green-one-piece-swimsuit-8o1P2eYk0H4",
-  "https://unsplash.com/photos/white-zip-up-jacket-hanging-on-brown-wooden-clothes-hanger-kJXGTOY1wLQ",
-  "https://unsplash.com/photos/hanged-assorted-color-dress-shirts-NPPNHZK1U0s",
-  "https://unsplash.com/photos/two-women-standing-next-to-each-other-in-front-of-a-rack-of-clothes-uQhobNLeIqY",
-  "https://unsplash.com/photos/womens-seven-assorted-color-footwear-on-surface-ugZxwLQuZec",
-  "https://unsplash.com/photos/a-rack-of-clothes-and-a-pair-of-shoes-UezE_kVjtc8"
+  "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=2070",
+  "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=873&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1509664158680-07c5032b51e5?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fGZhc2hpb24lMjBiYWNrZ3JvdW5kfGVufDB8MHwwfHx8MA%3D%3D",
+  "https://images.unsplash.com/photo-1566958799193-c2aa57a835d4?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aGlnaCUyMGhlZWxzfGVufDB8MHwwfHx8MA%3D%3D",
+  "https://images.unsplash.com/photo-1658043408629-a99f0fc6bf0b?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTQyfHxiaWtpbml8ZW58MHwwfDB8fHww",
+  "https://images.unsplash.com/photo-1771151723402-d45f379ceaa9?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fHNob3J0JTIwc2tpcnR8ZW58MHwwfDB8fHww",
+  "https://images.unsplash.com/photo-1722467180322-0bd55d4d99e8?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OTd8fHNob3J0JTIwc2tpcnR8ZW58MHwwfDB8fHww"
 ];
 
 // E-Commerce Nested Category Hierarchy 
