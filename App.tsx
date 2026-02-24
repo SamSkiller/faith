@@ -276,6 +276,18 @@ const [newProduct, setNewProduct] = useState({ name: '', price: 0, category: 'Wo
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
+  const prevOrderCount = useRef(orders.length);
+
+useEffect(() => {
+  // If order count increases, it's a new order! Play a cool futuristic sound
+  if (orders.length > prevOrderCount.current) {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    audio.play().catch(e => console.log("Audio autoplay blocked"));
+    // Update the ref
+    prevOrderCount.current = orders.length;
+  }
+}, [orders.length]);
+  
   const stats = useMemo(() => ({
     revenue: orders.reduce((s: number, o: any) => s + o.total, 0),
     avgOrder: orders.length ? orders.reduce((s: number, o: any) => s + o.total, 0) / orders.length : 0,
@@ -517,53 +529,82 @@ const handleSaveProduct = (e: React.FormEvent) => {
        )}
 
       {tab === 'orders' && (
-         <div className="space-y-8 animate-fade-in">
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Logistics Protocol Status</h3>
-            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
-               <div className="overflow-x-auto w-full"> {/* ADDED SCROLL WRAPPER */}
-                 <table className="w-full text-left min-w-[700px]"> {/* ADDED MIN-WIDTH */}
-                  <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                     <tr><th className="px-8 py-6">Protocol ID</th><th className="px-8 py-6">Citizen Trace</th><th className="px-8 py-6">Settlement</th><th className="px-8 py-6">Status</th><th className="px-8 py-6 text-right">Command</th></tr>
-                  </thead>
-                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                     {orders.map((o: any) => (
-                       <tr key={o._id || o.id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all">
-                          <td className="px-8 py-6 font-black text-rose-600">#{(o._id || o.id || 'XXXXXX').slice(-6).toUpperCase()}</td>
-                          <td className="px-8 py-6">
-                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-[10px]">{o.phoneNumber ? o.phoneNumber.slice(-2) : '??'}</div>
-                                <div><p className="font-bold text-slate-900 dark:text-white">{o.phoneNumber}</p><p className="text-[10px] text-slate-400 font-bold">{o.date || new Date().toLocaleDateString()}</p></div>
-                             </div>
-                          </td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString() || 0}</td>
-                          <td className="px-8 py-6">
-                             <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                               o.status === 'Processing' ? 'bg-amber-100 text-amber-600' : 
-                               o.status === 'Shipped' ? 'bg-sky-100 text-sky-600' : 
-                               o.status === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-                             }`}>{o.status || 'Processing'}</span>
-                          </td>
-                          <td className="px-8 py-6 text-right">
-                             <select 
-                                value={o.status || 'Processing'} 
-                                onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
-                                className="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-[9px] font-black uppercase outline-none border-none text-slate-900 dark:text-white"
-                             >
-                                <option value="Processing">Processing</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
-                             </select>
-                          </td>
-                       </tr>
-                     ))}
-                  </tbody>
-               </table>
-               {orders.length === 0 && <div className="p-40 text-center italic text-slate-300">Operational History Vacant</div>}
+  <div className="space-y-8 animate-fade-in">
+    <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+      <Activity className="w-6 h-6 text-rose-500" /> Logistics Protocol Status
+    </h3>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {orders.map((o: any) => {
+        // Assume standard 3 days delivery if missing, or use o.deliveryDays
+        const daysLeft = o.deliveryDays || 3; 
+        const isDelivered = o.status === 'Delivered';
+
+        return (
+          <div key={o._id || o.id} className={`bg-white dark:bg-slate-900 p-6 rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-neon'} transition-all relative overflow-hidden flex flex-col`}>
+            {/* Glowing background for active orders */}
+            {!isDelivered && <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 blur-3xl rounded-full"></div>}
+            
+            {/* Header: Profile Pic & Status */}
+            <div className="flex justify-between items-start mb-6 relative z-10">
+              <div className="flex items-center gap-3">
+                 {/* Replaced 2-digits with User Profile Icon */}
+                 <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-slate-800 overflow-hidden bg-rose-50 flex items-center justify-center shrink-0 shadow-md">
+                   {o.userProfilePic ? <img src={o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-rose-400" />}
+                 </div>
+                 <div>
+                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-widest">#{ (o._id || o.id || 'XXXX').slice(-6).toUpperCase() }</p>
+                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || o.phoneNumber}</p>
+                 </div>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                o.status === 'Processing' ? 'bg-amber-100 text-amber-600' : 
+                o.status === 'Shipped' ? 'bg-sky-100 text-sky-600' : 
+                o.status === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
+              }`}>{o.status || 'Processing'}</span>
             </div>
+
+            {/* Content: Details & Countdown */}
+            {!isDelivered && (
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-slate-700">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-[9px] font-black uppercase text-slate-400">Total Value</span>
+                  <span className="text-lg font-black italic text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500 animate-pulse" /> Countdown</span>
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{daysLeft} Days to Drop-off</span>
+                </div>
+              </div>
+            )}
+
+            {/* Drop-off Zone Note */}
+            <p className="text-[10px] font-bold text-slate-500 mb-6 truncate"><MapPin className="w-3 h-3 inline mr-1"/> {o.address || 'Drop-off Zone Pending'}</p>
+
+            {/* Action Buttons */}
+            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center relative z-10">
+               {isDelivered ? (
+                 <p className="text-xs font-black uppercase tracking-widest text-emerald-500 w-full text-center">Settled & Closed</p>
+               ) : (
+                 <select 
+                    value={o.status || 'Processing'} 
+                    onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
+                    className="w-full bg-slate-900 dark:bg-rose-600 text-white p-3 rounded-xl text-[10px] font-black uppercase outline-none shadow-xl cursor-pointer hover:bg-rose-700 transition-colors text-center appearance-none"
+                 >
+                    <option value="Processing">Tap to Update: Processing</option>
+                    <option value="Shipped">Tap to Update: Shipped</option>
+                    <option value="Delivered">Tap to Update: Delivered</option>
+                    <option value="Cancelled">Cancel Order</option>
+                 </select>
+               )}
             </div>
-         </div>
-       )}
+          </div>
+        )
+      })}
+    </div>
+    {orders.length === 0 && <div className="p-40 text-center italic text-slate-300">Operational History Vacant</div>}
+  </div>
+)}
 
 {tab === 'users' && (
          <div className="space-y-8 animate-fade-in">
