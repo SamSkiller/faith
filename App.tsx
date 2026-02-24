@@ -1078,17 +1078,17 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
         .then(data => setOrders(data))
         .catch(e => console.log("Order sync delayed"));
 
-      // 3. Admin Data (Users)
+// 3. Admin Data (Users)
       if (localUser?.role === 'admin') {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.ok ? r.json() : [])
-          .then(data => setUsers(data))
+          .then(data => {
+             // Ensure data is an array and map MongoDB _id to standard id
+             const formattedUsers = Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : [];
+             setUsers(formattedUsers);
+          })
           .catch(e => console.log("User list sync delayed"));
       }
-    } catch (e) {
-      setIsSynced(false);
-    }
-  };
 
   const handleAuth = (user: User, token?: string) => {
     // Standardize the ID format
@@ -1374,19 +1374,41 @@ const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
               });
               if(res.ok) setProducts(products.filter(p => p.id !== id));
             }}
-            onUpdateUser={async (id: any, data: any) => {
-              // This connects to your existing profile update logic
-              const res = await fetch(`${API_BASE}/users/${id}`, { // Ensure this route exists or use your profile-photo route logic
-                method: 'PUT',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-                },
-                body: JSON.stringify(data)
-              });
-              if(res.ok) setUsers(users.map(u => u.id === id ? { ...u, ...data } : u));
+onUpdateUser={async (id: any, data: any) => {
+              try {
+                const res = await fetch(`${API_BASE}/users/${id}`, { 
+                  method: 'PUT',
+                  headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                  },
+                  body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                   setUsers(users.map(u => (u.id === id || u._id === id) ? { ...u, ...data } : u));
+                } else {
+                   alert("Failed to update user role on server.");
+                }
+              } catch (e) {
+                console.log(e);
+              }
             }}
-            onDeleteUser={(id: any) => setUsers(users.filter(u => u.id !== id))}
+            onDeleteUser={async (id: any) => {
+              if(!window.confirm("Are you sure you want to permanently banish this citizen?")) return;
+              try {
+                const res = await fetch(`${API_BASE}/users/${id}`, { 
+                  method: 'DELETE',
+                  headers: { 'Authorization': `Bearer ${localStorage.getItem('faith_token')}` }
+                });
+                if(res.ok) {
+                  setUsers(users.filter(u => u.id !== id && u._id !== id));
+                } else {
+                  alert("Failed to delete user on server.");
+                }
+              } catch (e) {
+                console.log(e);
+              }
+            }}
             onUpdateOrder={handleOrderUpdate}
             onBulkUpdate={handleBulkUpdate}
           />
