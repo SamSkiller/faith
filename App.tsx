@@ -1161,6 +1161,8 @@ const MainContent = () => {
   const [heroIdx, setHeroIdx] = useState(0);
 const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
+
+    const toastTimeoutRef = useRef(null);
   
   // Persisted Dark Mode configuration
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -1312,13 +1314,19 @@ if (selectedCategory !== 'All') {
     sync('faith_users_db', nextUs);
   };
 
+  // 2. Update the function
   const handleAddToCart = (p: Product) => {
     setCart(prev => {
         const ex = prev.find(i => i.id === p.id);
         return ex ? prev.map(i => i.id === p.id ? {...i, quantity: i.quantity + 1} : i) : [...prev, {...p, quantity: 1}];
     });
+    
     setShowCartToast(p);
-    setTimeout(() => setShowCartToast(null), 3000);
+    
+    // Clear previous timeout so rapid clicks don't cause visual glitches
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    
+    toastTimeoutRef.current = setTimeout(() => setShowCartToast(null), 3000);
   };
 
 const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
