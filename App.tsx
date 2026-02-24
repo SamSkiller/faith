@@ -611,27 +611,38 @@ const handleSaveProduct = (e: React.FormEvent) => {
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Sanctuary Citizen Nodes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {users.map((u: any) => (
-                 <div key={u._id || u.id} className={`bg-white dark:bg-slate-900 p-8 rounded-[48px] border-2 transition-all group relative overflow-hidden ${u.role === 'admin' ? 'border-rose-500/50 shadow-neon' : 'border-slate-50 dark:border-slate-800'}`}>
-                    {u.role === 'admin' && <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 blur-3xl rounded-full"></div>}
-                    <div className="flex items-center gap-6 mb-8 relative z-10">
-                       <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 font-black text-2xl border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
-                         {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
-                       </div>
-                       <div>
-                          <h4 className="text-lg font-bold text-slate-900 dark:text-white">{u.name}</h4>
-                          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{u.email}</p>
-                       </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-8 relative z-10">
-                       <div><p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Protocol Tier</p><p className={`font-black uppercase text-[10px] mt-1 ${u.role === 'admin' ? 'text-rose-500' : 'text-slate-900 dark:text-white'}`}>{u.role}</p></div>
-                       <div className="text-right"><p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Faith Points</p><p className="font-black italic text-rose-600 mt-1">{u.faithPoints}</p></div>
-                    </div>
-                    {u.email !== 'faith@faith' && (
-                      <div className="flex gap-4 relative z-10">
-                         <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">{u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}</button>
-                         <button onClick={() => onDeleteUser(u._id || u.id)} className="p-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    )}
+{/* Change the User Card Header to show Supreme status */}
+<div className="flex justify-between items-start mb-8 relative z-10">
+  <div className="flex items-center gap-4">
+     <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 font-black text-2xl border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
+       {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
+     </div>
+     <div>
+        <h4 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          {u.name} 
+          {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500" />}
+        </h4>
+        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{u.email}</p>
+     </div>
+  </div>
+</div>
+
+{/* Update the Buttons at the bottom to hide for faith@faith */}
+{u.email !== 'faith@faith' ? (
+  <div className="flex gap-4 relative z-10 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+     <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">
+       {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
+     </button>
+     {/* Note: In App.jsx, ensure you pass currentUser down to AdminVault so we know who is clicking! */}
+     <button onClick={() => onDeleteUser(u._id || u.id)} className="p-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all">
+       <Trash2 className="w-4 h-4" />
+     </button>
+  </div>
+) : (
+  <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+    <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Supreme System Architect</p>
+  </div>
+)}
                  </div>
                ))}
             </div>
