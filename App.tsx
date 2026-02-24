@@ -1054,7 +1054,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     window.scrollTo({ top: 0, behavior: 'smooth' });
    }, [view, selectedProduct]);
 
-  // 1. DEFINED HERE: Now both handleAuth and useEffect can access it!
+// 1. DEFINED HERE: Now both handleAuth and useEffect can access it!
   const checkBackendSync = async () => {
     try {
       const res = await fetch(`${API_BASE}/health`);
@@ -1070,7 +1070,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
         .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
         .catch(e => console.log("Product sync delayed"));
 
-// 1. Get user session FIRST so we know if they are an admin
+      // 1. Get user session FIRST so we know if they are an admin
       const session = localStorage.getItem('faith_session_active');
       const localUser = session ? JSON.parse(session) : null;
 
@@ -1081,7 +1081,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
         .then(data => setOrders(data))
         .catch(e => console.log("Order sync delayed"));
 
-// 3. Admin Data (Users)
+      // 3. Admin Data (Users)
       if (localUser?.role === 'admin') {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.ok ? r.json() : [])
@@ -1092,6 +1092,10 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
           })
           .catch(e => console.log("User list sync delayed"));
       }
+    } catch (e) {
+      setIsSynced(false);
+    }
+  };
 
   const handleAuth = (user: User, token?: string) => {
     // Standardize the ID format
