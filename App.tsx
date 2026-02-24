@@ -8,7 +8,7 @@ import {
   ChevronRight, Key, Mail, Github, User as UserIcon, Package, TrendingUp, Settings, PieChart,
   ArrowRight, CreditCard as CardIcon, Map, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
   Languages, Trash, Share2, ShieldAlert, Crown, Zap, Fingerprint, Cloud, MessageSquare,
-  Wifi, WifiOff
+  Wifi, WifiOff, Clock, Youtube // <-- Added Clock and Youtube
 } from 'lucide-react';
 import { PRODUCTS as INITIAL_PRODUCTS, SHIPPING_OPTIONS } from './constants';
 import { Product, CartItem, Order, User, Category, Review } from './types';
@@ -1880,8 +1880,14 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                )}
             </div>
           )}
+          <Footer />
+        </main>
+      </div>
+    </div>
+  );
+};
 
-            const Footer = () => (
+     const Footer = () => (
   <footer className="bg-slate-950 text-white pt-20 pb-10 px-6 mt-20 border-t border-white/10 relative overflow-hidden">
     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
       <div>
@@ -1919,12 +1925,6 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
     </div>
   </footer>
 );
-          
-        </main>
-      </div>
-    </div>
-  );
-};
 
 export default function App() {
   return <MainContent />;
