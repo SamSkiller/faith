@@ -895,12 +895,12 @@ const [showAllComments, setShowAllComments] = useState(false);
                       )}
                     </div>
                   </div>
-                </div> {/* <-- ADDED: Closes space-y-12 */}
+                </div> 
               </div>
             </div>
           </div>
         </div>
-      </div> {/* <-- ADDED: Closes fixed inset-0 */}
+      </div> 
     );
   };
 // --- Helper Components ---
