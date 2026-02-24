@@ -532,16 +532,16 @@ const handleSaveProduct = (e: React.FormEvent) => {
          </div>
        )}
 
-       {tab === 'users' && (
+{tab === 'users' && (
          <div className="space-y-8 animate-fade-in">
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Sanctuary Citizen Nodes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {users.map((u: any) => (
-                 <div key={u.id} className={`bg-white dark:bg-slate-900 p-8 rounded-[48px] border-2 transition-all group relative overflow-hidden ${u.role === 'admin' ? 'border-rose-500/50 shadow-neon' : 'border-slate-50 dark:border-slate-800'}`}>
+                 <div key={u._id || u.id} className={`bg-white dark:bg-slate-900 p-8 rounded-[48px] border-2 transition-all group relative overflow-hidden ${u.role === 'admin' ? 'border-rose-500/50 shadow-neon' : 'border-slate-50 dark:border-slate-800'}`}>
                     {u.role === 'admin' && <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 blur-3xl rounded-full"></div>}
                     <div className="flex items-center gap-6 mb-8 relative z-10">
                        <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 font-black text-2xl border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
-                         {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name.charAt(0)}
+                         {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
                        </div>
                        <div>
                           <h4 className="text-lg font-bold text-slate-900 dark:text-white">{u.name}</h4>
@@ -554,8 +554,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     </div>
                     {u.email !== 'faith@faith' && (
                       <div className="flex gap-4 relative z-10">
-                         <button onClick={() => onUpdateUser(u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">{u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}</button>
-                         <button onClick={() => onDeleteUser(u.id)} className="p-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
+                         <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">{u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}</button>
+                         <button onClick={() => onDeleteUser(u._id || u.id)} className="p-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     )}
                  </div>
@@ -563,9 +563,6 @@ const handleSaveProduct = (e: React.FormEvent) => {
             </div>
          </div>
        )}
-    </div>
-  );
-};
 
 // --- Auth View ---
 const AuthView = ({ onAuthSuccess }: any) => {
@@ -1668,34 +1665,33 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
             </div>
           )}
 
-          {activeTab === 'settings' && (
+{activeTab === 'settings' && (
             <div className="space-y-6 md:space-y-8 animate-fade-in pb-10">
-               {/* FIXED TEXT COLORS: bg-slate-100 for light mode, bg-slate-800 for dark mode, text always visible */}
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Full Name</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Sync Number</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Security Key (Password)</label>
-                     <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
+                     <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Profile Photo Link</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
                   </div>
                </div>
                <div className="space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Drop-off Zone</label>
-                  <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
+                  <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
-               <button onClick={() => { onUpdateUser(user.id, editData); alert('Identity Resynced.'); }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">Commit Identity Changes</button>
+               <button onClick={() => { onUpdateUser(user.id || user._id, editData); alert('Identity Resynced.'); }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">Commit Identity Changes</button>
             </div>
           )}
 
