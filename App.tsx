@@ -1300,16 +1300,29 @@ if (selectedCategory !== 'All') {
     return products.filter(p => currentUser.wishlist.includes(p.id));
   }, [products, currentUser]);
 
-  const toggleWishlist = (productId: string) => {
+const toggleWishlist = async (productId: string) => {
     if (!currentUser) return setView('auth');
+    
     let nextW = currentUser.wishlist || [];
     nextW = nextW.includes(productId) ? nextW.filter(id => id !== productId) : [...nextW, productId];
     const nextU = { ...currentUser, wishlist: nextW };
+    
     setCurrentUser(nextU);
-    sync('faith_session_active', nextU);
-    const nextUs = users.map(u => u.id === currentUser.id ? nextU : u);
-    setUsers(nextUs);
-    sync('faith_users_db', nextUs);
+    localStorage.setItem('faith_session_active', JSON.stringify(nextU));
+
+    // Sync to backend DB
+    try {
+      await fetch(`${API_BASE}/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+        },
+        body: JSON.stringify({ wishlist: nextW })
+      });
+    } catch (e) {
+      console.error("Failed to sync wishlist to server");
+    }
   };
 
   const handleAddToCart = (p: Product) => {
@@ -1347,54 +1360,58 @@ const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
     }
   };
 
-  const handleAddReview = (productId: string, review: Review) => {
-    const nextProducts = products.map(p => {
-      if (p.id === productId) {
-        const nextReviews = [review, ...(p.reviews || [])];
-        const nextRating = nextReviews.reduce((sum, r) => sum + r.rating, 0) / nextReviews.length;
-        return { 
-          ...p, 
-          reviews: nextReviews, 
-          reviewsCount: nextReviews.length,
-          rating: Number(nextRating.toFixed(1))
-        };
+const handleAddReview = async (productId: string, review: Review) => {
+    try {
+      const res = await fetch(`${API_BASE}/products/${productId}/reviews`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+        },
+        body: JSON.stringify({ rating: review.rating, comment: review.comment })
+      });
+      
+      if (res.ok) {
+        const updatedProduct = await res.json();
+        // Replace product in list with updated DB product
+        const nextProducts = products.map(p => p.id === productId ? { ...updatedProduct, id: updatedProduct._id } : p);
+        setProducts(nextProducts);
+        
+        // Update modal view if currently open
+        if (selectedProduct && selectedProduct.id === productId) {
+           setSelectedProduct({ ...updatedProduct, id: updatedProduct._id });
+        }
+      } else {
+        alert("Failed to submit comment to Sanctuary.");
       }
-      return p;
-    });
-    setProducts(nextProducts);
-    sync('faith_products_db', nextProducts);
-    if (selectedProduct && selectedProduct.id === productId) {
-       setSelectedProduct(nextProducts.find(p => p.id === productId) || null);
+    } catch (e) {
+      console.error("Review error:", e);
     }
   };
 
-const handleBulkUpdate = (type: string, id?: string, amount?: any) => {
-  let next;
-
-  if (type === 'restock') {
-    next = products.map(p => ({ ...p, stock: p.stock + 10 }));
-
-  } else if (type === 'adjust' && id) {
-    next = products.map(p =>
-      p.id === id
-        ? { ...p, stock: Math.max(0, p.stock + (amount as number)) }
-        : p
-    );
-
-  } else if (type === 'edit' && id && amount) {
-    next = products.map(p =>
-      p.id === id
-        ? { ...p, ...amount }
-        : p
-    );
-  }
-
-  if (next) {
-    setProducts(next);
-    sync('faith_products_db', next);
-  }
-
-}; 
+const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
+    if (type === 'edit' && id && amount) {
+      try {
+        const res = await fetch(`${API_BASE}/products/${id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+          },
+          body: JSON.stringify(amount) // 'amount' is the edited product object here
+        });
+        
+        if (res.ok) {
+          const updatedProduct = await res.json();
+          setProducts(products.map(p => p.id === id ? { ...updatedProduct, id: updatedProduct._id } : p));
+        } else {
+          alert("Failed to update entity on server.");
+        }
+      } catch (e) {
+        console.error("Product update failed");
+      }
+    }
+  };
 
   return (
     <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
@@ -1565,6 +1582,8 @@ onUpdateUser={async (id: any, data: any) => {
               const formattedOrder = {
                 phoneNumber: o.phoneNumber,
                 total: o.total,
+                userName: currentUser.name,                 // <-- Added
+                deliveryMethod: o.shippingMethod,           // <-- Renamed to match schema
                 items: o.items.map((item: any) => ({
                   productId: item.id || item._id, 
                   name: item.name,
@@ -1729,29 +1748,44 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
               onChange={async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                  // 1. Give immediate feedback via an alert or toast
                   alert("Uploading Identity Visual to Cloud Archive... Please wait.");
-                  
                   const url = await uploadToCloudinary(file);
+                  
                   if (url) {
-                    const res = await fetch(`${API_BASE}/users/profile-photo`, {
-                      method: 'PUT',
-                      headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-                      },
-                      body: JSON.stringify({ profilePic: url })
-                    });
-                    if (res.ok) {
-                      onUpdateUser(user.id || user._id, { profilePic: url });
-                      alert("✅ Identity Visual Resynced Successfully.");
-                    }
+                    // Just call the prop! It will automatically sync with the DB now.
+                    onUpdateUser(user.id || user._id, { profilePic: url });
+                    alert("✅ Identity Visual Resynced Successfully.");
                   } else {
                     alert("❌ Upload failed. Check network connection.");
                   }
                 }
-              }} 
-                />
+              }}
+                    if (res.ok) {
+                      onUpdateUser={async (id: any, data: any) => {
+            try {
+              const res = await fetch(`${API_BASE}/users/${id}`, {
+                method: 'PUT',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                },
+                body: JSON.stringify(data)
+              });
+              if(res.ok) {
+                const updatedUser = await res.json();
+                const nextU = { ...currentUser, ...updatedUser, id: updatedUser._id };
+                setCurrentUser(nextU);
+                localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
+              } else {
+                alert("Failed to sync profile changes.");
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+          isDarkMode={isDarkMode} 
+          setIsDarkMode={setIsDarkMode}
+        />
               
               <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
                 {user.profilePic ? (
