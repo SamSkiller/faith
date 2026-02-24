@@ -288,11 +288,11 @@ useEffect(() => {
   }
 }, [orders.length]);
   
-  const stats = useMemo(() => ({
-    revenue: orders.reduce((s: number, o: any) => s + o.total, 0),
-    avgOrder: orders.length ? orders.reduce((s: number, o: any) => s + o.total, 0) / orders.length : 0,
+const stats = useMemo(() => ({
+    revenue: orders.reduce((s: number, o: any) => s + (o.total || 0), 0),
+    avgOrder: orders.length ? orders.reduce((s: number, o: any) => s + (o.total || 0), 0) / orders.length : 0,
     activeUsers: users.length,
-    inventoryValue: products.reduce((s: number, p: any) => s + (p.price * p.stock), 0)
+    inventoryValue: products.reduce((s: number, p: any) => s + ((p.price || 0) * (p.stock || 0)), 0)
   }), [orders, users, products]);
 
   const salesTrend = useMemo(() => [
