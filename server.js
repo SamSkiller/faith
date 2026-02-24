@@ -221,14 +221,25 @@ app.get("/api/users", authenticate, async (req, res) => {
   }
 });
 
-// Update a user role (Admin Only)
+// Update User Profile (Self or Admin)
 app.put("/api/users/:id", authenticate, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Ensure the user is updating their own account OR is an admin
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+      return res.status(403).json({ message: "Not authorized to update this profile." });
+    }
+
+    // If the user is updating their password, hash it first
+    if (req.body.password) {
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    } else {
+      delete req.body.password; // Prevent empty password from overwriting the current one
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).select("-password");
     res.json(user);
-  } catch {
-    res.status(500).json({ message: "Update failed" });
+  } catch (err) {
+    res.status(500).json({ message: "Update failed", error: err.message });
   }
 });
 
@@ -243,15 +254,6 @@ app.delete("/api/users/:id", authenticate, async (req, res) => {
   }
 });
 
-app.put("/api/users/profile-photo", authenticate, async (req, res) => {
-  try {
-    const { profilePic } = req.body;
-    const user = await User.findByIdAndUpdate(req.user.id, { profilePic }, { new: true });
-    res.json(user);
-  } catch {
-    res.status(500).json({ message: "Failed to update photo" });
-  }
-});
 
 // --- ORDERS ---
 // Replace this in server.js:
@@ -321,6 +323,17 @@ app.post("/api/products/:id/reviews", authenticate, async (req, res) => {
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: "Failed to post comment" });
+  }
+});
+
+// Update a product (Admin Only)
+app.put("/api/products/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: "Product update failed", error: err.message });
   }
 });
 
