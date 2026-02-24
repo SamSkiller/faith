@@ -562,6 +562,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
             </div>
          </div>
        )}
+    </div>
+  );
+};
 
 // --- Auth View ---
 const AuthView = ({ onAuthSuccess }: any) => {
