@@ -515,7 +515,6 @@ const handleSaveProduct = (e: React.FormEvent) => {
                                 onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
                                 className="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-[9px] font-black uppercase outline-none border-none text-slate-900 dark:text-white"
                              >
-                             >
                                 <option value="Processing">Processing</option>
                                 <option value="Shipped">Shipped</option>
                                 <option value="Delivered">Delivered</option>
