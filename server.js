@@ -230,6 +230,28 @@ app.get("/api/users", authenticate, async (req, res) => {
   }
 });
 
+// Update a user role (Admin Only)
+app.put("/api/users/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(user);
+  } catch {
+    res.status(500).json({ message: "Update failed" });
+  }
+});
+
+//  Delete a user (Admin Only)
+app.delete("/api/users/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin access required" });
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted" });
+  } catch {
+    res.status(500).json({ message: "Delete failed" });
+  }
+});
+
 app.put("/api/users/profile-photo", authenticate, async (req, res) => {
   try {
     const { profilePic } = req.body;
