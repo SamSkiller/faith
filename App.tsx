@@ -889,19 +889,20 @@ const [showAllComments, setShowAllComments] = useState(false);
           onChange={(e) => setReviewComment(e.target.value)}
         />
         <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all shadow-xl">
-          {isEditingReview ? 'Save Updates' : 'Submit Comment'}
-        </button>
-      </form>
-    )}
-  </div>
-</div>
-            
+                            {isEditingReview ? 'Save Updates' : 'Submit Comment'}
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                </div> {/* <-- ADDED: Closes space-y-12 */}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
+      </div> {/* <-- ADDED: Closes fixed inset-0 */}
+    );
+  };
 // --- Helper Components ---
 
 const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
