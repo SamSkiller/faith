@@ -42,6 +42,26 @@ const CATEGORY_HIERARCHY = {
   'Hot Deals': []
 };
 
+//Cloudinary
+const uploadToCloudinary = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'faith_shop'); 
+  
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/dqph9r4kj/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    return data.secure_url;
+  } catch (err) {
+    console.error("Cloudinary Error:", err);
+    return null;
+  }
+};
+
+
 // --- Shared Components ---
 
 const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
@@ -927,16 +947,20 @@ if (res.success) {
     }
   };
 
-  if (!currentUser) return (
+if (currentUser && !currentUser.address) {
+  return (
     <div className="pt-60 text-center animate-future-in">
-      <div className="rotating-border-container mx-auto w-24 h-24 mb-8 flex items-center justify-center relative">
-        <Lock className="w-10 h-10 text-rose-500 relative z-10" />
+      <div className="mx-auto w-24 h-24 mb-8 flex items-center justify-center text-rose-500">
+        <MapPin className="w-12 h-12" />
       </div>
-      <h2 className="text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Identity Missing</h2>
-      <p className="text-slate-400 mt-4 italic">Verification required to finalize the settlement.</p>
-      <button onClick={onAuth} className="mt-8 px-12 py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase text-[10px] shadow-2xl active-scale">Verify Identity</button>
+      <h2 className="text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Drop-off Zone Missing</h2>
+      <p className="text-slate-400 mt-4 italic">You must configure your Drop-off Zone in settings before settlement.</p>
+      <button onClick={() => onAuth('profile')} className="mt-8 px-12 py-5 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] shadow-2xl active-scale">
+        Configure Profile
+      </button>
     </div>
   );
+}
 
   return (
     <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
@@ -1562,7 +1586,13 @@ onUpdateUser={async (id: any, data: any) => {
 
 const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
-  const [editData, setEditData] = useState({ name: user.name, phoneNumber: user.phoneNumber || '', address: user.address || '', profilePic: user.profilePic || '', password: user.password || '' });
+  const [editData, setEditData] = useState({ 
+  name: user.name, 
+  email: user.email, 
+  phoneNumber: user.phoneNumber || '', 
+  address: user.address || '', 
+  password: '' 
+});
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 animate-fade-in">
@@ -1584,25 +1614,35 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
         <aside className="w-full md:w-72 lg:w-96 bg-slate-900 dark:bg-slate-950 text-white p-6 md:p-8 lg:p-12 flex flex-col shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full border-b md:border-b-0 md:border-r border-slate-800">
           <div className="text-center mb-6 md:mb-10 mt-4 md:mt-0">
             <div className="rotating-border-container mx-auto w-20 h-20 md:w-32 md:h-32 mb-4 md:mb-6 p-1 relative group cursor-pointer"
-              onClick={async () => {
-                const url = prompt("Transmit New Profile Image URL:");
-                if (url) {
-                  const res = await fetch(`${API_BASE}/users/profile-photo`, {
-                    method: 'PUT',
-                    headers: { 
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-                    },
-                    body: JSON.stringify({ profilePic: url })
-                  });
-                  if (res.ok) {
-                    onUpdateUser(user.id || user._id, { profilePic: url });
-                    const updatedUser = { ...user, profilePic: url };
-                    localStorage.setItem("faith_session_active", JSON.stringify(updatedUser));
-                    alert("Identity Visual Resynced.");
-                  }
-                }
-              }}>
+              onClick={() => document.getElementById('profilePicInput').click()}>
+              <input 
+                  type="file" 
+                  id="profilePicInput" 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const url = await uploadToCloudinary(file);
+                      if (url) {
+                        // Same as your old logic but using the uploaded URL
+                        const res = await fetch(`${API_BASE}/users/profile-photo`, {
+                          method: 'PUT',
+                          headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                          },
+                          body: JSON.stringify({ profilePic: url })
+                        });
+                        if (res.ok) {
+                          onUpdateUser(user.id || user._id, { profilePic: url });
+                          alert("Identity Visual Resynced.");
+                        }
+                      }
+                    }
+                  }} 
+                />
+              
               <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
                 {user.profilePic ? (
                   <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
