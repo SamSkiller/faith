@@ -438,10 +438,12 @@ const seedDatabase = async () => {
           reviews: []
         }
       ]);
-      console.log("✅ Collection seeded successfully");
+console.log("✅ Collection seeded successfully");
+    } else {
+      console.log(`✅ Sanctuary Database verified: ${count} entities exist.`);
     }
   } catch (err) {
-    console.error("❌ Seeding error:", err);
+    console.error("❌ Seeding error:", err.message);
   }
 };
 
