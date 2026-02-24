@@ -59,6 +59,7 @@ const userSchema = new mongoose.Schema({
   wishlist: [String],
   profilePic: { type: String, default: "" },
   address: { type: String, default: "" },
+   phoneNumber: { type: String, default: "" },
   joinedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
