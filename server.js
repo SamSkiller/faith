@@ -254,13 +254,15 @@ app.put("/api/users/profile-photo", authenticate, async (req, res) => {
 });
 
 // --- ORDERS ---
+// Replace this in server.js:
 app.post("/api/orders", authenticate, async (req, res) => {
   try {
     const order = new Order({ ...req.body, userId: req.user.id });
     await order.save();
     res.status(201).json(order);
-  } catch {
-    res.status(500).json({ message: "Order failed" });
+  } catch (err) { // <-- Add 'err'
+    console.error("Order Error:", err); // <-- Log it so you can see why it failed
+    res.status(500).json({ message: "Order failed", error: err.message });
   }
 });
 
