@@ -1314,7 +1314,6 @@ if (selectedCategory !== 'All') {
     sync('faith_users_db', nextUs);
   };
 
-  // 2. Update the function
   const handleAddToCart = (p: Product) => {
     setCart(prev => {
         const ex = prev.find(i => i.id === p.id);
