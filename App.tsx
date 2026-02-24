@@ -660,6 +660,8 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
 
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
+  const [isEditingReview, setIsEditingReview] = useState(false);
+const [showAllComments, setShowAllComments] = useState(false);
 
   useEffect(() => {
     const loadAI = async () => {
@@ -757,63 +759,93 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                    ))}
                 </div>
 
-                <div className="space-y-8 pt-8 border-t border-slate-50 dark:border-slate-800">
-                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><MessageSquare className="w-3 h-3 text-sky-500" /> Soul Reflections</h4>
-                   <div className="space-y-6">
-                     {product.reviews?.length ? product.reviews.map((r: any) => (
-                       <div key={r.id} className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800">
-                          <div className="flex justify-between items-start mb-4">
-                             <div>
-                                <p className="font-bold text-slate-900 dark:text-white text-sm">{r.userName}</p>
-                                <p className="text-[10px] text-slate-400 mt-1">{r.date}</p>
-                             </div>
-                             <div className="flex gap-0.5 text-amber-400">
-                                {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
-                             </div>
-                          </div>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
-                       </div>
-                     )) : (
-                       <p className="text-sm text-slate-400 dark:text-slate-500 italic">No reflections transmitted yet.</p>
-                     )}
-                   </div>
+<div className="space-y-6 pt-8 border-t border-slate-50 dark:border-slate-800">
+  <div className="flex justify-between items-center">
+    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+      <MessageSquare className="w-3 h-3 text-sky-500" /> Comments & Ratings
+    </h4>
+    {product.reviews?.length > 2 && (
+      <button onClick={() => setShowAllComments(!showAllComments)} className="text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">
+        {showAllComments ? 'Collapse' : 'Expand All'}
+      </button>
+    )}
+  </div>
 
-                   <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-10">
-                      <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Transmit Reflection</h5>
-                      <form onSubmit={handleReviewSubmit} className="space-y-6">
-                         <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Resonance:</span>
-                            <div className="flex gap-2">
-                               {[1,2,3,4,5].map(s => (
-                                 <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
-                                   <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
-                                 </button>
-                               ))}
-                            </div>
-                         </div>
-                         <textarea 
-                            required
-                            placeholder="Your narrative reflection..."
-                            className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-sm text-slate-900 dark:text-white min-h-[100px]"
-                            value={reviewComment}
-                            onChange={(e) => setReviewComment(e.target.value)}
-                         />
-                         <button type="submit" className="w-full py-5 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all">Submit Reflection</button>
-                      </form>
-                   </div>
-                </div>
+  {/* Comments Display Box (Flexible & Scrolling) */}
+  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[200px]'}`}>
+    {product.reviews?.length ? (
+      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
+        <div key={r.id || r.userId} className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 flex gap-4 items-start">
+          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-rose-400" />}
+          </div>
+          <div className="flex-1">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <p className="font-bold text-slate-900 dark:text-white text-xs">{r.userName}</p>
+                <p className="text-[8px] text-slate-400 mt-0.5">{r.date}</p>
+              </div>
+              <div className="flex gap-0.5 text-amber-400">
+                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
               </div>
             </div>
-            
-            {/* FIXED FOOTER (Never overlaps content) */}
-            <div className="bg-white dark:bg-slate-900 p-4 md:p-8 border-t border-slate-100 dark:border-slate-800 flex gap-4 shrink-0 z-20">
-              <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-5 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] md:rounded-[32px] font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl hover:bg-rose-700 transition-all flex items-center justify-center gap-3 active-scale">
-                 <ShoppingBag className="w-5 h-5" /> Acquire Presence
+            <p className="text-xs text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-xs text-slate-400 dark:text-slate-500 italic p-4 text-center">No comments transmitted yet.</p>
+    )}
+  </div>
+
+  {/* User's Input / Edit Section */}
+  <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-6 relative transition-opacity">
+    {currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview ? (
+      <div className="text-center opacity-70">
+        <div className="flex justify-center items-center gap-4 mb-4">
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Your Rating:</span>
+          <div className="flex gap-1 text-amber-400">
+             {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= (product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5) ? 'fill-current' : ''}`} />)}
+          </div>
+        </div>
+        <p className="text-sm text-slate-500 italic mb-6">"{product.reviews.find((r: any) => r.userId === currentUser.id)?.comment}"</p>
+        <button onClick={() => {
+          setReviewRating(product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5);
+          setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
+          setIsEditingReview(true);
+        }} className="flex items-center gap-2 mx-auto text-[10px] font-black uppercase text-rose-500 hover:text-rose-600">
+          <Edit3 className="w-3 h-3" /> Edit Your Comment
+        </button>
+      </div>
+    ) : (
+      <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6">
+        <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
+          {isEditingReview ? 'Update Your Comment' : 'Leave a Comment'}
+        </h5>
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Rating:</span>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map(s => (
+              <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
+                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-md' : 'text-slate-200'}`} />
               </button>
-              <button onClick={() => onToggleWishlist(product.id)} className={`p-5 md:p-7 rounded-[24px] md:rounded-[32px] border-2 transition-all active-scale ${isWishlisted ? 'border-rose-500 text-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-100 dark:border-slate-800 text-slate-400'}`}>
-                 <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
-              </button>
-            </div>
+            ))}
+          </div>
+        </div>
+        <textarea 
+          required
+          placeholder="Share your experience..."
+          className="w-full p-5 bg-slate-50 dark:bg-slate-800 rounded-[20px] font-bold outline-none text-xs text-slate-900 dark:text-white min-h-[80px]"
+          value={reviewComment}
+          onChange={(e) => setReviewComment(e.target.value)}
+        />
+        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all shadow-xl">
+          {isEditingReview ? 'Save Updates' : 'Submit Comment'}
+        </button>
+      </form>
+    )}
+  </div>
+</div>
             
           </div>
         </div>
