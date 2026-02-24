@@ -904,7 +904,8 @@ const [showAllComments, setShowAllComments] = useState(false);
 };
 // --- Helper Components ---
 
-const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => (
+const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
+  return (
   <div className="fixed inset-0 z-[110] flex animate-fade-in">
     <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={onClose}></div>
     <div className="relative ml-auto w-full sm:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-full flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
