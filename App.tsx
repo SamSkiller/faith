@@ -1625,7 +1625,10 @@ onUpdateUser={async (id: any, data: any) => {
              </div>
           </div>
         )}
-      </main>
+        
+      </main> 
+      
+      <Footer />
 
       {/* --- DRAWER & MODALS --- */}
       {isCartOpen && (
@@ -1725,27 +1728,31 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                   id="profilePicInput" 
                   className="hidden" 
                   accept="image/*" 
-                  onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const url = await uploadToCloudinary(file);
-                      if (url) {
-                        // Same as your old logic but using the uploaded URL
-                        const res = await fetch(`${API_BASE}/users/profile-photo`, {
-                          method: 'PUT',
-                          headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
-                          },
-                          body: JSON.stringify({ profilePic: url })
-                        });
-                        if (res.ok) {
-                          onUpdateUser(user.id || user._id, { profilePic: url });
-                          alert("Identity Visual Resynced.");
-                        }
-                      }
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  // 1. Give immediate feedback via an alert or toast
+                  alert("Uploading Identity Visual to Cloud Archive... Please wait.");
+                  
+                  const url = await uploadToCloudinary(file);
+                  if (url) {
+                    const res = await fetch(`${API_BASE}/users/profile-photo`, {
+                      method: 'PUT',
+                      headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
+                      },
+                      body: JSON.stringify({ profilePic: url })
+                    });
+                    if (res.ok) {
+                      onUpdateUser(user.id || user._id, { profilePic: url });
+                      alert("✅ Identity Visual Resynced Successfully.");
                     }
-                  }} 
+                  } else {
+                    alert("❌ Upload failed. Check network connection.");
+                  }
+                }
+              }} 
                 />
               
               <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
@@ -1887,7 +1894,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                )}
             </div>
           )}
-          <Footer />
+          
         </main>
       </div>
     </div>
