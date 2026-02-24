@@ -611,10 +611,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
     <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Sanctuary Citizen Nodes</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {users.map((u: any) => (
-        /* 🟢 MISSING WRAPPER DIV ADDED HERE 🟢 */
         <div key={u.id || u._id} className="bg-white dark:bg-slate-900 p-8 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl relative overflow-hidden group">
-          
-          {/* Change the User Card Header to show Supreme status */}
           <div className="flex justify-between items-start mb-8 relative z-10">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 font-black text-2xl border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
@@ -629,8 +626,6 @@ const handleSaveProduct = (e: React.FormEvent) => {
               </div>
             </div>
           </div>
-
-          {/* Update the Buttons at the bottom to hide for faith@faith */}
           {u.email !== 'faith@faith' ? (
             <div className="flex gap-4 relative z-10 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
               <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">
@@ -645,12 +640,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
               <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Supreme System Architect</p>
             </div>
           )}
-          
         </div>
       ))}
     </div>
   </div>
 )}
+    </div>
+  );
+};
 
 // --- Auth View ---
 const AuthView = ({ onAuthSuccess }: any) => {
