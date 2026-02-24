@@ -87,14 +87,9 @@ const searchResults = useMemo(() => {
 
   return (
     <header className="sticky top-0 z-[60] w-full">
-      <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 text-white py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.4em] animate-pulse relative">
-        Nairobi Same-Day Luxury Delivery • Presence By Faith
-        {!isSynced && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] bg-slate-900/40 px-2 py-0.5 rounded flex items-center gap-1 font-black">
-            <WifiOff className="w-2 h-2" /> Local Mode
-          </span>
-        )}
-      </div>
+<div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.4em] animate-gradient-x relative">
+  Nairobi Same-Day Luxury Delivery • Presence By Faith
+</div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
 <div className="flex items-center gap-4">
@@ -441,7 +436,26 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           </optgroup>
                        ))}
                     </select>
-                    <input className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Image URL (Unsplash preferred)" value={editingProduct ? editingProduct.image : newProduct.image} onChange={e => editingProduct ? setEditingProduct({...editingProduct, image: e.target.value}) : setNewProduct({...newProduct, image: e.target.value})} />
+                   <div className="md:col-span-2 flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-[24px]">
+  <input 
+    type="file" 
+    accept="image/*"
+    className="w-full font-bold text-slate-900 dark:text-white file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-rose-100 file:text-rose-600 hover:file:bg-rose-200 transition-all cursor-pointer"
+    onChange={async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const url = await uploadToCloudinary(file); // Calls your Cloudinary function
+        if (url) {
+          if (editingProduct) setEditingProduct({...editingProduct, image: url});
+          else setNewProduct({...newProduct, image: url});
+        }
+      }
+    }} 
+  />
+  {(editingProduct?.image || newProduct.image) && (
+    <img src={editingProduct ? editingProduct.image : newProduct.image} className="w-16 h-16 rounded-xl object-cover shadow-md" alt="Preview" />
+  )}
+</div>
                    <textarea className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Seductive Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
                     <label className="md:col-span-2 flex items-center gap-3 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white cursor-pointer select-none border border-transparent hover:border-rose-100 transition-colors">
@@ -1782,6 +1796,46 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                )}
             </div>
           )}
+
+            const Footer = () => (
+  <footer className="bg-slate-950 text-white pt-20 pb-10 px-6 mt-20 border-t border-white/10 relative overflow-hidden">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
+      <div>
+        <h2 className="text-3xl font-serif font-bold italic text-rose-600 mb-6">Faith</h2>
+        <p className="text-slate-400 text-sm font-light italic">Premium Nairobi fashion for the modern visionary.</p>
+      </div>
+      <div>
+        <h4 className="font-black uppercase tracking-widest text-[10px] mb-6">Sanctuary Links</h4>
+        <div className="space-y-4 text-sm text-slate-400">
+          <p className="hover:text-rose-500 cursor-pointer">Order Tracking</p>
+          <p className="hover:text-rose-500 cursor-pointer">Return Policy</p>
+          <p className="hover:text-rose-500 cursor-pointer">Privacy Protocol</p>
+        </div>
+      </div>
+      <div>
+        <h4 className="font-black uppercase tracking-widest text-[10px] mb-6">Socials</h4>
+        <div className="flex gap-4">
+          <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-rose-600 transition-colors"><Github className="w-4 h-4" /></a>
+          <a href="http://www.youtube.com/@samskiller4" target="_blank" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-rose-600 transition-colors"><Youtube className="w-4 h-4" /></a>
+        </div>
+      </div>
+    </div>
+    <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 flex flex-col items-center justify-center">
+      {/* Supercrazy SKILLER animation button */}
+      <a 
+        href="http://www.youtube.com/@samskiller4" 
+        target="_blank"
+        className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-full font-black uppercase tracking-[0.3em] text-[10px] transition-all hover:scale-110 active:scale-90"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 opacity-20 group-hover:opacity-100 group-hover:animate-gradient-x transition-all duration-500"></div>
+        <span className="relative z-10 text-white drop-shadow-lg flex items-center gap-2">
+          Developed By SKILLER <Sparkles className="w-3 h-3 animate-pulse" />
+        </span>
+      </a>
+    </div>
+  </footer>
+);
+          
         </main>
       </div>
     </div>
