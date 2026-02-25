@@ -127,14 +127,14 @@ const searchResults = useMemo(() => {
         </div>
 
         <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-300">
-<button onClick={() => { setView('home'); setSelectedCategory('All'); }} className={`hover:text-rose-600 transition-all ${selectedCategory === 'All' && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : ''}`}>
+<button onClick={() => { setView('home'); setSelectedCategory('All'); }} className={`hover:text-rose-600 font-bold transition-all ${selectedCategory === 'All' && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : 'text-slate-700 dark:text-slate-300'}`}>
             All
           </button>
           {Object.keys(CATEGORY_HIERARCHY).map((parentCat) => (
              <div key={parentCat} className="relative group py-4">
                 <button 
                   onClick={() => { setView('home'); setSelectedCategory(parentCat); }} 
-                  className={`hover:text-rose-600 transition-all ${selectedCategory.startsWith(parentCat) && activeView === 'home' ? 'text-rose-600' : ''}`}
+                  className={`hover:text-rose-600 font-bold transition-all ${selectedCategory.startsWith(parentCat) && activeView === 'home' ? 'text-rose-600' : 'text-slate-700 dark:text-slate-300'}`}
                 >
                   {parentCat}
                 </button>
@@ -166,7 +166,7 @@ const searchResults = useMemo(() => {
                 onFocus={() => setShowSearch(true)}
                 onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                 placeholder="Search sanctuary..." 
-                className="bg-transparent border-none outline-none text-[10px] w-full font-bold text-slate-900 dark:text-white placeholder:text-slate-500"
+                className={`bg-transparent border-none outline-none font-mono text-[10px] w-full placeholder:text-slate-500 transition-colors ${searchQuery && searchResults.length === 0 ? 'text-rose-600 font-black' : 'text-slate-900 dark:text-white'}`}
               />
             </div>
             {showSearch && searchResults.length > 0 && (
@@ -1223,20 +1223,35 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return () => clearTimeout(handler);
   }, [searchQuery]);
   
-  // Persisted Dark Mode configuration
+  // 1. SET DARK MODE AS DEFAULT
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('faith_theme') === 'dark';
+    const stored = localStorage.getItem('faith_theme');
+    return stored === null ? true : stored === 'dark'; 
   });
   
   const [showCartToast, setShowCartToast] = useState<Product | null>(null);
   const [isSynced, setIsSynced] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [activeProfileTab, setActiveProfileTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
-    useEffect(() => {
+  // 2. FIX PHONE BACK BUTTON ROUTING
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-   }, [view, selectedProduct]);
+    window.history.pushState({ view }, '', `#${view}`);
+    
+    const handlePopState = (e: any) => {
+      if (e.state && e.state.view) {
+        setView(e.state.view);
+        setIsProfileOpen(false);
+        setIsCartOpen(false);
+        setSelectedProduct(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [view, selectedProduct]);
 
 // 1. DEFINED HERE: Now both handleAuth and useEffect can access it!
   const checkBackendSync = async () => {
@@ -1711,7 +1726,11 @@ onUpdateUser={async (id: any, data: any) => {
                 showToast("Network error: Could not transmit order.", "error");
               }
             }} 
-            onAuth={() => setView('auth')} 
+            onAuth={() => {
+               setView('home'); 
+               setActiveProfileTab('settings'); // We defined this state in Step 1
+               setIsProfileOpen(true); 
+            }}
           />
         )}
 
@@ -1751,7 +1770,9 @@ onUpdateUser={async (id: any, data: any) => {
 
       {isProfileOpen && currentUser && (
         <ProfileModal 
-          user={currentUser} 
+          user={currentUser}
+          activeTab={activeProfileTab}
+          setActiveTab={setActiveProfileTab}
           onClose={() => setIsProfileOpen(false)}  
           onLogout={() => {
             setCurrentUser(null);
@@ -1808,114 +1829,72 @@ onUpdateUser={async (id: any, data: any) => {
 
 // --- Sub Components ---
 
-const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode }: any) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings'>('profile');
+const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
   const [editData, setEditData] = useState({ 
-  name: user.name, 
-  email: user.email, 
-  phoneNumber: user.phoneNumber || '', 
-  address: user.address || '', 
-  password: '' 
-});
+    name: user.name, 
+    email: user.email, 
+    phoneNumber: user.phoneNumber || '', 
+    address: user.address || '', 
+    password: '' 
+  });
+
+  // Controls visibility on small screens
+  const [showMenuOnMobile, setShowMenuOnMobile] = useState(true);
+
+  const handleTabSwitch = (tab: any) => {
+    setActiveTab(tab);
+    setShowMenuOnMobile(false); // Hide menu, show content on mobile
+  };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 animate-fade-in">
-      {/* Blurred Background Overlay */}
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}></div>
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-6 animate-fade-in">
+      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
       
-      {/* Main Modal Container - Responsive Height & Border Radius */}
-      <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 h-full max-h-[90vh] rounded-[32px] md:rounded-[64px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10 transition-colors">
+      <div className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-5xl bg-white dark:bg-slate-900 md:rounded-[48px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10">
         
-        {/* GLOBAL CLOSE BUTTON - Always visible on top right */}
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 md:top-8 md:right-8 z-50 p-3 md:p-4 bg-white/80 hover:bg-rose-100 dark:bg-slate-800/80 dark:hover:bg-slate-700 backdrop-blur-md rounded-full transition-all text-slate-900 dark:text-white shadow-xl active:scale-90"
+          className="absolute top-4 right-4 md:top-8 md:right-8 z-50 p-3 bg-slate-100 dark:bg-slate-800/80 backdrop-blur-md rounded-full transition-all hover:bg-rose-500 hover:text-white"
         >
-          <X className="w-5 h-5 md:w-6 md:h-6" />
+          <X className="w-5 h-5" />
         </button>
 
-        {/* SIDEBAR - Dynamically adjusts width to stop squishing */}
-        <aside className="w-full md:w-72 lg:w-96 bg-slate-900 dark:bg-slate-950 text-white p-6 md:p-8 lg:p-12 flex flex-col shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full border-b md:border-b-0 md:border-r border-slate-800">
-          <div className="text-center mb-6 md:mb-10 mt-4 md:mt-0">
-            <div className="rotating-border-container mx-auto w-20 h-20 md:w-32 md:h-32 mb-4 md:mb-6 p-1 relative group cursor-pointer"
-              onClick={() => document.getElementById('profilePicInput').click()}>
-             <input 
-                  type="file" 
-                  id="profilePicInput" 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={async (e) => {
+        {/* SIDEBAR - Hides on mobile when a tab is active */}
+        <aside className={`w-full md:w-80 bg-slate-50 dark:bg-slate-950 p-6 md:p-10 flex-col shrink-0 overflow-y-auto border-r border-slate-200 dark:border-white/5 ${showMenuOnMobile ? 'flex' : 'hidden md:flex'}`}>
+          <div className="text-center mb-8 mt-8 md:mt-0">
+             <div className="rotating-border-container mx-auto w-24 h-24 mb-4 relative group cursor-pointer"
+                  onClick={() => document.getElementById('profilePicInput').click()}>
+                <input type="file" id="profilePicInput" className="hidden" accept="image/*" onChange={async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                     
-                      showToast("Uploading Identity Visual to Cloud Archive... Please wait.", "error");
                       const url = await uploadToCloudinary(file);
-                      
-                      if (url) {
-                        onUpdateUser(user.id || user._id, { profilePic: url });
-                       
-                        showToast("✅ Identity Visual Resynced Successfully.", "error");
-                      } else {
-                      
-                        showToast("❌ Upload failed. Check network connection.", "error");
-                      }
+                      if (url) onUpdateUser(user.id || user._id, { profilePic: url });
                     }
-                  }}
-              />
-              
-              <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-neon">
-                {user.profilePic ? (
-                  <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
-                ) : (
-                  <div className="text-white font-black text-3xl md:text-4xl">{user.name.charAt(0)}</div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <Camera className="w-6 h-6 md:w-8 md:h-8 text-white" />
+                }}/>
+                <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-inner">
+                  {user.profilePic ? <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" /> : <div className="font-black text-3xl">{user.name.charAt(0)}</div>}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 text-white transition-opacity"><Camera className="w-6 h-6"/></div>
                 </div>
-              </div>
-            </div>
-            <h3 className="text-xl md:text-2xl font-serif italic font-bold text-white">{user.name}</h3>
-            <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-2">Verified {user.role}</p>
+             </div>
+             <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white">{user.name}</h3>
+             <p className="text-[9px] font-mono uppercase text-rose-500 mt-2 tracking-widest">{user.role}</p>
           </div>
           
           <nav className="space-y-2 flex-1">
-             <button onClick={() => setActiveTab('profile')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Activity className="w-4 h-4" /> My Dashboard</button>
-             <button onClick={() => setActiveTab('wishlist')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Heart className="w-4 h-4" /> My Favorites</button>
-             <button onClick={() => setActiveTab('settings')} className={`w-full text-left px-6 md:px-8 py-3 md:py-4 rounded-[20px] md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-xl' : 'text-slate-400 hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Sync Settings</button>
-             
-             <div className="h-px bg-white/10 my-4 md:my-6"></div>
-             
-             <div className="space-y-1">
-            {/* FIXED DARK MODE TOGGLE ANIMATION */}
-                <div className="flex items-center justify-between px-6 md:px-8 py-3 bg-white/5 rounded-2xl cursor-pointer" onClick={() => setIsDarkMode(!isDarkMode)}>
-                   <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-300">1. Dark Sanctuary</span>
-                   <button className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${isDarkMode ? 'bg-rose-600' : 'bg-slate-600'}`}>
-                     <div className={`w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                   </button>
-                </div>
-                <div className="px-6 md:px-8 py-3 flex items-center gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-400 cursor-default"><Crown className="w-4 h-4 text-amber-500" /> 2. Luxury Tier: {user.role === 'admin' ? 'Gold' : 'Citizen'}</div>
-                
-                {/* DISABLED "COMING SOON" OPTIONS */}
-                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
-                  <div className="flex items-center gap-4"><Fingerprint className="w-4 h-4" /> 3. Bio-Metric Key</div>
-                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
-                </div>
-                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
-                  <div className="flex items-center gap-4"><Languages className="w-4 h-4" /> 4. Global Dialect</div>
-                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
-                </div>
-                <div className="px-6 md:px-8 py-3 flex items-center justify-between gap-4 text-[9px] md:text-[10px] font-black uppercase text-slate-500 opacity-50 cursor-not-allowed">
-                  <div className="flex items-center gap-4"><Cloud className="w-4 h-4" /> 5. Cloud Archive</div>
-                  <span className="bg-white/10 px-2 py-0.5 rounded text-[8px]">V2</span>
-                </div>
-             </div>
+             <button onClick={() => handleTabSwitch('profile')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Activity className="w-4 h-4" /> Dashboard</button>
+             <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4" /> Favorites</button>
+             <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Settings</button>
           </nav>
-
-          <button onClick={onLogout} className="mt-6 py-4 bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white rounded-3xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95"><LogOut className="w-4 h-4" /> Disconnect</button>
+          <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Disconnect</button>
         </aside>
 
-       {/* MAIN CONTENT AREA */}
-        <main className="flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide relative">
+        {/* MAIN CONTENT AREA */}
+        <main className={`flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide relative ${!showMenuOnMobile ? 'block' : 'hidden md:block'}`}>
+          {!showMenuOnMobile && (
+             <button onClick={() => setShowMenuOnMobile(true)} className="md:hidden flex items-center gap-2 text-rose-500 font-mono text-[10px] font-bold uppercase mb-6 bg-rose-500/10 px-4 py-2 rounded-full w-max">
+               <ArrowLeft className="w-4 h-4"/> Back to Menu
+             </button>
+          )}
           
           <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-12 mt-2 md:mt-0">
             {activeTab === 'profile' && 'Citizen Overview'}
@@ -2010,40 +1989,61 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
 };
 
      const Footer = () => (
-  <footer className="bg-slate-950 text-white pt-20 pb-10 px-6 mt-20 border-t border-white/10 relative overflow-hidden">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
-      <div>
-        <h2 className="text-3xl font-serif font-bold italic text-rose-600 mb-6">Faith</h2>
-        <p className="text-slate-400 text-sm font-light italic">Premium Nairobi fashion for the modern visionary.</p>
-      </div>
-      <div>
-        <h4 className="font-black uppercase tracking-widest text-[10px] mb-6">Sanctuary Links</h4>
-        <div className="space-y-4 text-sm text-slate-400">
-          <p className="hover:text-rose-500 cursor-pointer">Order Tracking</p>
-          <p className="hover:text-rose-500 cursor-pointer">Return Policy</p>
-          <p className="hover:text-rose-500 cursor-pointer">Privacy Protocol</p>
+  <footer className="bg-slate-900 dark:bg-slate-950 text-slate-900 dark:text-white pt-24 pb-12 px-6 mt-20 border-t border-slate-200 dark:border-white/10 relative overflow-hidden transition-colors">
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(225,29,72,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(225,29,72,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+    
+    <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 relative z-10">
+      <div className="space-y-6">
+        <h2 className="text-4xl font-serif font-bold italic text-rose-600 drop-shadow-neon">Faith.</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm font-mono leading-relaxed">
+          Premium Nairobi fashion for the modern visionary. Initializing luxury protocols worldwide.
+        </p>
+        <div className="flex items-center gap-2 text-emerald-500 font-mono text-[10px] uppercase">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Servers Online
         </div>
       </div>
+      
       <div>
-        <h4 className="font-black uppercase tracking-widest text-[10px] mb-6">Socials</h4>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Sanctuary Links</h4>
+        <div className="space-y-4 text-sm font-mono text-slate-500 dark:text-slate-400">
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Order Tracking</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Return Policy</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Privacy Protocol</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Drop-off Zones</p>
+        </div>
+      </div>
+      
+      <div>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Comm Channels</h4>
+        <div className="space-y-4 text-sm font-mono text-slate-500 dark:text-slate-400">
+          <p className="flex items-center gap-3"><Mail className="w-4 h-4 text-rose-500"/> support@faith.com</p>
+          <p className="flex items-center gap-3"><Smartphone className="w-4 h-4 text-rose-500"/> +254 700 000 000</p>
+          <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-rose-500"/> Nairobi, Kenya</p>
+        </div>
+      </div>
+
+      <div>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Network</h4>
         <div className="flex gap-4">
-          <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-rose-600 transition-colors"><Github className="w-4 h-4" /></a>
-          <a href="http://www.youtube.com/@samskiller4" target="_blank" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-rose-600 transition-colors"><Youtube className="w-4 h-4" /></a>
+          <a href="#" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Github className="w-5 h-5" /></a>
+          <a href="http://www.youtube.com/@samskiller4" target="_blank" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Youtube className="w-5 h-5" /></a>
+          <a href="#" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Globe className="w-5 h-5" /></a>
         </div>
       </div>
     </div>
-    <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 flex flex-col items-center justify-center">
-      {/* Supercrazy SKILLER animation button */}
+    
+    <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-slate-200 dark:border-white/5 flex flex-col items-center justify-center relative">
       <a 
         href="http://www.youtube.com/@samskiller4" 
         target="_blank"
-        className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-full font-black uppercase tracking-[0.3em] text-[10px] transition-all hover:scale-110 active:scale-90"
+        className="group relative px-10 py-5 bg-transparent overflow-hidden rounded-full font-black uppercase tracking-[0.4em] text-[10px] transition-all hover:scale-110 active:scale-90 border border-slate-200 dark:border-white/10"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 opacity-20 group-hover:opacity-100 group-hover:animate-gradient-x transition-all duration-500"></div>
-        <span className="relative z-10 text-white drop-shadow-lg flex items-center gap-2">
-          Developed By SKILLER <Sparkles className="w-3 h-3 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 opacity-0 group-hover:opacity-100 group-hover:animate-gradient-x transition-all duration-700"></div>
+        <span className="relative z-10 text-slate-900 dark:text-white group-hover:text-white drop-shadow-lg flex items-center gap-3 transition-colors">
+          Developed By SKILLER <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
         </span>
       </a>
+      <p className="mt-8 font-mono text-[9px] text-slate-400 uppercase tracking-widest text-center">© 2026 Faith Sanctuary. All Protocols Monitored.</p>
     </div>
   </footer>
 );
