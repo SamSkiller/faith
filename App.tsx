@@ -454,7 +454,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
        {tab === 'products' && (
          <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Asset Inventory Management</h3>
+               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Inventory Management</h3>
                <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="px-8 py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] flex items-center gap-2 shadow-neon hover:scale-105 transition-all">
                   {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {showAddForm ? 'Cancel' : 'Register New Asset'}
                </button>
@@ -529,7 +529,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           <div className="flex items-center gap-2">Value <ArrowUpDown className="w-3 h-3" /></div>
                         </th>
                         <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('stock')}>
-                          <div className="flex items-center gap-2">Pool <ArrowUpDown className="w-3 h-3" /></div>
+                          <div className="flex items-center gap-2">Quantity <ArrowUpDown className="w-3 h-3" /></div>
                         </th>
                         <th className="px-8 py-6 text-right">Commands</th>
                      </tr>
@@ -565,7 +565,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
       {tab === 'orders' && (
         <div className="space-y-8 animate-fade-in">
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 font-mono">
-            <Activity className="w-6 h-6 text-rose-500" /> Active Logistics Protocols
+            <Activity className="w-6 h-6 text-rose-500" /> Active Orders
           </h3>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -655,7 +655,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
               )
             })}
           </div>
-          {orders.length === 0 && <div className="p-40 text-center font-mono text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-[32px]">No active telemetry data.</div>}
+          {orders.length === 0 && <div className="p-40 text-center font-mono text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-[32px]">No active data.</div>}
         </div>
       )}
 
@@ -706,7 +706,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 ) : (
                   <div className="pt-4 border-t border-slate-100 dark:border-white/5 text-center relative z-10">
                     <p className="font-mono text-[9px] font-black uppercase text-amber-500 tracking-[0.3em] flex items-center justify-center gap-2">
-                      <ShieldAlert className="w-3 h-3" /> Supreme Architect
+                      <ShieldAlert className="w-3 h-3" /> Supreme Admin
                     </p>
                   </div>
                 )}
@@ -1038,7 +1038,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
     <div className="relative ml-auto w-full sm:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-full flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
        <div className="p-12 border-b border-rose-50 dark:border-slate-800 flex justify-between items-center bg-rose-50/20 dark:bg-slate-800/20">
           <div>
-            <h2 className="text-4xl font-serif italic font-bold text-rose-600 mb-1">Your Bag</h2>
+            <h2 className="text-4xl font-serif italic font-bold text-rose-600 mb-1">My Cart</h2>
             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{cart.length} acquisition payloads</p>
           </div>
           <button onClick={onClose} className="p-5 hover:bg-rose-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"><X className="w-8 h-8 text-rose-600" /></button>
@@ -1066,7 +1066,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
                </div>
             </div>
           ))}
-          {cart.length === 0 && <div className="text-center py-40 text-slate-300 font-black italic text-2xl">Bag status: Empty.</div>}
+          {cart.length === 0 && <div className="text-center py-40 text-slate-300 font-black italic text-2xl">Cart status: Empty.</div>}
        </div>
        {cart.length > 0 && (
          <div className="p-12 border-t border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_-30px_60px_rgba(0,0,0,0.05)]">
@@ -1646,7 +1646,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                             
                             {p.isHot && (
                                <div className="absolute top-6 left-6 z-10 px-4 py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-2">
-                                  <Sparkles className="w-3 h-3 animate-pulse" /> High Yield
+                                  <Sparkles className="w-3 h-3 animate-pulse" /> Hot
                                </div>
                             )}
 
@@ -1656,7 +1656,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                             </div>
                             <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
-                                 <Terminal className="w-4 h-4" /> Inspect Data
+                                 <Terminal className="w-4 h-4" /> Quick View
                                </button>
                             </div>
                           </div>
@@ -1676,7 +1676,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
               {/* Only show "No entities detected" if we are DONE loading and there are 0 products */}
                {!isLoadingProducts && filteredProducts.length === 0 && (
                  <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">
-                   No entities detected matching this search signature.
+                   No entities detected matching this search result.
                  </div>
                )}
             </section>
@@ -1826,7 +1826,7 @@ onUpdateUser={async (id: any, data: any) => {
              </div>
              <h1 className="text-8xl font-serif italic font-bold mb-8 text-rose-600">Sync Success.</h1>
              {/* Changed text-slate-400 to text-slate-900 for light mode visibility */}
-             <p className="text-2xl text-slate-900 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. Protocol ID Trace Active.</p>
+             <p className="text-2xl text-slate-900 dark:text-slate-300 mb-16 font-light italic">Order protocol verified. ID Trace Active.</p>
              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                 <button onClick={() => setView('track-order')} className="px-12 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl active-scale flex items-center gap-3">
                   <Truck className="w-4 h-4" /> Trace Order Logistics
@@ -2030,7 +2030,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                </div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
-                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Security Key (Password)</label>
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Change Password</label>
                      <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
                   </div>
                   <div className="space-y-2">
@@ -2048,7 +2048,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
 
           {activeTab === 'wishlist' && (
             <div className="space-y-4 md:space-y-6 animate-fade-in pb-10">
-               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-400 italic text-xl md:text-2xl">Sanctuary is vacant.</div> : (
+               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-400 italic text-xl md:text-2xl">Sanctuary is empty.</div> : (
                  wishlistProducts.map((p: Product) => (
                    <div key={p.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-6 group bg-slate-50 dark:bg-slate-800/30 p-6 md:p-8 rounded-[32px] md:rounded-[48px] hover:bg-rose-50 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-transparent hover:border-rose-100">
                       <img src={p.image} className="w-full sm:w-24 h-48 sm:h-32 rounded-[24px] md:rounded-[32px] object-cover shadow-xl sm:group-hover:scale-110 transition-transform duration-700" />
