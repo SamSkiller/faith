@@ -1004,6 +1004,14 @@ const [showAllComments, setShowAllComments] = useState(false);
           </div>
         </div>
       </div> 
+       <div className="flex gap-4 pt-8 mt-8 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md pb-4 z-20">
+                   <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:bg-rose-500 transition-all active:scale-95">
+                     Add to Cart • Ksh {product.price.toLocaleString()}
+                   </button>
+                   <button onClick={() => onToggleWishlist(product.id)} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/50'}`}>
+                     <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+                   </button>
+                </div>
     );
   };
 
@@ -1306,11 +1314,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return () => clearTimeout(handler);
   }, [searchQuery]);
   
-  // 1. SET DARK MODE AS DEFAULT
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const stored = localStorage.getItem('faith_theme');
-    return stored === null ? true : stored === 'dark'; 
-  });
+
   
   const [showCartToast, setShowCartToast] = useState<Product | null>(null);
   const [isSynced, setIsSynced] = useState(false);
@@ -1444,16 +1448,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return () => clearInterval(interval);
   }, []);
 
-// Sync Dark Mode state to DOM and Storage
-  useEffect(() => {
-    if (isDarkMode) {
-       document.documentElement.classList.add('dark');
-       localStorage.setItem('faith_theme', 'dark');
-    } else {
-       document.documentElement.classList.remove('dark');
-       localStorage.setItem('faith_theme', 'light');
-    }
-  }, [isDarkMode]);
+
 
 
 
@@ -1578,7 +1573,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
   };
 
   return (
-    <div className={`flex flex-col min-h-screen transition-colors ${isDarkMode ? 'dark text-slate-100' : 'text-slate-900'}`}>
+    <div className="flex flex-col min-h-screen transition-colors dark text-slate-100 bg-slate-950">
       <Navbar 
         cartCount={cart.reduce((s, i) => s + i.quantity, 0)} 
         onOpenCart={() => setIsCartOpen(true)}
@@ -1651,8 +1646,8 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                             )}
 
                             <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
-                            <div className="absolute top-6 right-6 flex flex-col gap-2">
-                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/40 text-white opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
+                            <div className="absolute top-6 right-6 flex flex-col gap-2 z-20">
+                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/80 text-white opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
                             </div>
                             <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
@@ -1969,7 +1964,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
              <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4" /> Favorites</button>
              <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Settings</button>
           </nav>
-          <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Disconnect</button>
+          <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Log Out</button>
         </aside>
 
         {/* MAIN CONTENT AREA */}
