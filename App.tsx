@@ -1446,7 +1446,7 @@ const handleAddReview = async (productId: string, review: Review) => {
            setSelectedProduct({ ...updatedProduct, id: updatedProduct._id });
         }
       } else {
-        alert("Failed to submit comment to Sanctuary.");
+        showToast("Failed to submit comment to Sanctuary.", "error");
       }
     } catch (e) {
       console.error("Review error:", e);
@@ -1469,7 +1469,8 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
           const updatedProduct = await res.json();
           setProducts(products.map(p => p.id === id ? { ...updatedProduct, id: updatedProduct._id } : p));
         } else {
-          alert("Failed to update entity on server.");
+          
+          showToast("Failed to update entity on server.", "error");
         }
       } catch (e) {
         console.error("Product update failed");
@@ -1611,7 +1612,8 @@ onUpdateUser={async (id: any, data: any) => {
                 if(res.ok) {
                    setUsers(users.map(u => (u.id === id || u._id === id) ? { ...u, ...data } : u));
                 } else {
-                   alert("Failed to update user role on server.");
+                   
+                  showToast("Failed to update user role on server.", "error");
                 }
               } catch (e) {
                 console.log(e);
@@ -1627,7 +1629,8 @@ onUpdateUser={async (id: any, data: any) => {
                 if(res.ok) {
                   setUsers(users.filter(u => u.id !== id && u._id !== id));
                 } else {
-                  alert("Failed to delete user on server.");
+                
+                  showToast("Failed to delete user on server.", "error");
                 }
               } catch (e) {
                 console.log(e);
@@ -1686,10 +1689,12 @@ onUpdateUser={async (id: any, data: any) => {
                   setCart([]); 
                   setView('success'); 
                 } else {
-                  alert("Order processing failed on server.");
+                
+                  showToast("Order processing failed on server.", "error");
                 }
               } catch (e) {
-                alert("Network error: Could not transmit order.");
+               
+                showToast("Network error: Could not transmit order.", "error");
               }
             }} 
             onAuth={() => setView('auth')} 
@@ -1760,7 +1765,8 @@ onUpdateUser={async (id: any, data: any) => {
                 setCurrentUser(nextU);
                 localStorage.setItem("faith_session_active", JSON.stringify(nextU)); 
               } else {
-                alert("Failed to sync profile changes.");
+
+                showToast("Failed to sync profile changes.", "error");
               }
             } catch (e) {
               console.error(e);
@@ -1827,14 +1833,17 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                   onChange={async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      alert("Uploading Identity Visual to Cloud Archive... Please wait.");
+                     
+                      showToast("Uploading Identity Visual to Cloud Archive... Please wait.", "error");
                       const url = await uploadToCloudinary(file);
                       
                       if (url) {
                         onUpdateUser(user.id || user._id, { profilePic: url });
-                        alert("✅ Identity Visual Resynced Successfully.");
+                       
+                        showToast("✅ Identity Visual Resynced Successfully.", "error");
                       } else {
-                        alert("❌ Upload failed. Check network connection.");
+                      
+                        showToast("❌ Upload failed. Check network connection.", "error");
                       }
                     }
                   }}
