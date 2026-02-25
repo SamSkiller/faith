@@ -925,11 +925,29 @@ const [showAllComments, setShowAllComments] = useState(false);
   };
 
 // --- Custom Notification System (Cyber HUD) ---
+// --- Custom Notification System (Cyber HUD) ---
 const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 4000);
     return () => clearTimeout(timer);
   }, [onClose]);
+
+  return (
+    <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl transition-all border ${
+      type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(225,29,72,0.3)]' :
+      type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
+      'bg-slate-900/90 border-slate-700/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+    }`}>
+      {type === 'error' ? <AlertCircle className="w-5 h-5 animate-pulse" /> : 
+       type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
+       <Terminal className="w-5 h-5" />}
+      <span className="font-mono font-bold text-[10px] uppercase tracking-widest">{message}</span>
+      <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors ml-4">
+        <X className="w-4 h-4 opacity-70" />
+      </button>
+    </div>
+  );
+};
 
   return (
     <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl transition-all border ${
@@ -1521,7 +1539,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                     <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/10 rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center gap-2"><Terminal className="w-4 h-4"/> Track Protocol</button>
                   </div>
                </div>
-            </section>>
+            </section>
 
             <section id="shop" className="max-w-7xl mx-auto px-6 py-32 space-y-16">
                <div className="flex flex-col md:flex-row justify-between items-end gap-10">
