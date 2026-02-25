@@ -116,7 +116,7 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const SHIPPING_OPTIONS = [
-  { id: 'standard', name: 'Standard (Nairobi)', price: 0, days: '24–48 hours' },
-  { id: 'priority', name: 'Priority Express', price: 500, days: '3–5 hours' },
-  { id: 'instant', name: 'Boutique Drop (Instant)', price: 1200, days: 'Under 1 hour' }
+  { id: '1', name: 'Free Delivery', days: '5 Days', price: 0 },
+  { id: '2', name: 'Standard Delivery', days: '3 Days', price: 300 },
+  { id: '3', name: 'Priority Express', days: '1 Day', price: 500 }
 ];
