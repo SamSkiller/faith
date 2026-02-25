@@ -1965,7 +1965,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                   <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Drop-off Zone</label>
                   <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
-               <button onClick={() => { onUpdateUser(user.id || user._id, editData); alert('Identity Resynced.'); }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">Commit Identity Changes</button>
+              <button onClick={() => { onUpdateUser(user.id || user._id, editData); showToast('Identity Resynced.', 'success'); }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">Commit Identity Changes</button>
             </div>
           )}
 
