@@ -8,7 +8,7 @@ import {
   ChevronRight, Key, Mail, Github, User as UserIcon, Package, TrendingUp, Settings, PieChart,
   ArrowRight, CreditCard as CardIcon, Map, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
   Languages, Trash, Share2, ShieldAlert, Crown, Zap, Fingerprint, Cloud, MessageSquare,
-  Wifi, WifiOff, Clock, Youtube,AlertCircle, Info 
+  Wifi, WifiOff, Clock, Youtube,AlertCircle, Info, Terminal, Database
 } from 'lucide-react';
 import { PRODUCTS as INITIAL_PRODUCTS, SHIPPING_OPTIONS } from './constants';
 import { Product, CartItem, Order, User, Category, Review } from './types';
@@ -106,8 +106,9 @@ const searchResults = useMemo(() => {
 
   return (
     <header className="sticky top-0 z-[60] w-full">
-<div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.4em] animate-gradient-x relative">
-  Nairobi Same-Day Luxury Delivery • Presence By Faith
+<div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-1.5 px-4 flex items-center justify-center gap-3 text-[9px] font-mono font-bold uppercase tracking-[0.4em] animate-gradient-x relative shadow-[0_0_20px_rgba(225,29,72,0.4)] border-b border-white/20">
+  {isSynced ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />}
+  Sanctuary Uplink Active • Same-Day  Delivery
 </div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
@@ -923,7 +924,7 @@ const [showAllComments, setShowAllComments] = useState(false);
     );
   };
 
-// --- Custom Notification System ---
+// --- Custom Notification System (Cyber HUD) ---
 const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 4000);
@@ -931,15 +932,15 @@ const ToastMessage = ({ message, type, onClose }: { message: string, type: 'succ
   }, [onClose]);
 
   return (
-    <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl transition-all ${
-      type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500' :
-      type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400' :
-      'bg-slate-900/90 border-slate-700 text-white'
+    <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl transition-all border ${
+      type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(225,29,72,0.3)]' :
+      type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
+      'bg-slate-900/90 border-slate-700/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
     }`}>
-      {type === 'error' ? <AlertCircle className="w-5 h-5" /> : 
+      {type === 'error' ? <AlertCircle className="w-5 h-5 animate-pulse" /> : 
        type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
-       <Info className="w-5 h-5" />}
-      <span className="font-bold text-[10px] uppercase tracking-widest">{message}</span>
+       <Terminal className="w-5 h-5" />}
+      <span className="font-mono font-bold text-[10px] uppercase tracking-widest">{message}</span>
       <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors ml-4">
         <X className="w-4 h-4 opacity-70" />
       </button>
@@ -1498,18 +1499,29 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
         {view === 'home' && (
           <div>
             <section className="relative h-[90vh] bg-slate-950 flex items-center justify-center overflow-hidden">
-               {HERO_IMAGES.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover hero-img transition-all duration-[3000ms] ${heroIdx === i ? 'opacity-50 scale-100' : 'opacity-0 scale-125'}`} />)}
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/40"></div>
-               <div className="relative text-center text-white px-6 pt-20 animate-future-in z-10">
-                  <span className="px-6 py-2 bg-rose-600/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/50 shadow-neon">Couture Sanctuary</span>
-                  <h1 className="text-6xl md:text-[10rem] font-serif italic font-bold mb-8 leading-none drop-shadow-2xl">Presence <br/> <span className="text-rose-400">By Faith.</span></h1>
-                  <p className="text-xl max-w-2xl mx-auto font-light text-slate-300 mb-16 italic tracking-wide">Premium Nairobi fashion for the modern visionary.</p>
+               {/* Animated Cyber Grid Background */}
+               <div className="absolute inset-0 bg-[linear-gradient(rgba(225,29,72,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(225,29,72,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0"></div>
+               
+               {/* Glowing Ambient Orbs */}
+               <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse"></div>
+               <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none"></div>
+
+               {HERO_IMAGES.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover hero-img transition-all duration-[4000ms] ${heroIdx === i ? 'opacity-30 scale-100' : 'opacity-0 scale-110'}`} />)}
+               
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/80"></div>
+               
+               <div className="relative text-center text-white px-6 pt-20 animate-future-in z-10 backdrop-blur-sm p-12 rounded-[64px] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                  <span className="px-6 py-2 bg-rose-600/10 backdrop-blur-md rounded-full font-mono text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/30 shadow-[0_0_15px_rgba(225,29,72,0.5)] flex items-center gap-2 w-max mx-auto mb-8">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> System Online
+                  </span>
+                  <h1 className="text-6xl md:text-[8rem] font-serif italic font-bold mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Faith.</span></h1>
+                  <p className="text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-16 tracking-widest text-[10px] uppercase">Initialize Premium Nairobi Protocol [V2.0]</p>
                   <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                    <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-2 shadow-2xl active:scale-95">Discover Store</button>
-                    <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/20 rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white/10 backdrop-blur-sm transition-all shadow-xl active:scale-95">Order Tracking</button>
+                    <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-full font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.6)] active:scale-95">Initialize Store</button>
+                    <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/10 rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center gap-2"><Terminal className="w-4 h-4"/> Track Protocol</button>
                   </div>
                </div>
-            </section>
+            </section>>
 
             <section id="shop" className="max-w-7xl mx-auto px-6 py-32 space-y-16">
                <div className="flex flex-col md:flex-row justify-between items-end gap-10">
@@ -1528,35 +1540,34 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                </div>
               <div className="amazon-grid">
                   {isLoadingProducts ? (
-                    /* Show 6 beautiful skeletons while fetching data */
                     [...Array(6)].map((_, i) => <ProductSkeleton key={i} />)
                   ) : filteredProducts.length > 0 ? (
                     filteredProducts.map(p => (
-                      <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
-                         <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
+                      <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] hover:-translate-y-2 transition-all duration-500 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                         <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-lg">
                             
                             {p.isHot && (
-                               <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-rose-600/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-neon flex items-center gap-1.5">
-                                  <Sparkles className="w-3 h-3" /> Hot Deal
+                               <div className="absolute top-6 left-6 z-10 px-4 py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-2">
+                                  <Sparkles className="w-3 h-3 animate-pulse" /> High Yield
                                </div>
                             )}
 
                             <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
                             <div className="absolute top-6 right-6 flex flex-col gap-2">
-                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
+                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/40 text-white opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
                             </div>
                             <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                               <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl active-scale flex items-center gap-2">
-                                 <Eye className="w-4 h-4" /> Quick View
+                               <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
+                                 <Terminal className="w-4 h-4" /> Inspect Data
                                </button>
                             </div>
                           </div>
                           <div className="px-4 pb-4 flex-1 flex flex-col text-center">
-                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
+                            <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
-                            <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
-                              <span className="text-2xl font-black italic text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
-                              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-600 transition-all active:scale-90 shadow-xl"><Plus className="w-6 h-6" /></button>
+                            <div className="mt-auto flex justify-between items-center border-t border-slate-100 dark:border-white/5 pt-6">
+                              <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
+                              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all active:scale-90"><Plus className="w-6 h-6" /></button>
                             </div>
                           </div>
                       </div>
