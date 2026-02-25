@@ -8,7 +8,7 @@ import {
   ChevronRight, Key, Mail, Github, User as UserIcon, Package, TrendingUp, Settings, PieChart,
   ArrowRight, CreditCard as CardIcon, Map, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
   Languages, Trash, Share2, ShieldAlert, Crown, Zap, Fingerprint, Cloud, MessageSquare,
-  Wifi, WifiOff, Clock, Youtube // <-- Added Clock and Youtube
+  Wifi, WifiOff, Clock, Youtube,AlertCircle, Info 
 } from 'lucide-react';
 import { PRODUCTS as INITIAL_PRODUCTS, SHIPPING_OPTIONS } from './constants';
 import { Product, CartItem, Order, User, Category, Review } from './types';
@@ -63,6 +63,25 @@ const uploadToCloudinary = async (file) => {
 
 
 // --- Shared Components ---
+
+// --- Skeleton Components ---
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-slate-200 dark:bg-slate-800 ${className}`}></div>
+);
+
+const ProductSkeleton = () => (
+  <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 p-5 flex flex-col min-h-[450px]">
+    <Skeleton className="w-full aspect-[3/4] rounded-[40px] mb-6" />
+    <div className="px-4 flex-1 flex flex-col text-center gap-3">
+      <Skeleton className="w-1/3 h-3 rounded-full mx-auto" />
+      <Skeleton className="w-3/4 h-6 rounded-full mx-auto mb-2" />
+      <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
+        <Skeleton className="w-24 h-8 rounded-full" />
+        <Skeleton className="w-14 h-14 rounded-[24px]" />
+      </div>
+    </div>
+  </div>
+);
 
 const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
 const [showSearch, setShowSearch] = useState(false);
@@ -670,12 +689,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     
     authData = await res.json();
 
-    if (!res.ok) {
-      return alert(authData.message || "Identity verification failed.");
-    }
-  } catch (err) {
-    return alert("Sanctuary server is offline. Check connection.");
+      if (!res.ok) {
+    return showToast(authData.message || "Identity verification failed.", "error"); // REPLACED ALERT
   }
+} catch (err) {
+  return showToast("Sanctuary server is offline. Check connection.", "error"); // REPLACED ALERT
+}
 
   if (authData) {
     onAuthSuccess(authData.user, authData.token);
@@ -903,7 +922,30 @@ const [showAllComments, setShowAllComments] = useState(false);
       </div> 
     );
   };
-// --- Helper Components ---
+
+// --- Custom Notification System ---
+const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-xl transition-all ${
+      type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500' :
+      type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400' :
+      'bg-slate-900/90 border-slate-700 text-white'
+    }`}>
+      {type === 'error' ? <AlertCircle className="w-5 h-5" /> : 
+       type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
+       <Info className="w-5 h-5" />}
+      <span className="font-bold text-[10px] uppercase tracking-widest">{message}</span>
+      <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors ml-4">
+        <X className="w-4 h-4 opacity-70" />
+      </button>
+    </div>
+  );
+};
 
 const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
   return (
@@ -1163,6 +1205,22 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
   const [searchQuery, setSearchQuery] = useState('');
 
     const toastTimeoutRef = useRef(null);
+
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+  };
+
+  // NEW EFFECT: Debounce Search
+  // This prevents the app from filtering products on every single keystroke, improving performance
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300); // Wait 300ms after user stops typing
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
   
   // Persisted Dark Mode configuration
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -1171,6 +1229,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
   
   const [showCartToast, setShowCartToast] = useState<Product | null>(null);
   const [isSynced, setIsSynced] = useState(false);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
@@ -1188,11 +1247,13 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
       const token = localStorage.getItem('faith_token');
       if (!token) return;
 
-      // Fetch Products
+     // Fetch Products
+      setIsLoadingProducts(true); // Start loading
       fetch(`${API_BASE}/products`)
         .then(r => r.json())
         .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
-        .catch(e => console.log("Product sync delayed"));
+        .catch(e => console.log("Product sync delayed"))
+        .finally(() => setIsLoadingProducts(false)); 
 
       // 1. Get user session FIRST so we know if they are an admin
       const session = localStorage.getItem('faith_session_active');
@@ -1240,13 +1301,14 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
   const filteredProducts = useMemo(() => {
     let result = [...(products || [])];
 
-    if (searchQuery)
+    // USE debouncedSearch HERE
+    if (debouncedSearch)
       result = result.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        p.category.toLowerCase().includes(debouncedSearch.toLowerCase())
       );
 
-if (selectedCategory !== 'All') {
+    if (selectedCategory !== 'All') {
       if (selectedCategory === 'Hot Deals') {
         result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
       } else {
@@ -1427,6 +1489,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
         products={products}
         isSynced={isSynced}
       />
+      {toast && <ToastMessage message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       {showCartToast && <CartToast product={showCartToast} onClose={() => setShowCartToast(null)} />}
 
@@ -1462,42 +1525,50 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                     </div>
                   </div>
                </div>
-               <div className="amazon-grid">
-                  {filteredProducts.map(p => (
-                    <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
-                     <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
-                        
-                        {p.isHot && (
-                           <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-rose-600/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-neon flex items-center gap-1.5">
-                              <Sparkles className="w-3 h-3" /> Hot Deal
-                           </div>
-                        )}
+              <div className="amazon-grid">
+                  {isLoadingProducts ? (
+                    /* Show 6 beautiful skeletons while fetching data */
+                    [...Array(6)].map((_, i) => <ProductSkeleton key={i} />)
+                  ) : filteredProducts.length > 0 ? (
+                    filteredProducts.map(p => (
+                      <div key={p.id} className="group relative bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-700 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                         <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-2xl">
+                            
+                            {p.isHot && (
+                               <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-rose-600/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-neon flex items-center gap-1.5">
+                                  <Sparkles className="w-3 h-3" /> Hot Deal
+                               </div>
+                            )}
 
-                        <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
-                        <div className="absolute top-6 right-6 flex flex-col gap-2">
-                          <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
-                        </div>
-                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                           <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl active-scale flex items-center gap-2">
-                             <Eye className="w-4 h-4" /> Quick View
-                           </button>
-                        </div>
+                            <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
+                            <div className="absolute top-6 right-6 flex flex-col gap-2">
+                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500 text-white shadow-neon' : 'bg-white/20 text-white opacity-0 group-hover:opacity-100'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
+                            </div>
+                            <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                               <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl active-scale flex items-center gap-2">
+                                 <Eye className="w-4 h-4" /> Quick View
+                               </button>
+                            </div>
+                          </div>
+                          <div className="px-4 pb-4 flex-1 flex flex-col text-center">
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
+                            <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
+                              <span className="text-2xl font-black italic text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
+                              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-600 transition-all active:scale-90 shadow-xl"><Plus className="w-6 h-6" /></button>
+                            </div>
+                          </div>
                       </div>
-                      <div className="px-4 pb-4 flex-1 flex flex-col text-center">
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
-                        <div className="mt-auto flex justify-between items-center border-t border-slate-50 dark:border-slate-800 pt-6">
-                          <span className="text-2xl font-black italic text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
-                          <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-600 transition-all active:scale-90 shadow-xl"><Plus className="w-6 h-6" /></button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : null}
                </div>
-               {filteredProducts.length === 0 && <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">No entities detected matching this search signature.</div>}
-            </section>
-          </div>
-        )}
+               
+               {/* Only show "No entities detected" if we are DONE loading and there are 0 products */}
+               {!isLoadingProducts && filteredProducts.length === 0 && (
+                 <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">
+                   No entities detected matching this search signature.
+                 </div>
+               )}
 
 {/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
@@ -1571,7 +1642,7 @@ onUpdateUser={async (id: any, data: any) => {
         {view === 'track-order' && <TrackOrderView orders={orders} currentUser={currentUser} />}
         
         {/* --- AUTHENTICATION --- */}
-        {view === 'auth' && <AuthView onAuthSuccess={handleAuth} />}
+        {view === 'auth' && <AuthView onAuthSuccess={handleAuth} showToast={showToast} />}
         
         {/* --- CHECKOUT PROTOCOL --- */}
         {view === 'checkout' && (
