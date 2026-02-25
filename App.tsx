@@ -288,13 +288,16 @@ const searchResults = useMemo(() => {
 };
 
 // --- Admin Dashboard Component ---
-const AdminVault = ({ products, orders, users, onAdd, onDelete, onUpdateUser, onDeleteUser, onUpdateOrder, onBulkUpdate }: any) => {
+const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onUpdateUser, onDeleteUser, onUpdateOrder, onBulkUpdate }: any) => {
   const [tab, setTab] = useState<'analytics' | 'products' | 'orders' | 'users'>('analytics');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-const [newProduct, setNewProduct] = useState({ name: '', price: 0, category: 'Women' as any, stock: 10, image: '', description: '', isHot: false });
+  const [newProduct, setNewProduct] = useState({ name: '', price: 100, category: 'Women' as any, stock: 10, image: '', description: '', isHot: false });
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+  
+  const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
 
   const prevOrderCount = useRef(orders.length);
 
@@ -361,6 +364,17 @@ const handleSaveProduct = (e: React.FormEvent) => {
     }
     return sortableItems;
   }, [products, sortConfig]);
+
+  // Sort Citizens: Faith on top, then admins, then customers
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+      if (a.email === 'faith@faith') return -1;
+      if (b.email === 'faith@faith') return 1;
+      if (a.role === 'admin' && b.role !== 'admin') return -1;
+      if (b.role === 'admin' && a.role !== 'admin') return 1;
+      return 0;
+    });
+  }, [users]);
 
   return (
     <div className="max-w-7xl mx-auto pt-32 pb-32 px-6 animate-future-in">
@@ -549,122 +563,158 @@ const handleSaveProduct = (e: React.FormEvent) => {
        )}
 
       {tab === 'orders' && (
-  <div className="space-y-8 animate-fade-in">
-    <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-      <Activity className="w-6 h-6 text-rose-500" /> Logistics Protocol Status
-    </h3>
-    
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      {orders.map((o: any) => {
-        // Assume standard 3 days delivery if missing, or use o.deliveryDays
-        const daysLeft = o.deliveryDays || 3; 
-        const isDelivered = o.status === 'Delivered';
+        <div className="space-y-8 animate-fade-in">
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 font-mono">
+            <Activity className="w-6 h-6 text-rose-500" /> Active Logistics Protocols
+          </h3>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {orders.map((o: any) => {
+              const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
+              const isDelivered = o.status === 'Delivered';
+              const isExpanded = expandedOrders.includes(o._id || o.id);
 
-        return (
-          <div key={o._id || o.id} className={`bg-white dark:bg-slate-900 p-6 rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-neon'} transition-all relative overflow-hidden flex flex-col`}>
-            {/* Glowing background for active orders */}
-            {!isDelivered && <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 blur-3xl rounded-full"></div>}
-            
-            {/* Header: Profile Pic & Status */}
-            <div className="flex justify-between items-start mb-6 relative z-10">
-              <div className="flex items-center gap-3">
-                 {/* Replaced 2-digits with User Profile Icon */}
-                 <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-slate-800 overflow-hidden bg-rose-50 flex items-center justify-center shrink-0 shadow-md">
-                   {o.userProfilePic ? <img src={o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-rose-400" />}
-                 </div>
-                 <div>
-                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-widest">#{ (o._id || o.id || 'XXXX').slice(-6).toUpperCase() }</p>
-                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || o.phoneNumber}</p>
-                 </div>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                o.status === 'Processing' ? 'bg-amber-100 text-amber-600' : 
-                o.status === 'Shipped' ? 'bg-sky-100 text-sky-600' : 
-                o.status === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-              }`}>{o.status || 'Processing'}</span>
-            </div>
+              return (
+                <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-[0_0_20px_rgba(225,29,72,0.15)]'} transition-all relative overflow-hidden flex flex-col`}>
+                  
+                  {/* Collapsed Header (Always Visible) */}
+                  <div className="p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
+                         {o.userProfilePic ? <img src={o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
+                       </div>
+                       <div>
+                         <p className="font-mono text-[9px] uppercase text-rose-500 tracking-widest flex items-center gap-2">
+                           ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
+                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>}
+                         </p>
+                         <p className="font-bold text-sm text-slate-900 dark:text-white font-mono">{o.userName || 'Anonymous Entity'}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`px-3 py-1.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${
+                        o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
+                        o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 
+                        o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      }`}>{o.status || 'Processing'}</span>
+                      {isDelivered && <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
+                    </div>
+                  </div>
 
-            {/* Content: Details & Countdown */}
-            {!isDelivered && (
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[9px] font-black uppercase text-slate-400">Total Value</span>
-                  <span className="text-lg font-black italic text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                  {/* Expanded Content Area */}
+                  {(!isDelivered || isExpanded) && (
+                    <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-6">
+                      {!isDelivered && <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>}
+                      
+                      <div className="bg-slate-50 dark:bg-slate-950/50 p-5 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-white/5">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="font-mono text-[10px] uppercase text-slate-500">Value Processed</span>
+                          <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                        </div>
+                        {!isDelivered && (
+                          <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
+                            <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">T-MINUS {daysLeft} DAYS</span>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
+                          <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
+                          <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><MapPin className="w-3 h-3 text-rose-400"/> Zone: {o.address || 'Location Data Missing'}</p>
+                        </div>
+                      </div>
+
+                      {/* Admin Update Controls */}
+                      {!isDelivered && (
+                        <div className="flex items-center gap-4 relative z-10">
+                           <select 
+                              value={o.status || 'Processing'} 
+                              onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
+                              className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white p-4 rounded-2xl text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors appearance-none border border-slate-200 dark:border-white/10"
+                           >
+                              <option value="Processing">Set: Processing</option>
+                              <option value="Shipped">Set: Shipped</option>
+                              <option value="Delivered">Set: Delivered</option>
+                              <option value="Cancelled">Abort Protocol</option>
+                           </select>
+                           
+                           {/* Modern Sync Button */}
+                           <button onClick={() => {
+                             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+                             audio.play().catch(() => {});
+                             // Note: Status already updates onChange of the select. This button is for sensory feedback/re-triggering sync.
+                           }} className="w-14 h-14 bg-rose-600 text-white rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
+                             <RefreshCw className="w-5 h-5" />
+                           </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3 text-amber-500 animate-pulse" /> Countdown</span>
-                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{daysLeft} Days to Drop-off</span>
-                </div>
-              </div>
-            )}
-
-            {/* Drop-off Zone Note */}
-            <p className="text-[10px] font-bold text-slate-500 mb-6 truncate"><MapPin className="w-3 h-3 inline mr-1"/> {o.address || 'Drop-off Zone Pending'}</p>
-
-            {/* Action Buttons */}
-            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center relative z-10">
-               {isDelivered ? (
-                 <p className="text-xs font-black uppercase tracking-widest text-emerald-500 w-full text-center">Settled & Closed</p>
-               ) : (
-                 <select 
-                    value={o.status || 'Processing'} 
-                    onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
-                    className="w-full bg-slate-900 dark:bg-rose-600 text-white p-3 rounded-xl text-[10px] font-black uppercase outline-none shadow-xl cursor-pointer hover:bg-rose-700 transition-colors text-center appearance-none"
-                 >
-                    <option value="Processing">Tap to Update: Processing</option>
-                    <option value="Shipped">Tap to Update: Shipped</option>
-                    <option value="Delivered">Tap to Update: Delivered</option>
-                    <option value="Cancelled">Cancel Order</option>
-                 </select>
-               )}
-            </div>
+              )
+            })}
           </div>
-        )
-      })}
-    </div>
-    {orders.length === 0 && <div className="p-40 text-center italic text-slate-300">Operational History Vacant</div>}
-  </div>
-)}
-
-{tab === 'users' && (
-  <div className="space-y-8 animate-fade-in">
-    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Sanctuary Citizen Nodes</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {users.map((u: any) => (
-        <div key={u.id || u._id} className="bg-white dark:bg-slate-900 p-8 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl relative overflow-hidden group">
-          <div className="flex justify-between items-start mb-8 relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-rose-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 font-black text-2xl border-4 border-white dark:border-slate-900 shadow-xl overflow-hidden">
-                {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
-              </div>
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  {u.name} 
-                  {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500" />}
-                </h4>
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{u.email}</p>
-              </div>
-            </div>
-          </div>
-          {u.email !== 'faith@faith' ? (
-            <div className="flex gap-4 relative z-10 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all text-slate-900 dark:text-white">
-                {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
-              </button>
-              <button onClick={() => onDeleteUser(u._id || u.id)} className="p-3 bg-rose-50 dark:bg-rose-900/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all">
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
-              <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Supreme System Architect</p>
-            </div>
-          )}
+          {orders.length === 0 && <div className="p-40 text-center font-mono text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-[32px]">No active telemetry data.</div>}
         </div>
-      ))}
-    </div>
-  </div>
-)}
+      )}
+
+      {tab === 'users' && (
+        <div className="space-y-8 animate-fade-in">
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-mono">Citizen Directory</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedUsers.map((u: any, index: number) => (
+              <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
+                
+                {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
+                
+                <div className="flex items-center gap-4 mb-6 relative z-10">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0">
+                    {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate font-mono">
+                      {u.name} 
+                      {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
+                    </h4>
+                    <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1">{u.email}</p>
+                  </div>
+                </div>
+                
+                {u.email !== 'faith@faith' ? (
+                  <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
+                    <button 
+                      onClick={() => {
+                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions.");
+                        onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })
+                      }} 
+                      className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                    >
+                      {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can banish citizens.");
+                        onDeleteUser(u._id || u.id)
+                      }} 
+                      className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-4 border-t border-slate-100 dark:border-white/5 text-center relative z-10">
+                    <p className="font-mono text-[9px] font-black uppercase text-amber-500 tracking-[0.3em] flex items-center justify-center gap-2">
+                      <ShieldAlert className="w-3 h-3" /> Supreme Architect
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1603,6 +1653,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
 {/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
           <AdminVault 
+            currentUser={currentUser}
             products={products} 
             orders={orders} 
             users={users}
