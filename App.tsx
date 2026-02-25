@@ -618,7 +618,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
                             <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
                             <div className="flex items-center gap-2">
-                              <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">T-MINUS {daysLeft} DAYS</span>
+                              <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                                EST: {(() => {
+                                  const d = new Date(o.date || Date.now());
+                                  const extraDays = o.deliveryMethod?.includes('1 Day') ? 1 : o.deliveryMethod?.includes('3 Days') ? 3 : 5;
+                                  d.setDate(d.getDate() + extraDays);
+                                  return d.toLocaleDateString();
+                                })()}
+                                </span>
                             </div>
                           </div>
                         )}
@@ -680,7 +687,15 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       {u.name} 
                       {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
                     </h4>
-                    <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1">{u.email}</p>
+                    <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
+                    {/* ADDED ROLE BADGE */}
+                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                      u.role === 'admin' 
+                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' 
+                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                    }`}>
+                      {u.role === 'admin' ? 'Shield Admin' : 'Citizen'}
+                    </span>
                   </div>
                 </div>
                 
@@ -1772,7 +1787,9 @@ onUpdateUser={async (id: any, data: any) => {
                 phoneNumber: o.phoneNumber,
                 total: o.total,
                 userName: currentUser.name,                 // <-- Added
-                deliveryMethod: o.shippingMethod,           // <-- Renamed to match schema
+                deliveryMethod: o.shippingMethod,
+                userProfilePic: currentUser.profilePic,
+                address: currentUser.address,// <-- Renamed to match schema
                 items: o.items.map((item: any) => ({
                   productId: item.id || item._id, 
                   name: item.name,
