@@ -1564,12 +1564,15 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                   ) : null}
                </div>
                
-               {/* Only show "No entities detected" if we are DONE loading and there are 0 products */}
+              {/* Only show "No entities detected" if we are DONE loading and there are 0 products */}
                {!isLoadingProducts && filteredProducts.length === 0 && (
                  <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">
                    No entities detected matching this search signature.
                  </div>
                )}
+            </section>
+          </div>
+        )}
 
 {/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
