@@ -878,92 +878,125 @@ const [showAllComments, setShowAllComments] = useState(false);
                    ))}
                 </div>
 
-<div className="space-y-6 pt-8 border-t border-slate-50 dark:border-slate-800">
-  <div className="flex justify-between items-center">
-    <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
-      <MessageSquare className="w-3 h-3 text-sky-500" /> Comments & Ratings
-    </h4>
-    {product.reviews?.length > 2 && (
-      <button onClick={() => setShowAllComments(!showAllComments)} className="text-[9px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">
-        {showAllComments ? 'Collapse' : 'Expand All'}
-      </button>
-    )}
-  </div>
-
-  {/* Comments Display Box (Flexible & Scrolling) */}
-  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[200px]'}`}>
-    {product.reviews?.length ? (
-      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
-        <div key={r.id || r.userId} className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-[24px] border border-slate-100 dark:border-slate-800 flex gap-4 items-start">
-          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden shrink-0">
-            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-rose-400" />}
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="font-bold text-slate-900 dark:text-white text-xs">{r.userName}</p>
-                <p className="text-[8px] text-slate-400 mt-0.5">{r.date}</p>
-              </div>
-              <div className="flex gap-0.5 text-amber-400">
-                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 italic">"{r.comment}"</p>
-          </div>
-        </div>
-      ))
-    ) : (
-      <p className="text-xs text-slate-400 dark:text-slate-500 italic p-4 text-center">No comments transmitted yet.</p>
-    )}
-  </div>
-
-  {/* User's Input / Edit Section */}
-  <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800 mt-6 relative transition-opacity">
-    {currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview ? (
-      <div className="text-center opacity-70">
-        <div className="flex justify-center items-center gap-4 mb-4">
-          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Your Rating:</span>
-          <div className="flex gap-1 text-amber-400">
-             {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= (product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5) ? 'fill-current' : ''}`} />)}
-          </div>
-        </div>
-        <p className="text-sm text-slate-500 italic mb-6">"{product.reviews.find((r: any) => r.userId === currentUser.id)?.comment}"</p>
-        <button onClick={() => {
-          setReviewRating(product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5);
-          setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
-          setIsEditingReview(true);
-        }} className="flex items-center gap-2 mx-auto text-[10px] font-black uppercase text-rose-500 hover:text-rose-600">
-          <Edit3 className="w-3 h-3" /> Edit Your Comment
-        </button>
-      </div>
-    ) : (
-      <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6">
-        <h5 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
-          {isEditingReview ? 'Update Your Comment' : 'Leave a Comment'}
-        </h5>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Rating:</span>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map(s => (
-              <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform active:scale-110">
-                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-md' : 'text-slate-200'}`} />
-              </button>
-            ))}
-          </div>
-        </div>
-        <textarea 
-          required
-          placeholder="Share your experience..."
-          className="w-full p-5 bg-slate-50 dark:bg-slate-800 rounded-[20px] font-bold outline-none text-xs text-slate-900 dark:text-white min-h-[80px]"
-          value={reviewComment}
-          onChange={(e) => setReviewComment(e.target.value)}
-        />
-        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-black uppercase tracking-widest text-[10px] hover:bg-rose-700 transition-all shadow-xl">
-                            {isEditingReview ? 'Save Updates' : 'Submit Comment'}
-                          </button>
-                        </form>
-                      )}
+<div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-end mb-6">
+                    <div>
+                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
+                        <Terminal className="w-3 h-3 text-sky-400" /> Global Resonance
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Network Ping(s)</p>
                     </div>
+                    {product.reviews?.length > 2 && (
+                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors border-b border-rose-500/30 pb-0.5">
+                        {showAllComments ? '[ COLLAPSE LOG ]' : '[ EXPAND LOG ]'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Flexible Comments Display Box */}
+                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+                    {product.reviews?.length ? (
+                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => {
+                        // Attempt to match the review to a real user in the system to get their latest profile pic
+                        // (If you pass 'users' array to this modal later, you could do users.find(u => u.id === r.userId). For now, we use what's stored in the review, or fallback to the current user's pic if it's their review)
+                        const isThisUser = currentUser && currentUser.id === r.userId;
+                        const displayPic = isThisUser ? currentUser.profilePic : r.userProfilePic;
+
+                        return (
+                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group hover:border-slate-200 dark:hover:border-white/10 transition-colors">
+                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-slate-300 dark:border-slate-700">
+                            {displayPic ? <img src={displayPic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <p className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName}</p>
+                                <p className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-widest">{new Date(r.date).toLocaleDateString()}</p>
+                              </div>
+                              <div className="flex gap-0.5 text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.3)]">
+                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
+                              </div>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                          </div>
+                        </div>
+                      )})
+                    ) : (
+                      <div className="p-6 text-center border border-dashed border-slate-200 dark:border-white/10 rounded-[24px]">
+                        <p className="font-mono text-[10px] text-slate-400 uppercase tracking-widest">No resonance detected.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Smart User Input / Edit Section */}
+                  <div className={`p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
+                      currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview 
+                      ? 'border-transparent bg-slate-50 dark:bg-slate-900/50' 
+                      : 'border-dashed border-rose-200 dark:border-rose-500/30 bg-rose-50/30 dark:bg-rose-950/10'
+                  }`}>
+                    
+                    {currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview ? (
+                      
+                      /* VIEW MODE: User has commented and is NOT editing */
+                      <div className="text-center relative z-10">
+                        <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></div>
+                        <h5 className="font-mono text-[9px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Your Synced Resonance</h5>
+                        
+                        <div className="flex justify-center items-center gap-4 mb-4">
+                          <div className="flex gap-1 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+                             {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= (product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5) ? 'fill-current' : 'opacity-30'}`} />)}
+                          </div>
+                        </div>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-6">"{product.reviews.find((r: any) => r.userId === currentUser.id)?.comment}"</p>
+                        
+                        <button onClick={() => {
+                          setReviewRating(product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5);
+                          setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
+                          setIsEditingReview(true);
+                        }} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors bg-white dark:bg-slate-950 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-white/5">
+                          <Edit3 className="w-3 h-3" /> Adjust Resonance
+                        </button>
+                      </div>
+
+                    ) : (
+                      
+                      /* EDIT/CREATE MODE: User is typing a new comment or editing an old one */
+                      <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6 relative z-10">
+                        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
+                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Recalibrate Resonance' : 'Transmit Resonance'}
+                        </h5>
+                        
+                        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
+                          <span className="font-mono text-[9px] uppercase text-slate-500 tracking-widest">Signal Strength:</span>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform hover:scale-125 active:scale-90">
+                                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]' : 'text-slate-300 dark:text-slate-700'}`} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <textarea 
+                          required
+                          placeholder="Initialize thought sequence..."
+                          className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10 focus:border-rose-400 dark:focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-slate-400 shadow-inner"
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                        />
+                        
+                        <div className="flex gap-4">
+                          {isEditingReview && (
+                            <button type="button" onClick={() => setIsEditingReview(false)} className="px-6 py-4 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-slate-300 dark:hover:bg-slate-700 transition-all">
+                              Cancel
+                            </button>
+                          )}
+                          <button type="submit" className="flex-1 py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] active:scale-95">
+                            {isEditingReview ? 'Commit Recalibration' : 'Initialize Transmission'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 </div> 
               </div>
