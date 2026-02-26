@@ -1912,8 +1912,7 @@ onUpdateUser={async (id: any, data: any) => {
               console.error(e);
             }
           }}
-          isDarkMode={isDarkMode} 
-          setIsDarkMode={setIsDarkMode}
+
         />
       )}
 
