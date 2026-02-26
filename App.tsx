@@ -296,6 +296,7 @@ const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onU
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: '', price: 100, category: 'Women' as any, stock: 10, image: '', description: '', isHot: false });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
@@ -486,33 +487,57 @@ const handleSaveProduct = (e: React.FormEvent) => {
                        ))}
                     </select>
                    <div className="md:col-span-2 flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-[24px]">
-  <input 
-    type="file" 
-    accept="image/*"
-    className="w-full font-bold text-slate-900 dark:text-white file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-rose-100 file:text-rose-600 hover:file:bg-rose-200 transition-all cursor-pointer"
-    onChange={async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const url = await uploadToCloudinary(file); // Calls your Cloudinary function
-        if (url) {
-          if (editingProduct) setEditingProduct({...editingProduct, image: url});
-          else setNewProduct({...newProduct, image: url});
-        }
-      }
-    }} 
-  />
-  {(editingProduct?.image || newProduct.image) && (
-    <img src={editingProduct ? editingProduct.image : newProduct.image} className="w-16 h-16 rounded-xl object-cover shadow-md" alt="Preview" />
-  )}
-</div>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        disabled={isUploadingImage}
+                        className="w-full font-bold text-slate-900 dark:text-white file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-rose-100 file:text-rose-600 hover:file:bg-rose-200 transition-all cursor-pointer disabled:opacity-50"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setIsUploadingImage(true);
+                            const url = await uploadToCloudinary(file);
+                            if (url) {
+                              if (editingProduct) setEditingProduct({...editingProduct, image: url});
+                              else setNewProduct({...newProduct, image: url});
+                            } else {
+                              alert("Failed to sync image payload with Cloudinary.");
+                            }
+                            setIsUploadingImage(false);
+                          }
+                        }} 
+                      />
+                      {isUploadingImage ? (
+                         <div className="w-16 h-16 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse flex items-center justify-center shrink-0 shadow-inner">
+                            <Loader2 className="w-6 h-6 animate-spin text-rose-500"/>
+                         </div>
+                      ) : (editingProduct?.image || newProduct.image) && (
+                        <img src={editingProduct ? editingProduct.image : newProduct.image} className="w-16 h-16 rounded-xl object-cover shadow-md shrink-0" alt="Preview" />
+                      )}
+                    </div>
+
                    <textarea className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Seductive Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
-                    <label className="md:col-span-2 flex items-center gap-3 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white cursor-pointer select-none border border-transparent hover:border-rose-100 transition-colors">
-                       <input type="checkbox" checked={editingProduct ? editingProduct.isHot : newProduct.isHot} onChange={e => editingProduct ? setEditingProduct({...editingProduct, isHot: e.target.checked}) : setNewProduct({...newProduct, isHot: e.target.checked})} className="w-6 h-6 rounded-lg accent-rose-600" />
-                       Mark as "Hot Deal" 🔥 (Shows glowing badge)
+                    <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
+                       (editingProduct ? editingProduct.isHot : newProduct.isHot) 
+                         ? 'bg-rose-500/10 border-rose-500 text-rose-600 dark:text-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.2)]' 
+                         : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-900 dark:text-white hover:border-rose-200'
+                    }`}>
+                       <div className={`w-6 h-6 rounded-md flex items-center justify-center border-2 transition-colors ${
+                          (editingProduct ? editingProduct.isHot : newProduct.isHot) 
+                          ? 'bg-rose-500 border-rose-500' 
+                          : 'border-slate-300 dark:border-slate-600'
+                       }`}>
+                          {(editingProduct ? editingProduct.isHot : newProduct.isHot) && <CheckCircle2 className="w-4 h-4 text-white" />}
+                       </div>
+                       <input type="checkbox" checked={editingProduct ? editingProduct.isHot : newProduct.isHot} onChange={e => editingProduct ? setEditingProduct({...editingProduct, isHot: e.target.checked}) : setNewProduct({...newProduct, isHot: e.target.checked})} className="hidden" />
+                       Mark as "Hot Deal" 🔥 
+                       <span className="text-[10px] font-mono text-slate-400 font-normal ml-auto">(Glows when active)</span>
                     </label>
 
-                    <button className="md:col-span-2 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] hover:shadow-neon transition-all">Commit Configuration</button>
+                    <button disabled={isUploadingImage} className="md:col-span-2 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] hover:shadow-neon transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                       {isUploadingImage ? 'Uploading Image...' : 'Commit Configuration'}
+                    </button>
                  </form>
               </div>
             )}
@@ -538,8 +563,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                     {sortedProducts.map((p: any) => (
-                       <tr key={p.id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all group">
+                    {sortedProducts.map((p: any) => (
+                       <tr key={p.id || p._id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all group">
                           <td className="px-8 py-6 flex items-center gap-4">
                              <img src={p.image} className="w-12 h-16 rounded-xl object-cover shadow-lg" />
                              <span className="font-bold text-slate-900 dark:text-white">{p.name}</span>
@@ -586,12 +611,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
                        <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
                          {o.userProfilePic ? <img src={o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
                        </div>
-                       <div>
-                         <p className="font-mono text-[9px] uppercase text-rose-500 tracking-widest flex items-center gap-2">
-                           ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
-                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>}
+                      <div>
+                         <p className="font-bold text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2">
+                           {o.userName || 'Anonymous Entity'}
+                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_#e11d48]"></span>}
                          </p>
-                         <p className="font-bold text-sm text-slate-900 dark:text-white font-mono">{o.userName || 'Anonymous Entity'}</p>
+                         <p className="font-mono text-[9px] uppercase text-rose-500 tracking-widest mt-0.5">
+                           ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
+                         </p>
                        </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -812,6 +839,12 @@ const [showAllComments, setShowAllComments] = useState(false);
           setTips(t);
       } catch (err) {
           console.error("AI Error:", err);
+          setCopy("An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance and modern luxury.");
+          setTips([
+            "Pair with minimalistic accessories to maintain a clean profile.",
+            "Ideal for high-end evening events or exclusive sanctuary gatherings.",
+            "Maintain fabric integrity by avoiding direct harsh elements."
+          ]);
       } finally {
           setLoading(false);
       }
@@ -927,14 +960,12 @@ const [showAllComments, setShowAllComments] = useState(false);
                           <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-slate-300 dark:border-slate-700">
                             {displayPic ? <img src={displayPic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
                           </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <p className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName}</p>
-                                <p className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-widest">{new Date(r.date).toLocaleDateString()}</p>
-                              </div>
-                              <div className="flex gap-0.5 text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.3)]">
-                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : ''}`} />)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">{r.userName || 'Anonymous'}</span>
+                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
+                              <div className="flex gap-0.5 text-amber-400 ml-auto drop-shadow-[0_0_5px_rgba(251,191,36,0.3)] shrink-0">
+                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
                               </div>
                             </div>
                             <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
