@@ -4,18 +4,15 @@
 
 @layer base {
   :root {
+    color-scheme: dark light; 
+    -webkit-tap-highlight-color: transparent;
+    
     --rose-primary: #f472b6;
     --neon-cyan: #22d3ee;
-    
     --luxury-bg: #f8fafc; 
     --luxury-text: #0f172a;
   }
-
-  .dark {
-    --luxury-bg: #020617; 
-    --luxury-text: #f8fafc;
-  }
-
+  
   body {
     background-color: var(--luxury-bg);
     color: var(--luxury-text);
@@ -23,10 +20,9 @@
     scroll-behavior: smooth;
     transition: background-color 0.5s ease, color 0.5s ease;
     font-family: 'Inter', sans-serif;
-
-    /* FIXED TYPO HERE */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
   }
 
   /* Force browsers to drop native styling for inputs/selects */
@@ -39,9 +35,7 @@
   }
 
   /* 
-    FIX CHROME AUTOFILL BUG: 
-    Stops Chrome from changing your input fields to white background with black text.
-    This fixes the text clashing issue!
+
   */
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 
