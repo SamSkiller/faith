@@ -461,6 +461,52 @@ console.log("✅ Collection seeded successfully");
 };
 
 /* =========================
+   M-PESA DARAJA PRODUCTION ROUTE
+========================= */
+app.post("/api/mpesa/stkpush", authenticate, async (req, res) => {
+  const { phone, amount } = req.body;
+  const formattedPhone = phone.replace(/^0/, "254").replace(/^\+/, "");
+
+  try {
+    const authAuth = Buffer.from(`${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`).toString('base64');
+    const authRes = await fetch("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
+      headers: { "Authorization": `Basic ${authAuth}` }
+    });
+    const { access_token } = await authRes.json();
+
+    const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+    const password = Buffer.from(`${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`).toString('base64');
+
+    const stkRes = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+      method: 'POST',
+      headers: { "Authorization": `Bearer ${access_token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        BusinessShortCode: process.env.MPESA_SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: amount,
+        PartyA: formattedPhone,
+        PartyB: process.env.MPESA_SHORTCODE,
+        PhoneNumber: formattedPhone,
+        CallBackURL: "https://your-domain.com/api/mpesa/callback", // Update to your real domain later
+        AccountReference: "Faith Shop",
+        TransactionDesc: "Sanctuary Asset Purchase"
+      })
+    });
+
+    const stkData = await stkRes.json();
+    if (stkData.ResponseCode === "0") {
+      res.json({ success: true, message: "M-Pesa STK Push sent to device." });
+    } else {
+      res.status(400).json({ success: false, message: stkData.errorMessage || "Failed to initiate M-Pesa." });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "M-Pesa API communication error." });
+  }
+});
+
+/* =========================
    FRONTEND ROUTING (SPA)
 ========================= */
 // Fixed: This must be below all /api routes
