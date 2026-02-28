@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // <--- THIS PREVENTS DEVICE OS FROM HIJACKING COLORS
   content: [
     "./index.html",
     "./index.tsx",
@@ -9,7 +10,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // These allow you to use class names like 'text-rosePrimary'
         rosePrimary: '#f472b6',
         neonCyan: '#22d3ee',
       },
