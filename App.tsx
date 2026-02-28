@@ -516,7 +516,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       )}
                     </div>
 
-                   // REPLACE THE TEXTAREA WITH THIS:
+                  
 <textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
                     <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
