@@ -516,7 +516,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       )}
                     </div>
 
-                   <textarea className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Seductive Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                   // REPLACE THE TEXTAREA WITH THIS:
+<textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
                     <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
                        (editingProduct ? editingProduct.isHot : newProduct.isHot) 
@@ -816,6 +817,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   );
 };
 
+const aiMemoryCache = new Map();
+
 // --- Product Modal ---
 const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddToCart, onAddReview, currentUser }: any) => {
   const [copy, setCopy] = useState('');
@@ -825,21 +828,33 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [isEditingReview, setIsEditingReview] = useState(false);
-const [showAllComments, setShowAllComments] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   useEffect(() => {
     const loadAI = async () => {
       setLoading(true);
+      
+      // Fallback: Use database description immediately to save massive AI tokens
+      const dbDescription = product.description || "An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance.";
+
+      if (aiMemoryCache.has(product.id)) {
+        setCopy(dbDescription);
+        setTips(aiMemoryCache.get(product.id));
+        setLoading(false);
+        return;
+      }
+
       try {
-          const [c, t] = await Promise.all([
-            generateProductCopy(product.name, product.category),
-            getStyleTips(product.name)
-          ]);
-          setCopy(c); 
+
+          const t = await getStyleTips(product.name);
+          
+          aiMemoryCache.set(product.id, t);
+          
+          setCopy(dbDescription); 
           setTips(t);
       } catch (err) {
           console.error("AI Error:", err);
-          setCopy("An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance and modern luxury.");
+          setCopy(dbDescription);
           setTips([
             "Pair with minimalistic accessories to maintain a clean profile.",
             "Ideal for high-end evening events or exclusive sanctuary gatherings.",
@@ -932,12 +947,13 @@ const [showAllComments, setShowAllComments] = useState(false);
                 </div>
 
 <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+                  
                   <div className="flex justify-between items-end mb-6">
                     <div>
                       <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                        <Terminal className="w-3 h-3 text-sky-400" /> Global Resonance
+                        <Terminal className="w-3 h-3 text-sky-400" /> Comment Section
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Network Ping(s)</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Comment(s)</p>
                     </div>
                     {product.reviews?.length > 2 && (
                       <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors border-b border-rose-500/30 pb-0.5">
@@ -962,7 +978,9 @@ const [showAllComments, setShowAllComments] = useState(false);
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">{r.userName || 'Anonymous'}</span>
+                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">
+                                 {r.userName || 'Verified Citizen'}
+                              </span>
                               <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
                               <div className="flex gap-0.5 text-amber-400 ml-auto drop-shadow-[0_0_5px_rgba(251,191,36,0.3)] shrink-0">
                                 {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
