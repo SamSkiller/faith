@@ -1962,17 +1962,6 @@ onUpdateUser={async (id: any, data: any) => {
           </div>
         )}
 
-        {activeTab === 'orders' && (
-          <div className="space-y-6 animate-fade-in pb-10">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Transmissions</h3>
-              <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
-            </div>
-            <div className="w-full overflow-x-hidden">
-              <TrackOrderView orders={user.orders || []} currentUser={user} />
-            </div>
-          </div>
-        )}
       </main> 
       
       <Footer />
