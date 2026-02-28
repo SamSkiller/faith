@@ -776,7 +776,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     
                     <button 
                       onClick={() => {
-                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can banish citizens.");
+                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users.");
                         onDeleteUser(u._id || u.id)
                       }} 
                       className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
@@ -1157,7 +1157,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
        <div className="p-12 border-b border-rose-50 dark:border-slate-800 flex justify-between items-center bg-rose-50/20 dark:bg-slate-800/20">
           <div>
             <h2 className="text-4xl font-serif italic font-bold text-rose-600 mb-1">My Cart</h2>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{cart.length} acquisition payloads</p>
+            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{cart.length} Items in Cart</p>
           </div>
           <button onClick={onClose} className="p-5 hover:bg-rose-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"><X className="w-8 h-8 text-rose-600" /></button>
        </div>
@@ -1332,13 +1332,13 @@ if (currentUser && !currentUser.address) {
                 <h3 className="text-2xl font-serif italic font-bold mb-10 text-slate-900 dark:text-white flex items-center gap-3"><Smartphone className="w-6 h-6 text-rose-500" /> M-Pesa Settlement</h3>
                 <div className="space-y-8">
                    <div className="space-y-4">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Transmit Linkage Number</label>
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Enter M-Pesa Phone Number</label>
                       <input className="w-full p-8 bg-slate-50 dark:bg-slate-800 rounded-[32px] font-black text-4xl outline-none focus:ring-2 focus:ring-rose-200 text-slate-900 dark:text-white transition-all" placeholder="07XX XXX XXX" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
                       <p className="text-[9px] text-slate-400 italic ml-4 uppercase tracking-tighter">Enter your M-Pesa number to receive the secure push.</p>
                    </div>
                    
                    <div className="space-y-4">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Logistics Velocity</label>
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Shipping Speed</label>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                          {SHIPPING_OPTIONS.map(opt => (
                            <button 
@@ -1735,7 +1735,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> System Online
                   </span>
                   <h1 className="text-6xl md:text-[8rem] font-serif italic font-bold mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Faith.</span></h1>
-                  <p className="text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-16 tracking-widest text-[10px] uppercase">Initialize Premium Nairobi Protocol [V2.0]</p>
+                  <p className="text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-16 tracking-widest text-[10px] uppercase">Shop the Nairobi Collection</p>
                   <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                     <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-full font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.6)] active:scale-95">Initialize Store</button>
                     <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/10 rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center gap-2"><Terminal className="w-4 h-4"/> Track Order</button>
@@ -2059,7 +2059,6 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
   // Controls visibility on small screens
   const [showMenuOnMobile, setShowMenuOnMobile] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'wishlist' | 'settings' | 'orders'>('profile');
   
   const handleTabSwitch = (tab: any) => {
     setActiveTab(tab);
@@ -2182,7 +2181,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
   onUpdateUser(user.id || user._id, editData); 
   onClose(); 
 }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">
-  Commit Identity Changes
+  Save Profile
 </button>
             </div>
           )}
