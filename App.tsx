@@ -108,7 +108,7 @@ const searchResults = useMemo(() => {
     <header className="sticky top-0 z-[60] w-full">
 <div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-1.5 px-4 flex items-center justify-center gap-3 text-[9px] font-mono font-bold uppercase tracking-[0.4em] animate-gradient-x relative shadow-[0_0_20px_rgba(225,29,72,0.4)] border-b border-white/20">
   {isSynced ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />}
-  Sanctuary Uplink Active • Same-Day  Delivery
+ Faith Boutique Active • Same-Day  Delivery
 </div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
@@ -411,21 +411,21 @@ const handleSaveProduct = (e: React.FormEvent) => {
              </div>
           </div>
           <div className="flex flex-wrap sm:flex-nowrap p-2 bg-slate-100 dark:bg-slate-800 rounded-[32px] border border-slate-200 dark:border-slate-700 gap-2 overflow-x-auto scrollbar-hide">
-           {[
+              {[
                 { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                 { id: 'products', label: 'Products', icon: Package },
                 { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered').length },
                 { id: 'users', label: 'Users Directory', icon: Users }
               ].map(t => (
-  <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
-    <t.icon className="w-3.5 h-3.5" /> {t.label}
-    {(t.badge !== undefined && t.badge > 0) && (
-      <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[18px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-800 shadow-neon">
-        {t.badge}
-      </span>
-    )}
-  </button>
-))}
+                <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <t.icon className="w-3.5 h-3.5" /> {t.label}
+                  {(t.badge !== undefined && t.badge > 0) && (
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[18px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-800 shadow-neon">
+                      {t.badge}
+                    </span>
+                  )}
+                </button>
+              ))}
           </div>
        </div>
 
@@ -490,23 +490,27 @@ const handleSaveProduct = (e: React.FormEvent) => {
                  <h4 className="text-xl font-bold mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Entity' : 'New Entity Protocol'}</h4>
                  <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <input required className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Value (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool Quantity" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
-                      <select className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white outline-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
-                       <optgroup label="General / Top Level">
-                         <option value="Women">Women (All)</option>
-                         <option value="Men">Men (All)</option>
-                         <option value="Accessories">Accessories (All)</option>
-                         <option value="Hot Deals">Hot Deals (Standalone)</option>
-                       </optgroup>
-                       {Object.keys(CATEGORY_HIERARCHY).map(parentCat => CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].length > 0 && (
-                          <optgroup key={parentCat} label={`${parentCat} Specifics`}>
-                            {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
-                               <option key={`${parentCat} - ${sub}`} value={`${parentCat} - ${sub}`}>{parentCat} - {sub}</option>
-                            ))}
-                          </optgroup>
-                       ))}
-                    </select>
+                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
+                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool (Quantity)" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
+                    
+                    <div className="relative">
+                      <select className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
+                         <optgroup label="General / Top Level">
+                           <option value="Women">Women (All)</option>
+                           <option value="Men">Men (All)</option>
+                           <option value="Accessories">Accessories (All)</option>
+                           <option value="Hot Deals">Hot Deals (Standalone)</option>
+                         </optgroup>
+                         {Object.keys(CATEGORY_HIERARCHY).map(parentCat => CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].length > 0 && (
+                            <optgroup key={parentCat} label={`${parentCat} Specifics`}>
+                              {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
+                                 <option key={`${parentCat} - ${sub}`} value={`${parentCat} - ${sub}`}>{parentCat} - {sub}</option>
+                              ))}
+                            </optgroup>
+                         ))}
+                      </select>
+                      <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                    </div>
                    <div className="md:col-span-2 flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-[24px]">
                       <input 
                         type="file" 
@@ -654,46 +658,46 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   </div>
 
                   {/* Expanded Content Area */}
-                  {(!isDelivered || isExpanded) && (
-                    <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-6">
-                      {!isDelivered && <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>}
-                      
-                      <div className="bg-slate-50 dark:bg-slate-950/50 p-5 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-white/5">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="font-mono text-[10px] uppercase text-slate-500">Value Processed</span>
-                          <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
-                          <span className="font-mono text-[9px] uppercase text-slate-500">Order Placed</span>
-                          <span className="font-mono text-[10px] text-slate-900 dark:text-white font-bold">{new Date(o.date).toLocaleDateString()} at {new Date(o.date).toLocaleTimeString()}</span>
-                        </div>
+            {(!isDelivered || isExpanded) && (
+              <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-6">
+                {!isDelivered && <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>}
+                
+                <div className="bg-slate-50 dark:bg-slate-950/50 p-5 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-mono text-[10px] uppercase text-slate-500">Value Processed</span>
+                    <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                  </div>
                   
-                        {!isDelivered && (
-                          <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
-                            <div className="flex flex-col">
-                               <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
-                               <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">{o.deliveryMethod || 'Standard Delivery'}</span>
-                            </div>
-                            <div className="flex flex-col items-end">
-                              <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-                                EST: {(() => {
-                                  const d = new Date(o.date || Date.now());
-                                  d.setDate(d.getDate() + daysLeft);
-                                  return d.toLocaleDateString();
-                                })()}
-                              </span>
-                              <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
-                          <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
-                          <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><MapPin className="w-3 h-3 text-rose-400"/> Drop-off Zone: {o.address || 'Data Missing'}</p>
-                        </div>
+                  <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
+                    <span className="font-mono text-[9px] uppercase text-slate-500">Order Placed</span>
+                    <span className="font-mono text-[10px] text-slate-900 dark:text-white font-bold">{new Date(o.date).toLocaleDateString()} at {new Date(o.date).toLocaleTimeString()}</span>
+                  </div>
+            
+                  {!isDelivered && (
+                    <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
+                      <div className="flex flex-col">
+                         <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
+                         <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">{o.deliveryMethod || 'Standard Delivery'}</span>
                       </div>
-                  
-                      {/* Admin Update Controls */}
+                      <div className="flex flex-col items-end">
+                        <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                          EST: {(() => {
+                            const d = new Date(o.date || Date.now());
+                            d.setDate(d.getDate() + daysLeft);
+                            return d.toLocaleDateString();
+                          })()}
+                        </span>
+                        <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
+                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
+                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><MapPin className="w-3 h-3 text-rose-400"/> Drop-off Zone: {o.address || 'Data Missing'}</p>
+                  </div>
+                </div>
+            
+                {/* Admin Update Controls */}
                       {!isDelivered && (
                         <div className="flex items-center gap-4 relative z-10">
                            <select 
@@ -748,11 +752,12 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
                     {/* ADDED ROLE BADGE */}
                     <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                      u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
                       u.role === 'admin' 
-                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' 
+                        ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' 
                         : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
                     }`}>
-                      {u.role === 'admin' ? 'Shield Admin' : 'Citizen'}
+                      {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
                     </span>
                   </div>
                 </div>
@@ -962,8 +967,10 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
               
               <div className="space-y-12">
                 <div>
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Narrative Spectrum</h4>
-                  <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">{loading ? 'Synthesizing narrative...' : copy}</p>
+                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Description</h4>
+                  <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">
+                    {product.description || (loading ? 'Loading narrative...' : copy)}
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -1260,20 +1267,29 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
     if (!phoneNumber) return alert('Protocol Transmission Failure: Phone number missing.'); 
     setLoading(true);
     try {
-      const res = await initiateSTKPush(phoneNumber, total);
-if (res.success) {
+      const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('faith_token')}`
+        },
+        body: JSON.stringify({ phone: phoneNumber, amount: total })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
         onComplete({ 
-           id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-           userId: currentUser.id || currentUser._id,
+          id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+          userId: currentUser.id || currentUser._id,
           items: cart, 
           total, 
           shippingMethod: shipping.name, 
           status: 'Processing', 
-          date: new Date().toLocaleString(), 
+          date: new Date().toISOString(), 
           phoneNumber 
         });
       } else { 
-        alert(res.message); 
+        alert(data.message); 
         setLoading(false); 
       }
     } catch (e) {
@@ -1443,59 +1459,58 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return () => window.removeEventListener('popstate', handlePopState);
   }, [view, selectedProduct]);
 
-
-  const prevOrdersRef = useRef<any[]>([]);
-
-  const checkBackendSync = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/health`);
-      if (!res.ok) { setIsSynced(false); return; }
-      setIsSynced(true);
-
-      // FIX: Move Product Fetch ABOVE token check so public users see products!
-      setIsLoadingProducts(true); 
-      fetch(`${API_BASE}/products`)
-        .then(r => r.json())
-        .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
-        .catch(e => console.log("Product sync delayed"))
-        .finally(() => setIsLoadingProducts(false)); 
-
-      const token = localStorage.getItem('faith_token');
-      if (!token) return;
-
-      const session = localStorage.getItem('faith_session_active');
-      const localUser = session ? JSON.parse(session) : null;
-
-      const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
-      fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : [])
-        .then(data => {
-          // CUSTOMER NOTIFICATION: Delivery Alert
-          if (localUser?.role !== 'admin' && prevOrdersRef.current.length > 0) {
-             data.forEach((newOrder: any) => {
-               const oldOrder = prevOrdersRef.current.find(o => (o.id === newOrder._id || o._id === newOrder._id));
-               if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
-                  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                  audio.play().catch(()=>{});
-                  showToast(`Protocol #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
-               }
-             });
+    const prevOrdersRef = useRef<any[]>([]);
+    
+      const checkBackendSync = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/health`);
+          if (!res.ok) { setIsSynced(false); return; }
+          setIsSynced(true);
+    
+          // FIX: Move Product Fetch ABOVE token check so public users see products!
+          setIsLoadingProducts(true); 
+          fetch(`${API_BASE}/products`)
+            .then(r => r.json())
+            .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
+            .catch(e => console.log("Product sync delayed"))
+            .finally(() => setIsLoadingProducts(false)); 
+    
+          const token = localStorage.getItem('faith_token');
+          if (!token) return;
+    
+          const session = localStorage.getItem('faith_session_active');
+          const localUser = session ? JSON.parse(session) : null;
+    
+          const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
+          fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(r => r.ok ? r.json() : [])
+            .then(data => {
+              // CUSTOMER NOTIFICATION: Delivery Alert
+              if (localUser?.role !== 'admin' && prevOrdersRef.current.length > 0) {
+                 data.forEach((newOrder: any) => {
+                   const oldOrder = prevOrdersRef.current.find(o => (o.id === newOrder._id || o._id === newOrder._id));
+                   if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
+                      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                      audio.play().catch(()=>{});
+                      showToast(`Protocol #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
+                   }
+                 });
+              }
+              prevOrdersRef.current = data;
+              setOrders(data);
+            })
+            .catch(e => console.log("Order sync delayed"));
+    
+          if (localUser?.role === 'admin') {
+            fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
+              .then(r => r.ok ? r.json() : [])
+              .then(data => setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []))
+              .catch(e => console.log("User list sync delayed"));
           }
-          prevOrdersRef.current = data;
-          setOrders(data);
-        })
-        .catch(e => console.log("Order sync delayed"));
-
-      if (localUser?.role === 'admin') {
-        fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(r => r.ok ? r.json() : [])
-          .then(data => setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []))
-          .catch(e => console.log("User list sync delayed"));
-      }
-    } catch (e) {
-      setIsSynced(false);
-    }
-  };
+        } catch (e) {
+          setIsSynced(false);
+        }
+      };
 
   const handleAuth = (user: User, token?: string) => {
     // Standardize the ID format
@@ -1946,7 +1961,18 @@ onUpdateUser={async (id: any, data: any) => {
              </div>
           </div>
         )}
-        
+
+        {activeTab === 'orders' && (
+          <div className="space-y-6 animate-fade-in pb-10">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Transmissions</h3>
+              <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
+            </div>
+            <div className="w-full overflow-x-hidden">
+              <TrackOrderView orders={user.orders || []} currentUser={user} />
+            </div>
+          </div>
+        )}
       </main> 
       
       <Footer />
@@ -2078,7 +2104,6 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
              <button onClick={() => handleTabSwitch('profile')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Activity className="w-4 h-4" /> Dashboard</button>
              <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4" /> Favorites</button>
              <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Settings</button>
-             <button onClick={() => handleTabSwitch('orders')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'orders' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><ClipboardList className="w-4 h-4" /> My Orders</button> 
           </nav>
           <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Log Out</button>
         </aside>
@@ -2181,17 +2206,19 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
                )}
             </div>
           )}
-       {activeTab === 'orders' && (
-  <div className="space-y-6 animate-fade-in pb-10">
-    <div className="flex justify-between items-center mb-6">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Transmissions</h3>
-      <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
-    </div>
-    <div className="w-full overflow-x-hidden">
-      <TrackOrderView orders={user.orders || []} currentUser={user} />
-    </div>
-  </div>
-)} 
+
+          {activeTab === 'orders' && (
+            <div className="space-y-6 animate-fade-in pb-10">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Transmissions</h3>
+                <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
+              </div>
+              <div className="w-full overflow-x-hidden">
+                <TrackOrderView orders={user.orders || []} currentUser={user} />
+              </div>
+            </div>
+          )}
+          
         </main>
       </div>
     </div>
