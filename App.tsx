@@ -6,7 +6,7 @@ import {
   LogOut, Users, BarChart3, ClipboardList, Camera, History, Edit3, Globe, 
   Shield, Activity, RefreshCw, Cpu, Menu, Gem, Layers, Send, Search, ArrowUpDown, 
   ChevronRight, Key, Mail, Github, User as UserIcon, Package, TrendingUp, Settings, PieChart,
-  ArrowRight, CreditCard as CardIcon, Map, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
+  ArrowRight, CreditCard as CardIcon, Map as MapIcon, DollarSign, Briefcase, Moon, Sun, Bell, Gift, 
   Languages, Trash, Share2, ShieldAlert, Crown, Zap, Fingerprint, Cloud, MessageSquare,
   Wifi, WifiOff, Clock, Youtube,AlertCircle, Info, Terminal, Database
 } from 'lucide-react';
@@ -1990,6 +1990,7 @@ onUpdateUser={async (id: any, data: any) => {
       {isProfileOpen && currentUser && (
         <ProfileModal 
           user={currentUser}
+          orders={orders}
           activeTab={activeProfileTab}
           setActiveTab={setActiveProfileTab}
           onClose={() => setIsProfileOpen(false)}  
@@ -2047,7 +2048,7 @@ onUpdateUser={async (id: any, data: any) => {
 
 // --- Sub Components ---
 
-const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
+const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
   const [editData, setEditData] = useState({ 
     name: user.name, 
     email: user.email, 
@@ -2101,6 +2102,7 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           
           <nav className="space-y-2 flex-1">
              <button onClick={() => handleTabSwitch('profile')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Activity className="w-4 h-4" /> Dashboard</button>
+            <button onClick={() => handleTabSwitch('orders')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'orders' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Package className="w-4 h-4" /> My Orders</button>
              <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4" /> Favorites</button>
              <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Settings</button>
           </nav>
@@ -2116,9 +2118,10 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           )}
           
           <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-12 mt-2 md:mt-0">
-            {activeTab === 'profile' && 'Citizen Overview'}
+            {activeTab === 'profile' && 'Profile Overview'}
             {activeTab === 'wishlist' && 'Luxury Favorites'}
             {activeTab === 'settings' && 'Identity Control'}
+            {activeTab === 'orders' && 'Orders Hub'}
           </h2>
           
           {activeTab === 'profile' && (
@@ -2209,11 +2212,11 @@ const ProfileModal = ({ user, onClose, onLogout, wishlistProducts, onRemoveFromW
           {activeTab === 'orders' && (
             <div className="space-y-6 animate-fade-in pb-10">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Transmissions</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Orders</h3>
                 <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
               </div>
               <div className="w-full overflow-x-hidden">
-                <TrackOrderView orders={user.orders || []} currentUser={user} />
+                <TrackOrderView orders={orders} currentUser={user} />
               </div>
             </div>
           )}
