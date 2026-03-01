@@ -256,14 +256,18 @@ app.delete("/api/users/:id", authenticate, async (req, res) => {
 
 
 // --- ORDERS ---
-// Replace this in server.js:
 app.post("/api/orders", authenticate, async (req, res) => {
   try {
     const order = new Order({ ...req.body, userId: req.user.id });
     await order.save();
+    
+    // Calculate and award Faith Points (10 points per 100 Ksh)
+    const pointsToAdd = Math.floor(req.body.total / 10);
+    await User.findByIdAndUpdate(req.user.id, { $inc: { faithPoints: pointsToAdd } });
+
     res.status(201).json(order);
-  } catch (err) { // <-- Add 'err'
-    console.error("Order Error:", err); // <-- Log it so you can see why it failed
+  } catch (err) {
+    console.error("Order Error:", err);
     res.status(500).json({ message: "Order failed", error: err.message });
   }
 });
