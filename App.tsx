@@ -2263,9 +2263,10 @@ onUpdateUser={async (id: any, data: any) => {
 };
 
 // --- Sub Components ---
-const [showPicOptions, setShowPicOptions] = useState(false);
+
 
 const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
+const [showPicOptions, setShowPicOptions] = useState(false);
   const [editData, setEditData] = useState({ 
     name: user.name, 
     email: user.email, 
