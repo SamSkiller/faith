@@ -289,22 +289,29 @@ const searchResults = useMemo(() => {
 };
 
 const OrderCountdown = ({ orderDate, deliveryDays }: { orderDate: string, deliveryDays: number }) => {
-  const [timeLeft, setTimeLeft] = useState('');
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const target = new Date(orderDate).getTime() + (deliveryDays * 24 * 60 * 60 * 1000);
-      const now = new Date().getTime();
-      const diff = target - now;
-      if (diff <= 0) { setTimeLeft('EXPIRED'); return; }
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft(`${h}h ${m}m ${s}s`);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [orderDate, deliveryDays]);
-  return <span className="text-rose-500 font-bold ml-2 animate-pulse">{timeLeft}</span>;
-};
+    const [timeLeft, setTimeLeft] = useState('');
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const target = new Date(orderDate).getTime() + (deliveryDays * 24 * 60 * 60 * 1000);
+        const now = new Date().getTime();
+        const diff = target - now;
+        if (diff <= 0) { setTimeLeft('EXPIRED'); return; }
+        
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        let timeString = '';
+        if (d > 0) timeString += `${d}d `;
+        timeString += `${h}h ${m}m ${s}s`;
+        
+        setTimeLeft(timeString);
+      }, 1000);
+      return () => clearInterval(interval);
+    }, [orderDate, deliveryDays]);
+    return <span className="text-rose-500 font-bold ml-2 animate-pulse">{timeLeft}</span>;
+  };
 
 // --- Admin Dashboard Component ---
 const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onUpdateUser, onDeleteUser, onUpdateOrder, onBulkUpdate }: any) => {
@@ -315,7 +322,8 @@ const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onU
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-    
+
+    const [expandedStat, setExpandedStat] = useState<string | null>(null);
     // Orders Expand State
     const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
     const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
@@ -347,18 +355,33 @@ useEffect(() => {
   }
 }, [orders.length]);
   
-const stats = useMemo(() => ({
-    revenue: orders.reduce((s: number, o: any) => s + (o.total || 0), 0),
-    avgOrder: orders.length ? orders.reduce((s: number, o: any) => s + (o.total || 0), 0) / orders.length : 0,
+  const stats = useMemo(() => ({
+    revenue: orders.filter((o:any)=> o.status !== 'Cancelled').reduce((s: number, o: any) => s + (o.total || 0), 0),
+    avgOrder: orders.filter((o:any)=> o.status !== 'Cancelled').length ? orders.filter((o:any)=> o.status !== 'Cancelled').reduce((s: number, o: any) => s + (o.total || 0), 0) / orders.filter((o:any)=> o.status !== 'Cancelled').length : 0,
     activeUsers: users.length,
     inventoryValue: products.reduce((s: number, p: any) => s + ((p.price || 0) * (p.stock || 0)), 0)
   }), [orders, users, products]);
 
-  const salesTrend = useMemo(() => [
-    { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
-    { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 },
-    { name: 'Sun', sales: 3490 }
-  ], []);
+  const salesTrend = useMemo(() => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push({
+        date: d.toLocaleDateString(),
+        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        sales: 0
+      });
+    }
+
+    orders.forEach((o: any) => {
+      if (o.status === 'Cancelled') return;
+      const oDate = new Date(o.date || o.createdAt).toLocaleDateString();
+      const dayObj = days.find(d => d.date === oDate);
+      if (dayObj) dayObj.sales += (o.total || 0);
+    });
+    return days;
+  }, [orders]);
 
 const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
@@ -447,21 +470,129 @@ const handleSaveProduct = (e: React.FormEvent) => {
 
 {tab === 'analytics' && (
          <div className="space-y-6 md:space-y-10 animate-fade-in w-full overflow-hidden">
-            {/* Stats Grid - Now responsive for mobile (1 col), tablet (2 cols), and desktop (4 cols) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
                {[
-                 { label: 'Total Revenue', val: `Ksh ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500' },
-                 { label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500' },
-                 { label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500' },
-                 { label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500' }
+                 { id: 'revenue', label: 'Total Revenue', val: `Ksh ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500', desc: 'Click to view breakdown' },
+                 { id: 'users', label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500', desc: 'Click to view demographics' },
+                 { id: 'aov', label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500', desc: 'Click to view extremes' },
+                 { id: 'pool', label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500', desc: 'Click to view inventory split' }
                ].map((s: any, i: number) => (
-                 <div key={i} className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-100 dark:border-slate-800 shadow-xl flex flex-col justify-center">
-                    <s.icon className={`w-6 h-6 md:w-8 md:h-8 mb-4 md:mb-6 ${s.color}`} />
+                 <div key={i} onClick={() => setExpandedStat(s.id)} className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-100 dark:border-slate-800 shadow-xl flex flex-col justify-center cursor-pointer hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all group">
+                    <s.icon className={`w-6 h-6 md:w-8 md:h-8 mb-4 md:mb-6 ${s.color} group-hover:scale-110 transition-transform`} />
                     <p className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-widest mb-1 md:mb-2">{s.label}</p>
                     <h4 className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate">{s.val}</h4>
+                    <p className="text-[8px] font-mono text-slate-400 mt-2 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-6">{s.desc}</p>
                  </div>
                ))}
             </div>
+
+            {/* EXPANDED MODAL OVERLAY */}
+            {expandedStat && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setExpandedStat(null)}>
+                 <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[48px] shadow-2xl border border-slate-100 dark:border-slate-800 max-w-4xl w-full max-h-[85vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setExpandedStat(null)} className="absolute top-6 right-6 p-3 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-500 hover:text-white transition-colors">
+                      <X className="w-5 h-5" />
+                    </button>
+                    
+                    {expandedStat === 'revenue' && (
+                      <>
+                         <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><DollarSign className="text-emerald-500 w-8 h-8"/> Revenue Ledger</h3>
+                         <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
+                            {orders.filter((o:any) => o.status !== 'Cancelled').sort((a:any,b:any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((o:any) => (
+                              <div key={o._id || o.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                 <div>
+                                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || 'Unknown Entity'}</p>
+                                   <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase mt-1">ID: {(o._id || o.id).slice(-6)} • {new Date(o.date).toLocaleString()}</p>
+                                 </div>
+                                 <span className="font-black text-emerald-500 text-lg">Ksh {o.total?.toLocaleString()}</span>
+                              </div>
+                            ))}
+                         </div>
+                      </>
+                    )}
+
+                    {expandedStat === 'users' && (
+                       <>
+                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Users className="text-sky-500 w-8 h-8"/> Citizens Demographics</h3>
+                          <div className="grid grid-cols-2 gap-4 mb-6 shrink-0">
+                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='faith@faith').length}</p></div>
+                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Active Customers</p><p className="text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='faith@faith').length}</p></div>
+                          </div>
+                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
+                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-4">Recent Registrations</p>
+                             {users.sort((a:any,b:any) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime()).slice(0, 20).map((u:any) => (
+                                <div key={u._id || u.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3">
+                                   <div className="flex items-center gap-4">
+                                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                                        {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                                      </div>
+                                      <div>
+                                        <p className="font-bold text-sm text-slate-900 dark:text-white">{u.name}</p>
+                                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">{u.email}</p>
+                                      </div>
+                                   </div>
+                                   <span className="text-xs font-mono font-bold text-slate-400">{new Date(u.joinedAt).toLocaleDateString()}</span>
+                                </div>
+                             ))}
+                          </div>
+                       </>
+                    )}
+
+                    {expandedStat === 'aov' && (
+                       <>
+                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><TrendingUp className="text-rose-500 w-8 h-8"/> Average Order Value Metrics</h3>
+                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
+                             <div className="p-10 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] text-center mb-8 shadow-inner">
+                                <p className="text-[10px] text-slate-500 uppercase font-black mb-3 tracking-widest">Mathematical Average</p>
+                                <p className="text-5xl font-black italic text-rose-500 drop-shadow-md">Ksh {Math.round(stats.avgOrder).toLocaleString()}</p>
+                                <p className="text-[10px] text-slate-400 mt-4 uppercase font-bold">Calculated across {orders.filter((o:any)=>o.status!=='Cancelled').length} verified transactions.</p>
+                             </div>
+                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Extremes (Highest vs Lowest)</p>
+                             {orders.filter((o:any)=>o.status!=='Cancelled').length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                   <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-emerald-500 hover:shadow-lg transition-shadow">
+                                      <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Maximum Record</p>
+                                      <span className="font-black text-emerald-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).total?.toLocaleString()}</span>
+                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).userName || 'Unknown Entity'}</p>
+                                   </div>
+                                   <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-rose-500 hover:shadow-lg transition-shadow">
+                                      <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Minimum Record</p>
+                                      <span className="font-black text-rose-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).total?.toLocaleString()}</span>
+                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).userName || 'Unknown Entity'}</p>
+                                   </div>
+                                </div>
+                             ) : <p className="text-center text-slate-500 py-10 font-mono">No verified orders data.</p>}
+                          </div>
+                       </>
+                    )}
+
+                    {expandedStat === 'pool' && (
+                       <>
+                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Gem className="text-amber-500 w-8 h-8"/> Inventory Pool Distribution</h3>
+                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
+                             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4 mt-2 px-2">
+                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Entity & Base Asset</span>
+                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pool Total Value (Ksh)</span>
+                             </div>
+                             {products.map((p:any) => ({ ...p, poolValue: (p.price || 0) * (p.stock || 0) })).sort((a:any,b:any) => b.poolValue - a.poolValue).map((p:any) => (
+                                <div key={p.id || p._id} className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                   <div className="flex items-center gap-4">
+                                      <img src={p.image} className="w-12 h-14 rounded-xl object-cover shadow-sm"/>
+                                      <div>
+                                         <p className="font-bold text-sm text-slate-900 dark:text-white w-32 md:w-64 truncate">{p.name}</p>
+                                         <p className="text-[10px] text-slate-500 font-mono font-bold mt-1">Vol: {p.stock} • Base: {p.price.toLocaleString()}</p>
+                                      </div>
+                                   </div>
+                                   <span className="font-black text-amber-500 text-lg">{(p.poolValue).toLocaleString()}</span>
+                                </div>
+                             ))}
+                          </div>
+                       </>
+                    )}
+                 </div>
+              </div>
+            )}
             
             {/* Chart Container - Padding and height adjusted for mobile */}
             <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full">
