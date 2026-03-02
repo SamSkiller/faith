@@ -315,9 +315,22 @@ const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onU
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
-  
-  const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
+    
+    // Orders Expand State
+    const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+    const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
+
+    // Users Expand & View State
+    const [expandedUsers, setExpandedUsers] = useState<string[]>([]);
+    const toggleUser = (id: string) => setExpandedUsers(prev => prev.includes(id) ? prev.filter(uId => uId !== id) : [...prev, id]);
+    const [viewingImage, setViewingImage] = useState<string | null>(null);
+
+    // Clear new users badge when tab is visited
+    useEffect(() => {
+      if (tab === 'users') {
+        localStorage.setItem('admin_users_viewed', Date.now().toString());
+      }
+    }, [tab]);
 
   const prevOrderCount = useRef(orders.length);
 
@@ -415,7 +428,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                 { id: 'products', label: 'Products', icon: Package },
                 { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered').length },
-                { id: 'users', label: 'Users Directory', icon: Users }
+                { id: 'users', label: 'Users', icon: Users, badge: users.filter((u:any) => new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0)).length }
               ].map(t => (
                 <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
                   <t.icon className="w-3.5 h-3.5" /> {t.label}
@@ -542,7 +555,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     </div>
 
                   
-<textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                      <textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
                     <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
                        (editingProduct ? editingProduct.isHot : newProduct.isHot) 
@@ -625,7 +638,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {orders.map((o: any) => {
               const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
-              const isDelivered = o.status === 'Delivered';
+              const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
               const isExpanded = expandedOrders.includes(o._id || o.id);
 
               return (
@@ -635,7 +648,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <div className="p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
                     <div className="flex items-center gap-4">
                        <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
-                         {o.userProfilePic ? <img src={o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
+                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
                        </div>
                       <div>
                          <p className="font-bold text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2">
@@ -677,7 +690,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
                       <div className="flex flex-col">
                          <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
-                         <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">{o.deliveryMethod || 'Standard Delivery'}</span>
+                          <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">
+                            {o.deliveryMethod || 'Standard Delivery'} - {o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3)} Days
+                          </span>
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
@@ -693,7 +708,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   )}
                   <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
                     <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
-                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><MapPin className="w-3 h-3 text-rose-400"/> Drop-off Zone: {o.address || 'Data Missing'}</p>
+                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2">
+                      <MapPin className="w-3 h-3 text-rose-400"/> Drop-off Zone: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}
+                    </p>
                   </div>
                 </div>
             
@@ -731,122 +748,147 @@ const handleSaveProduct = (e: React.FormEvent) => {
         </div>
       )}
 
-      {tab === 'users' && (
-        <div className="space-y-8 animate-fade-in">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-mono">Citizen Directory</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedUsers.map((u: any, index: number) => (
-              <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
-                
-                {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
-                
-                <div className="flex items-center gap-4 mb-6 relative z-10">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0">
-                    {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate font-mono">
-                      {u.name} 
-                      {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
-                    </h4>
-                    <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
-                    {/* ADDED ROLE BADGE */}
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                      u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
-                      u.role === 'admin' 
-                        ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' 
-                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                    }`}>
-                      {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
-                    </span>
-                  </div>
-                </div>
-                
-                {u.email !== 'faith@faith' ? (
-                  <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
-                    <button 
-                      onClick={() => {
-                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions.");
-                        onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })
-                      }} 
-                      className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                    >
-                      {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
-                    </button>
+                {tab === 'users' && (
+                  <div className="space-y-8 animate-fade-in relative">
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-mono">Users Directory</h3>
                     
-                    <button 
-                      onClick={() => {
-                        if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users.");
-                        onDeleteUser(u._id || u.id)
-                      }} 
-                      className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="pt-4 border-t border-slate-100 dark:border-white/5 text-center relative z-10">
-                    <p className="font-mono text-[9px] font-black uppercase text-amber-500 tracking-[0.3em] flex items-center justify-center gap-2">
-                      <ShieldAlert className="w-3 h-3" /> Supreme Admin
-                    </p>
+                    {/* Full Screen Image Viewer Modal */}
+                    {viewingImage && (
+                      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90" onClick={() => setViewingImage(null)}>
+                        <button className="absolute top-6 right-6 p-2 bg-white/10 rounded-full text-white hover:bg-white/20"><X className="w-6 h-6" /></button>
+                        <img src={viewingImage} className="max-w-full max-h-full object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {sortedUsers.map((u: any, index: number) => {
+                        const isNewUser = new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0) - 5000;
+                        const isExpanded = expandedUsers.includes(u.id || u._id);
+                        const userTotal = orders.filter((o:any) => o.userId === (u.id || u._id)).reduce((sum:number, o:any) => sum + o.total, 0);
+
+                        return (
+                        <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
+                          {isNewUser && <div className="absolute top-4 right-4 z-20 px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider rounded-md animate-pulse">New</div>}
+                          {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
+                          
+                          <div className="flex items-center gap-4 mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
+                            <div 
+                              className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0 cursor-zoom-in"
+                              onClick={(e) => { e.stopPropagation(); if(u.profilePic) setViewingImage(u.profilePic); }}
+                            >
+                              {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate font-mono">
+                                {u.name} 
+                                {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
+                              </h4>
+                              <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
+                              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                                u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
+                                u.role === 'admin' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                              }`}>
+                                {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
+                              </span>
+                            </div>
+                            <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          </div>
+
+                          {/* Expandable Details Box */}
+                          {isExpanded && (
+                            <div className="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-slate-100 dark:border-white/5 animate-fade-in relative z-10">
+                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Phone:</span> <span className="text-slate-900 dark:text-white">{u.phoneNumber || 'N/A'}</span></p>
+                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Drop-off:</span> <span className="text-slate-900 dark:text-white truncate max-w-[120px]" title={u.address}>{u.address || 'N/A'}</span></p>
+                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Joined:</span> <span className="text-slate-900 dark:text-white">{new Date(u.joinedAt).toLocaleDateString()}</span></p>
+                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Purchases:</span> <span className="text-emerald-500 font-black">Ksh {userTotal.toLocaleString()}</span></p>
+                            </div>
+                          )}
+                          
+                          {u.email !== 'faith@faith' && (
+                            <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
+                              <button 
+                                onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
+                                className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              >
+                                {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
+                              </button>
+                              <button 
+                                onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); onDeleteUser(u._id || u.id) }} 
+                                className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )})}
+                    </div>
                   </div>
                 )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 // --- Auth View ---
-const AuthView = ({ onAuthSuccess }: any) => {
+const AuthView = ({ onAuthSuccess, showToast }: any) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const endpoint = isLogin ? "/auth/login" : "/auth/register";
-  
-  let authData = null;
-
-  // ONLY catch network/server errors here
-  try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      return showToast("Passwords do not match.", "error");
+    }
     
-    authData = await res.json();
+    setIsLoading(true);
+    const endpoint = isLogin ? "/auth/login" : "/auth/register";
+    let authData = null;
 
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      authData = await res.json();
       if (!res.ok) {
-    return showToast(authData.message || "Identity verification failed.", "error"); // REPLACED ALERT
-  }
-} catch (err) {
-  return showToast("Sanctuary server is offline. Check connection.", "error"); // REPLACED ALERT
-}
+        setIsLoading(false);
+        return showToast(authData.message || "Identity verification failed.", "error");
+      }
+    } catch (err) {
+      setIsLoading(false);
+      return showToast("Sanctuary server is offline. Check connection.", "error");
+    }
 
-  if (authData) {
-    onAuthSuccess(authData.user, authData.token);
-  }
-};
+    if (authData) {
+      onAuthSuccess(authData.user, authData.token);
+    }
+  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 p-12 rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl"></div>
         <div className="w-20 h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-8 h-8" /></div>
-        <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-4">{isLogin ? 'Access Identity' : 'Register Identity'}</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm italic mb-10 font-medium">Sync your persona with the sanctuary.</p>
+        <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-4">{isLogin ? 'Login' : 'Identity Registration'}</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm italic mb-10 font-medium">
+          {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
+        </p>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Name Protocol" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
-          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Email Channel" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Security Key" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
-          <button type="submit" className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95">Verify & Initialize</button>
+          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+          {!isLogin && <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
+          
+          <button type="submit" disabled={isLoading} className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70">
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+            {isLoading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
+          </button>
         </form>
-        <button onClick={() => setIsLogin(!isLogin)} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors tracking-widest">{isLogin ? "New visionary? Create identity" : "Existing citizen? Access sanctuary"}</button>
+        <button onClick={() => {setIsLogin(!isLogin); setFormData({name:'', email:'', password:'', confirmPassword:''});}} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors tracking-widest">
+          {isLogin ? "Don't have an account? Signup" : "Already have an account? Log in."}
+        </button>
       </div>
     </div>
   );
@@ -865,42 +907,36 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
 
-  useEffect(() => {
-    const loadAI = async () => {
-      setLoading(true);
-      
-      // Fallback: Use database description immediately to save massive AI tokens
-      const dbDescription = product.description || "An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance.";
+        useEffect(() => {
+          const loadAI = async () => {
+            setLoading(true);
+            const dbDescription = product.description || "An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance.";
+            
+            // Use dynamic cache key with timestamp fallback to bust Edge cache
+            const uniqueCacheKey = `${product.id}-${product.name}`;
+            
+            if (aiMemoryCache.has(uniqueCacheKey)) {
+              setCopy(dbDescription);
+              setTips(aiMemoryCache.get(uniqueCacheKey));
+              setLoading(false);
+              return;
+            }
 
-      if (aiMemoryCache.has(product.id)) {
-        setCopy(dbDescription);
-        setTips(aiMemoryCache.get(product.id));
-        setLoading(false);
-        return;
-      }
-
-      try {
-
-          const t = await getStyleTips(product.name);
-          
-          aiMemoryCache.set(product.id, t);
-          
-          setCopy(dbDescription); 
-          setTips(t);
-      } catch (err) {
-          console.error("AI Error:", err);
-          setCopy(dbDescription);
-          setTips([
-            "Pair with minimalistic accessories to maintain a clean profile.",
-            "Ideal for high-end evening events or exclusive sanctuary gatherings.",
-            "Maintain fabric integrity by avoiding direct harsh elements."
-          ]);
-      } finally {
-          setLoading(false);
-      }
-    };
-    loadAI();
-  }, [product]);
+            try {
+                // Pass randomized parameter slightly internally to bypass strict Edge caching
+                const t = await getStyleTips(`${product.name} (ID:${Math.floor(Math.random()*1000)})`);
+                aiMemoryCache.set(uniqueCacheKey, t);
+                setCopy(dbDescription); 
+                setTips(t);
+            } catch (err) {
+                setCopy(dbDescription);
+                setTips(["Pair with minimalistic accessories to maintain a clean profile.", "Ideal for high-end evening events.", "Maintain fabric integrity by avoiding direct harsh elements."]);
+            } finally {
+                setLoading(false);
+            }
+          };
+          loadAI();
+        }, [product]);
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -925,7 +961,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
  return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 animate-fade-in">
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-2xl" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm" onClick={onClose}></div>
       
       {/* Modal Container */}
       <div className="relative w-full max-w-6xl m-auto bg-white dark:bg-slate-900 h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[64px] shadow-2xl overflow-hidden flex flex-row border border-white/10">
@@ -983,7 +1019,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                    ))}
                 </div>
 
-<div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+                  <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
                   
                   <div className="flex justify-between items-end mb-6">
                     <div>
@@ -1016,8 +1052,8 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
                               <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">
-                                 {r.userName || 'Verified Citizen'}
-                              </span>
+                                  {r.userName || 'Verified Citizen'}
+                                </span>
                               <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
                               <div className="flex gap-0.5 text-amber-400 ml-auto drop-shadow-[0_0_5px_rgba(251,191,36,0.3)] shrink-0">
                                 {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
@@ -1069,12 +1105,12 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                       /* EDIT/CREATE MODE: User is typing a new comment or editing an old one */
                       <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6 relative z-10">
                         <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Recalibrate Resonance' : 'Transmit Resonance'}
+                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Edit Comment' : 'Comment Transmission'}
                         </h5>
                         
                         <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                          <span className="font-mono text-[9px] uppercase text-slate-500 tracking-widest">Signal Strength:</span>
-                          <div className="flex gap-2">
+                          <span className="font-mono text-[9px] uppercase text-slate-500 tracking-widest shrink-0">Rating:</span>
+                          <div className="flex flex-wrap gap-1 md:gap-2">
                             {[1, 2, 3, 4, 5].map(s => (
                               <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform hover:scale-125 active:scale-90">
                                 <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]' : 'text-slate-300 dark:text-slate-700'}`} />
@@ -1085,7 +1121,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                         
                         <textarea 
                           required
-                          placeholder="Initialize thought sequence..."
+                          placeholder="Enter your comment..."
                           className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10 focus:border-rose-400 dark:focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-slate-400 shadow-inner"
                           value={reviewComment}
                           onChange={(e) => setReviewComment(e.target.value)}
@@ -1098,7 +1134,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                             </button>
                           )}
                           <button type="submit" className="flex-1 py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] active:scale-95">
-                            {isEditingReview ? 'Commit Recalibration' : 'Initialize Transmission'}
+                            {isEditingReview ? 'Commit Changes' : 'Transmit Comment'}
                           </button>
                         </div>
                       </form>
@@ -1263,40 +1299,47 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
   const [loading, setLoading] = useState(false);
   const total = useMemo(() => cart.reduce((s: number, i: any) => s + (i.price * i.quantity), 0) + shipping.price, [cart, shipping]);
   
-  const handlePay = async () => {
-    if (!phoneNumber) return alert('Protocol Transmission Failure: Phone number missing.'); 
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('faith_token')}`
-        },
-        body: JSON.stringify({ phone: phoneNumber, amount: total })
-      });
-      
-      const data = await res.json();
-      if (data.success) {
-        onComplete({ 
-          id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-          userId: currentUser.id || currentUser._id,
-          items: cart, 
-          total, 
-          shippingMethod: shipping.name, 
-          status: 'Processing', 
-          date: new Date().toISOString(), 
-          phoneNumber 
+  const [awaitingMpesa, setAwaitingMpesa] = useState(false);
+
+    const handlePay = async () => {
+      if (!phoneNumber) return alert('Protocol Transmission Failure: Phone number missing.'); 
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('faith_token')}`
+          },
+          body: JSON.stringify({ phone: phoneNumber, amount: total })
         });
-      } else { 
-        alert(data.message); 
-        setLoading(false); 
+        
+        const data = await res.json();
+        if (data.success) {
+          setAwaitingMpesa(true); // Stop auto-completion. Wait for user.
+          setLoading(false);
+        } else { 
+          alert(data.message); 
+          setLoading(false); 
+        }
+      } catch (e) {
+        alert("System sync error. Re-try in T-minus 10 seconds.");
+        setLoading(false);
       }
-    } catch (e) {
-      alert("System sync error. Re-try in T-minus 10 seconds.");
-      setLoading(false);
-    }
-  };
+    };
+
+    const confirmPaymentCompletion = () => {
+      onComplete({ 
+        id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+        userId: currentUser.id || currentUser._id,
+        items: cart, 
+        total, 
+        shippingMethod: shipping.name, 
+        status: 'Processing', 
+        date: new Date().toISOString(), 
+        phoneNumber 
+      });
+    };
 
 if (currentUser && !currentUser.address) {
   return (
@@ -1354,10 +1397,21 @@ if (currentUser && !currentUser.address) {
                       </div>
                    </div>
 
-                   <button onClick={handlePay} disabled={loading} className="w-full py-8 bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-4 shadow-2xl hover:bg-rose-700 transition-all active-scale disabled:opacity-50">
-                     {loading ? <Loader2 className="animate-spin w-6 h-6" /> : <Shield className="w-6 h-6" />} 
-                     {loading ? 'Synchronizing Transaction...' : 'Initiate Secure Payment'}
-                   </button>
+                    {!awaitingMpesa ? (
+                      <button onClick={handlePay} disabled={loading} className="w-full py-8 bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-4 shadow-2xl hover:bg-rose-700 transition-all active-scale disabled:opacity-50">
+                        {loading ? <Loader2 className="animate-spin w-6 h-6" /> : <Shield className="w-6 h-6" />} 
+                        {loading ? 'Synchronizing Transaction...' : 'Initiate Secure Payment'}
+                      </button>
+                    ) : (
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-[32px] border border-emerald-200 dark:border-emerald-800 text-center animate-fade-in">
+                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mx-auto mb-4" />
+                        <h4 className="text-emerald-600 dark:text-emerald-400 font-bold mb-2">Payment Prompt Sent</h4>
+                        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mb-6">Please check your phone, enter your M-Pesa PIN, and click the button below once payment is successful.</p>
+                        <button onClick={confirmPaymentCompletion} className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-black uppercase text-[10px] shadow-lg hover:bg-emerald-600 transition-all">
+                          I Have Paid (Confirm)
+                        </button>
+                      </div>
+                    )}
                 </div>
              </div>
           </div>
@@ -1424,8 +1478,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     setToast({ message, type });
   };
 
-  // NEW EFFECT: Debounce Search
-  // This prevents the app from filtering products on every single keystroke, improving performance
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -1442,7 +1495,6 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
 
   const sync = (key: string, data: any) => localStorage.setItem(key, JSON.stringify(data));
 
-  // 2. FIX PHONE BACK BUTTON ROUTING
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window.history.pushState({ view }, '', `#${view}`);
@@ -1513,7 +1565,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
       };
 
   const handleAuth = (user: User, token?: string) => {
-    // Standardize the ID format
+
     const normalizedUser = { 
       ...user, 
       id: (user as any)._id || user.id 
@@ -1524,7 +1576,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     if (token) localStorage.setItem("faith_token", token);
     
     setView("home");
-    // 2. THIS WILL NOW WORK WITHOUT CRASHING!
+
     checkBackendSync();
   };
 
@@ -1554,26 +1606,41 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return result;
   }, [products, selectedCategory, sortBy, searchQuery]);
 
-  useEffect(() => {
-    const session = localStorage.getItem('faith_session_active');
-    if (session) setCurrentUser(JSON.parse(session));
+// For New Product Badging
+  const [sessionStartTime] = useState(() => Number(localStorage.getItem('faith_last_visit')) || (Date.now() - 86400000));
+  
+    useEffect(() => {
+      // Record visit to clear "NEW" badges on next refresh
+      const visitTimer = setTimeout(() => localStorage.setItem('faith_last_visit', Date.now().toString()), 5000);
 
-    localStorage.removeItem('faith_products_db');
-    localStorage.removeItem('faith_orders_db');
-    localStorage.removeItem('faith_users_db');
+      const session = localStorage.getItem('faith_session_active');
+      if (session) setCurrentUser(JSON.parse(session));
 
-    setProducts(INITIAL_PRODUCTS);
-    
-    // 🔹 Hero interval
-    const interval = setInterval(() => {
-      setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
-    }, 7000);
+      localStorage.removeItem('faith_products_db');
+      localStorage.removeItem('faith_orders_db');
+      localStorage.removeItem('faith_users_db');
 
-    // 3. THIS ALSO WORKS!
-    checkBackendSync();
+      setProducts(INITIAL_PRODUCTS);
+      
+      // 🔹 Hero interval
+      const interval = setInterval(() => {
+        setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
+      }, 7000);
 
-    return () => clearInterval(interval);
-  }, []);
+      // Initial Sync
+      checkBackendSync();
+      
+      // Auto-Refresh Sync for both Admin and Customers every 15 seconds
+      const syncInterval = setInterval(() => {
+        checkBackendSync();
+      }, 15000);
+
+      return () => {
+        clearInterval(interval);
+        clearInterval(syncInterval);
+        clearTimeout(visitTimer);
+      };
+    }, []);
 
 
 
@@ -1750,10 +1817,10 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                     <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-full shadow-sm text-slate-400">
                       <ArrowUpDown className="w-4 h-4" />
                       <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white">
-                        <option value="default">Sort: Default</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="rating">Top Rated</option>
+                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="default">Sort: Default</option>
+                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-asc">Price: Low to High</option>
+                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-desc">Price: High to Low</option>
+                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="rating">Top Rated</option>
                       </select>
                     </div>
                   </div>
@@ -1766,12 +1833,18 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                       <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] hover:-translate-y-2 transition-all duration-500 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
                          <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-lg">
                             
-                            {p.isHot && (
-                               <div className="absolute top-6 left-6 z-10 px-4 py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-2">
-                                  <Sparkles className="w-3 h-3 animate-pulse" /> Hot
-                               </div>
-                            )}
-
+                            <div className="absolute top-6 left-6 z-10 flex flex-col gap-2 items-start">
+                              {new Date(p.createdAt || p.date || Date.now()).getTime() > sessionStartTime && (
+                                <div className="px-4 py-2 bg-emerald-500/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)] animate-pulse">
+                                    New
+                                </div>
+                              )}
+                              {p.isHot && (
+                                <div className="px-4 py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-2">
+                                    <Sparkles className="w-3 h-3 animate-pulse" /> Hot
+                                </div>
+                              )}
+                            </div>
                             <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
                             <div className="absolute top-6 right-6 flex flex-col gap-2 z-20">
                               <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/80 text-white opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
@@ -2074,7 +2147,7 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
              <div className="rotating-border-container mx-auto w-24 h-24 mb-4 relative group cursor-pointer"
                   onClick={() => document.getElementById('profilePicInput').click()}>
                 <input type="file" id="profilePicInput" className="hidden" accept="image/*" onChange={async (e) => {
-                    const file = e.target.files[0];
+                    const file = e.target.files?.[0];
                     if (file) {
                       const url = await uploadToCloudinary(file);
                       if (url) onUpdateUser(user.id || user._id, { profilePic: url });
