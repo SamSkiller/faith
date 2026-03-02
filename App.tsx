@@ -328,7 +328,10 @@ const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onU
     // Clear new users badge when tab is visited
     useEffect(() => {
       if (tab === 'users') {
-        localStorage.setItem('admin_users_viewed', Date.now().toString());
+        const timer = setTimeout(() => {
+          localStorage.setItem('admin_users_viewed', Date.now().toString());
+        }, 5000); // Wait 5 seconds before marking as viewed
+        return () => clearTimeout(timer);
       }
     }, [tab]);
 
@@ -427,7 +430,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
               {[
                 { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                 { id: 'products', label: 'Products', icon: Package },
-                { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered').length },
+                { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered' && o.status !== 'Cancelled').length },
                 { id: 'users', label: 'Users', icon: Users, badge: users.filter((u:any) => new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0)).length }
               ].map(t => (
                 <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -492,15 +495,15 @@ const handleSaveProduct = (e: React.FormEvent) => {
        {tab === 'products' && (
          <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Inventory Management</h3>
+               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Product Management</h3>
                <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="px-8 py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] flex items-center gap-2 shadow-neon hover:scale-105 transition-all">
-                  {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {showAddForm ? 'Cancel' : 'Register New Asset'}
+                  {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {showAddForm ? 'Cancel' : 'Register New Product'}
                </button>
             </div>
 
             {(showAddForm || editingProduct) && (
               <div className="bg-white dark:bg-slate-900 p-10 rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in mb-10">
-                 <h4 className="text-xl font-bold mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Entity' : 'New Entity Protocol'}</h4>
+                 <h4 className="text-xl font-bold mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
                  <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <input required className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
                     <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
@@ -717,16 +720,21 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 {/* Admin Update Controls */}
                       {!isDelivered && (
                         <div className="flex items-center gap-4 relative z-10">
-                           <select 
-                              value={o.status || 'Processing'} 
-                              onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
-                              className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white p-4 rounded-2xl text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors appearance-none border border-slate-200 dark:border-white/10"
-                           >
-                              <option value="Processing">Set: Processing</option>
-                              <option value="Shipped">Set: Shipped</option>
-                              <option value="Delivered">Set: Delivered</option>
-                              <option value="Cancelled">Abort Protocol</option>
-                           </select>
+                          <select 
+                            value={o.status || 'Processing'} 
+                            onChange={(e) => {
+                              if (e.target.value === 'Cancelled') {
+                                if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+                              }
+                              onUpdateOrder(o._id || o.id, { status: e.target.value });
+                            }}
+                            className={`flex-1 ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-4 rounded-2xl text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
+                          >
+                            <option value="Processing">Set: Processing</option>
+                            <option value="Shipped">Set: Shipped</option>
+                            <option value="Delivered">Set: Delivered</option>
+                            <option value="Cancelled">Cancel Order</option>
+                          </select>
                            
                            {/* Modern Sync Button */}
                            <button onClick={() => {
@@ -805,20 +813,24 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           )}
                           
                           {u.email !== 'faith@faith' && (
-                            <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
-                              <button 
-                                onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
-                                className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-600 dark:text-slate-300' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                              >
-                                {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
-                              </button>
-                              <button 
-                                onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); onDeleteUser(u._id || u.id) }} 
-                                className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-slate-100 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+
+                          <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
+                            <button 
+                              onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
+                              className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                            >
+                              {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
+                            </button>
+                            <button 
+                              onClick={() => { 
+                                if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); 
+                                if (window.confirm(`Are you sure you want to completely banish ${u.name}?`)) onDeleteUser(u._id || u.id) 
+                              }} 
+                              className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                           )}
                         </div>
                       )})}
@@ -878,8 +890,9 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
           <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
-          {!isLogin && <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
+          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          
+          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
           
           <button type="submit" disabled={isLoading} className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
@@ -924,7 +937,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
 
             try {
                 // Pass randomized parameter slightly internally to bypass strict Edge caching
-                const t = await getStyleTips(`${product.name} (ID:${Math.floor(Math.random()*1000)})`);
+                const t = await getStyleTips(`${product.name}`);
                 aiMemoryCache.set(uniqueCacheKey, t);
                 setCopy(dbDescription); 
                 setTips(t);
@@ -1052,8 +1065,8 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
                               <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">
-                                  {r.userName || 'Verified Citizen'}
-                                </span>
+                                {r.userName || r.name || 'Verified Customer'}
+                              </span>
                               <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
                               <div className="flex gap-0.5 text-amber-400 ml-auto drop-shadow-[0_0_5px_rgba(251,191,36,0.3)] shrink-0">
                                 {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
@@ -1257,34 +1270,34 @@ const TrackOrderView = ({ orders, currentUser }: any) => {
 
   return (
     <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
-       <h2 className="text-6xl font-serif italic font-bold text-slate-900 dark:text-white mb-16">Logistics Trace</h2>
-       {userOrders.length === 0 ? <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[64px] italic text-slate-500 font-bold">No active transmissions.</div> : (
+       <h2 className="text-4xl md:text-6xl font-serif italic font-bold text-slate-900 dark:text-white mb-10 md:mb-16">Orders View</h2>
+       {userOrders.length === 0 ? <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[64px] italic text-slate-500 font-bold">No active orders.</div> : (
          <div className="grid gap-10">
            {userOrders.map((order: any) => {
              const currentIdx = stages.indexOf(order.status);
              return (
                <div key={order._id || order.id} className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-200 dark:border-slate-800 shadow-xl relative overflow-hidden">
-                  <div className="flex flex-col md:flex-row justify-between mb-10">
+                  <div className="flex flex-col sm:flex-row justify-between mb-8 sm:mb-10 gap-4">
                      <div>
                         <span className="px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full">Protocol #{(order._id || order.id).slice(-6)}</span>
-                        <h4 className="text-2xl font-bold mt-4 text-slate-900 dark:text-white">{order.items.length} Payload(s)</h4>
+                        <h4 className="text-xl sm:text-2xl font-bold mt-4 text-slate-900 dark:text-white">{order.items.length} Payload(s)</h4>
                      </div>
-                     <div className="text-right">
-                        <p className="text-4xl font-black italic text-rose-600">Ksh {order.total.toLocaleString()}</p>
+                     <div className="sm:text-right">
+                        <p className="text-2xl sm:text-4xl font-black italic text-rose-600">Ksh {order.total.toLocaleString()}</p>
                      </div>
                   </div>
 
                   {/* Stage Progress Bar */}
-                  <div className="flex justify-between mb-4">
-                     {stages.map((s, i) => (
-                       <span key={s} className={`text-[9px] font-black uppercase ${i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{s}</span>
-                     ))}
-                  </div>
-                  <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
-                     {stages.map((_, i) => (
-                       <div key={i} className={`h-full flex-1 transition-all duration-1000 ${i <= currentIdx ? 'bg-emerald-500 shadow-neon' : 'bg-transparent'}`} />
-                     ))}
-                  </div>
+                <div className="flex justify-between mb-4">
+                   {stages.map((s, i) => (
+                     <span key={s} className={`text-[9px] font-black uppercase ${order.status === 'Cancelled' ? 'text-rose-500' : i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{order.status === 'Cancelled' && i === 0 ? 'Cancelled' : s}</span>
+                   ))}
+                </div>
+                <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
+                   {stages.map((_, i) => (
+                     <div key={i} className={`h-full flex-1 transition-all duration-1000 ${order.status === 'Cancelled' ? 'bg-rose-500' : i <= currentIdx ? 'bg-emerald-500 shadow-neon' : 'bg-transparent'}`} />
+                   ))}
+                </div>
                </div>
              )
            })}
@@ -1293,7 +1306,7 @@ const TrackOrderView = ({ orders, currentUser }: any) => {
     </div>
   );
 };
-const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
+const CheckoutView = ({ cart, currentUser, onComplete, onAuth, showToast }: any) => {
   const [shipping, setShipping] = useState(SHIPPING_OPTIONS[0]);
   const [phoneNumber, setPhoneNumber] = useState(currentUser?.phoneNumber || '');
   const [loading, setLoading] = useState(false);
@@ -1302,7 +1315,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
   const [awaitingMpesa, setAwaitingMpesa] = useState(false);
 
     const handlePay = async () => {
-      if (!phoneNumber) return alert('Protocol Transmission Failure: Phone number missing.'); 
+      if (!phoneNumber) return showToast('Payment Transaction Failure: Phone number missing.'); 
       setLoading(true);
       try {
         const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
@@ -1319,11 +1332,11 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth }: any) => {
           setAwaitingMpesa(true); // Stop auto-completion. Wait for user.
           setLoading(false);
         } else { 
-          alert(data.message); 
+          showToast(data.message, 'error');  
           setLoading(false); 
         }
       } catch (e) {
-        alert("System sync error. Re-try in T-minus 10 seconds.");
+        showToast("System sync error. Re-fresh page and try again", 'error');
         setLoading(false);
       }
     };
@@ -1554,10 +1567,19 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
             .catch(e => console.log("Order sync delayed"));
     
           if (localUser?.role === 'admin') {
-            fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
+            fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
               .then(r => r.ok ? r.json() : [])
-              .then(data => setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []))
-              .catch(e => console.log("User list sync delayed"));
+              .then(data => {
+                // Check if new orders arrived (for popup and sound globally)
+                if (prevOrdersRef.current.length > 0 && data.length > prevOrdersRef.current.length) {
+                  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                  audio.play().catch(()=>{});
+                  showToast('A new order has been placed!', 'success');
+                }
+                prevOrdersRef.current = data;
+                setOrders(data);
+              })
+              .catch(e => console.log("Order sync delayed"));
           }
         } catch (e) {
           setIsSynced(false);
@@ -1834,7 +1856,7 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
                          <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-lg">
                             
                             <div className="absolute top-6 left-6 z-10 flex flex-col gap-2 items-start">
-                              {new Date(p.createdAt || p.date || Date.now()).getTime() > sessionStartTime && (
+                              {(Date.now() - new Date(p.createdAt || p.date || Date.now()).getTime() < 86400000) && (
                                 <div className="px-4 py-2 bg-emerald-500/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)] animate-pulse">
                                     New
                                 </div>
@@ -1959,7 +1981,8 @@ onUpdateUser={async (id: any, data: any) => {
         {view === 'checkout' && (
           <CheckoutView 
             cart={cart} 
-            currentUser={currentUser} 
+            currentUser={currentUser}
+            showToast={showToast}
             onComplete={async (o: any) => { 
               // 1. We no longer save to localStorage mock DBs here.
               // 2. Format the order for MongoDB
@@ -2109,6 +2132,7 @@ onUpdateUser={async (id: any, data: any) => {
 };
 
 // --- Sub Components ---
+const [showPicOptions, setShowPicOptions] = useState(false);
 
 const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
   const [editData, setEditData] = useState({ 
@@ -2144,20 +2168,41 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
         {/* SIDEBAR - Hides on mobile when a tab is active */}
         <aside className={`w-full md:w-80 bg-slate-50 dark:bg-slate-950 p-6 md:p-10 flex-col shrink-0 overflow-y-auto border-r border-slate-200 dark:border-white/5 ${showMenuOnMobile ? 'flex' : 'hidden md:flex'}`}>
           <div className="text-center mb-8 mt-8 md:mt-0">
-             <div className="rotating-border-container mx-auto w-24 h-24 mb-4 relative group cursor-pointer"
-                  onClick={() => document.getElementById('profilePicInput').click()}>
-                <input type="file" id="profilePicInput" className="hidden" accept="image/*" onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const url = await uploadToCloudinary(file);
-                      if (url) onUpdateUser(user.id || user._id, { profilePic: url });
-                    }
-                }}/>
+            <div className="relative mx-auto w-24 h-24 mb-4">
+              <div className="rotating-border-container w-full h-full relative group cursor-pointer" onClick={() => setShowPicOptions(!showPicOptions)}>
                 <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex items-center justify-center relative shadow-inner">
                   {user.profilePic ? <img src={user.profilePic} className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" /> : <div className="font-black text-3xl">{user.name.charAt(0)}</div>}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 text-white transition-opacity"><Camera className="w-6 h-6"/></div>
                 </div>
-             </div>
+              </div>
+              
+              {showPicOptions && (
+                <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden z-[60] animate-fade-in">
+                  {user.profilePic && (
+                    <a href={user.profilePic} target="_blank" className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">View Image</a>
+                  )}
+                  <label className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                    Upload from Device
+                    <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                      setShowPicOptions(false);
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = await uploadToCloudinary(file);
+                        if (url) onUpdateUser(user.id || user._id, { profilePic: url });
+                      }
+                    }}/>
+                  </label>
+                  <button onClick={() => {
+                    setShowPicOptions(false);
+                    // Generates random IDs to fetch different images
+                    const randomId = Math.floor(Math.random() * 1000) + 1;
+                    onUpdateUser(user.id || user._id, { profilePic: `https://picsum.photos/id/${randomId}/400/400` });
+                  }} className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
+                    Generate Random Avatar
+                  </button>
+                </div>
+              )}
+            </div>
              <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white">{user.name}</h3>
              <p className="text-[9px] font-mono uppercase text-rose-500 mt-2 tracking-widest">{user.role}</p>
           </div>
@@ -2193,14 +2238,14 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
                     <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Faith Points</p>
                     <div className="flex items-center gap-2 md:gap-3">
                        <Gem className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
-                       <span className="text-4xl md:text-5xl font-black italic text-slate-900 dark:text-white">{user.faithPoints}</span>
+                       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white">{user.faithPoints}</span>
                     </div>
                   </div>
                   <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
                     <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Favorites</p>
                     <div className="flex items-center gap-2 md:gap-3">
                        <Heart className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
-                       <span className="text-4xl md:text-5xl font-black italic text-slate-900 dark:text-white">{wishlistProducts.length}</span>
+                       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white">{wishlistProducts.length}</span>
                     </div>
                   </div>
                </div>
@@ -2352,3 +2397,4 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
 export default function App() {
   return <MainContent />;
 }
+
