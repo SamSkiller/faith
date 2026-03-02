@@ -444,8 +444,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                    <Shield className="w-8 h-8" />
                 </div>
                 <div>
-                   <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Staff Vault</h2>
-                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1">Operational Command Center</p>
+                   <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Admin Dashboard</h2>
+                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1">Store Overview</p>
                 </div>
              </div>
           </div>
@@ -502,7 +502,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                             {orders.filter((o:any) => o.status !== 'Cancelled').sort((a:any,b:any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((o:any) => (
                               <div key={o._id || o.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                  <div>
-                                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || 'Unknown Entity'}</p>
+                                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || 'Unknown User'}</p>
                                    <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase mt-1">ID: {(o._id || o.id).slice(-6)} • {new Date(o.date).toLocaleString()}</p>
                                  </div>
                                  <span className="font-black text-emerald-500 text-lg">Ksh {o.total?.toLocaleString()}</span>
@@ -514,7 +514,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
 
                     {expandedStat === 'users' && (
                        <>
-                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Users className="text-sky-500 w-8 h-8"/> Citizens Demographics</h3>
+                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Users className="text-sky-500 w-8 h-8"/> User Demographics</h3>
                           <div className="grid grid-cols-2 gap-4 mb-6 shrink-0">
                              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='faith@faith').length}</p></div>
                              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Active Customers</p><p className="text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='faith@faith').length}</p></div>
@@ -544,7 +544,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><TrendingUp className="text-rose-500 w-8 h-8"/> Average Order Value Metrics</h3>
                           <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
                              <div className="p-10 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] text-center mb-8 shadow-inner">
-                                <p className="text-[10px] text-slate-500 uppercase font-black mb-3 tracking-widest">Mathematical Average</p>
+                                <p className="text-[10px] text-slate-500 uppercase font-black mb-3 tracking-widest">Calculated Average</p>
                                 <p className="text-5xl font-black italic text-rose-500 drop-shadow-md">Ksh {Math.round(stats.avgOrder).toLocaleString()}</p>
                                 <p className="text-[10px] text-slate-400 mt-4 uppercase font-bold">Calculated across {orders.filter((o:any)=>o.status!=='Cancelled').length} verified transactions.</p>
                              </div>
@@ -554,12 +554,12 @@ const handleSaveProduct = (e: React.FormEvent) => {
                                    <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-emerald-500 hover:shadow-lg transition-shadow">
                                       <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Maximum Record</p>
                                       <span className="font-black text-emerald-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).total?.toLocaleString()}</span>
-                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).userName || 'Unknown Entity'}</p>
+                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).userName || 'Unknown User'}</p>
                                    </div>
                                    <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-rose-500 hover:shadow-lg transition-shadow">
                                       <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Minimum Record</p>
                                       <span className="font-black text-rose-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).total?.toLocaleString()}</span>
-                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).userName || 'Unknown Entity'}</p>
+                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).userName || 'Unknown User'}</p>
                                    </div>
                                 </div>
                              ) : <p className="text-center text-slate-500 py-10 font-mono">No verified orders data.</p>}
@@ -569,10 +569,10 @@ const handleSaveProduct = (e: React.FormEvent) => {
 
                     {expandedStat === 'pool' && (
                        <>
-                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Gem className="text-amber-500 w-8 h-8"/> Inventory Pool Distribution</h3>
+                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Gem className="text-amber-500 w-8 h-8"/> Inventory Value Breakdown</h3>
                           <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
                              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4 mt-2 px-2">
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Entity & Base Asset</span>
+                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Product & Base Price</span>
                                 <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pool Total Value (Ksh)</span>
                              </div>
                              {products.map((p:any) => ({ ...p, poolValue: (p.price || 0) * (p.stock || 0) })).sort((a:any,b:any) => b.poolValue - a.poolValue).map((p:any) => (
@@ -597,7 +597,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
             {/* Chart Container - Padding and height adjusted for mobile */}
             <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full">
                <h3 className="text-lg md:text-xl font-bold mb-6 md:mb-10 text-slate-900 dark:text-white flex items-center gap-2 md:gap-3">
-                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Capital Trend Session
+                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Weekly Revenue Trend
                </h3>
                <div className="flex-1 w-full min-h-[200px]">
                  <ResponsiveContainer width="100%" height="100%">
@@ -721,13 +721,13 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr>
                         <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('name')}>
-                          <div className="flex items-center gap-2">Entity <ArrowUpDown className="w-3 h-3" /></div>
+                          <div className="flex items-center gap-2">Product <ArrowUpDown className="w-3 h-3" /></div>
                         </th>
                         <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('category')}>
-                          <div className="flex items-center gap-2">Sector <ArrowUpDown className="w-3 h-3" /></div>
+                          <div className="flex items-center gap-2">Category <ArrowUpDown className="w-3 h-3" /></div>
                         </th>
                         <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('price')}>
-                          <div className="flex items-center gap-2">Value <ArrowUpDown className="w-3 h-3" /></div>
+                          <div className="flex items-center gap-2">Price <ArrowUpDown className="w-3 h-3" /></div>
                         </th>
                         <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('stock')}>
                           <div className="flex items-center gap-2">Quantity <ArrowUpDown className="w-3 h-3" /></div>
@@ -843,7 +843,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
                     <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
                     <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-rose-400"/> Drop-off Zone: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}
+                      <MapPin className="w-3 h-3 text-rose-400"/> Delivery Address: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}
                     </p>
                   </div>
                 </div>
@@ -950,12 +950,12 @@ const handleSaveProduct = (e: React.FormEvent) => {
                               onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
                               className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
-                              {u.role === 'admin' ? 'Revoke Shield' : 'Elevate Privilege'}
+                              {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                             </button>
                             <button 
                               onClick={() => { 
                                 if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); 
-                                if (window.confirm(`Are you sure you want to completely banish ${u.name}?`)) onDeleteUser(u._id || u.id) 
+                                if (window.confirm(`Are you sure you want to delete ${u.name}?`)) onDeleteUser(u._id || u.id) 
                               }} 
                               className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
@@ -1019,11 +1019,13 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
           {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
-          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+          
+          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
           
           <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+
+          {!isLogin && <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
           
           <button type="submit" disabled={isLoading} className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
@@ -1154,7 +1156,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                 </div>
 
                 <div className="space-y-4">
-                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Directives</h4>
+                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Tips</h4>
                    {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
                      <div key={i} className="flex items-center gap-4 p-4 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
@@ -1168,13 +1170,13 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                   <div className="flex justify-between items-end mb-6">
                     <div>
                       <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                        <Terminal className="w-3 h-3 text-sky-400" /> Comment Section
+                        <Terminal className="w-3 h-3 text-sky-400" /> Customer Reviews
                       </h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Comment(s)</p>
                     </div>
                     {product.reviews?.length > 2 && (
                       <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors border-b border-rose-500/30 pb-0.5">
-                        {showAllComments ? '[ COLLAPSE LOG ]' : '[ EXPAND LOG ]'}
+                        {showAllComments ? '[ SHOW LESS ]' : '[ VIEW ALL ]'}
                       </button>
                     )}
                   </div>
@@ -1226,7 +1228,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                       /* VIEW MODE: User has commented and is NOT editing */
                       <div className="text-center relative z-10">
                         <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></div>
-                        <h5 className="font-mono text-[9px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Your Synced Resonance</h5>
+                        <h5 className="font-mono text-[9px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Your Review</h5>
                         
                         <div className="flex justify-center items-center gap-4 mb-4">
                           <div className="flex gap-1 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
@@ -1240,7 +1242,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                           setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
                           setIsEditingReview(true);
                         }} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors bg-white dark:bg-slate-950 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-white/5">
-                          <Edit3 className="w-3 h-3" /> Adjust Resonance
+                          <Edit3 className="w-3 h-3" /> Edit Review
                         </button>
                       </div>
 
@@ -1249,7 +1251,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                       /* EDIT/CREATE MODE: User is typing a new comment or editing an old one */
                       <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6 relative z-10">
                         <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Edit Comment' : 'Comment Transmission'}
+                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Edit Comment' : 'Write a Review'}
                         </h5>
                         
                         <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
@@ -1278,7 +1280,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                             </button>
                           )}
                           <button type="submit" className="flex-1 py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] active:scale-95">
-                            {isEditingReview ? 'Commit Changes' : 'Transmit Comment'}
+                            {isEditingReview ? 'Commit Changes' : 'Submit Review'}
                           </button>
                         </div>
                       </form>
@@ -1491,8 +1493,8 @@ if (currentUser && !currentUser.address) {
       <div className="mx-auto w-24 h-24 mb-8 flex items-center justify-center text-rose-500">
         <MapPin className="w-12 h-12" />
       </div>
-      <h2 className="text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Drop-off Zone Missing</h2>
-      <p className="text-slate-400 mt-4 italic">You must configure your Drop-off Zone in settings before settlement.</p>
+      <h2 className="text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Delivery Address Missing</h2>
+      <p className="text-slate-400 mt-4 italic">You must configure your Delivery Address in settings before settlement.</p>
       <button onClick={() => onAuth('profile')} className="mt-8 px-12 py-5 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] shadow-2xl active-scale">
         Configure Profile
       </button>
@@ -1504,7 +1506,7 @@ if (currentUser && !currentUser.address) {
     <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
        <div className="mb-16">
           <div className="flex justify-between items-end mb-4">
-             <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Checkout Protocol</h2>
+             <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Checkout</h2>
              <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Step 1 of 3: Sync Payment</span>
           </div>
           <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -1562,7 +1564,7 @@ if (currentUser && !currentUser.address) {
           <div className="lg:col-span-2">
              <div className="bg-slate-950 p-12 rounded-[64px] text-white shadow-2xl sticky top-32 overflow-hidden border border-white/5">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl"></div>
-                <h3 className="text-3xl font-serif italic font-bold mb-12">Protocol Summary</h3>
+                <h3 className="text-3xl font-serif italic font-bold mb-12">Order Summary</h3>
                 <div className="space-y-6 mb-12 max-h-64 overflow-y-auto pr-4 scrollbar-hide">
                    {cart.map((i: any) => (
                      <div key={i.id} className="flex justify-between items-center group">
@@ -1577,15 +1579,15 @@ if (currentUser && !currentUser.address) {
                 <div className="h-px bg-white/5 my-8"></div>
                 <div className="space-y-6">
                    <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                      <span>Inventory Total</span>
+                      <span>Subtotal</span>
                       <span>Ksh {cart.reduce((s, i) => s + (i.price * i.quantity), 0).toLocaleString()}</span>
                    </div>
                    <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                      <span>Logistics Fee</span>
+                      <span>Shipping Fee</span>
                       <span>Ksh {shipping.price}</span>
                    </div>
                    <div className="space-y-3 pt-6 border-t border-white/5">
-                      <p className="text-rose-500 text-[10px] font-black uppercase tracking-[0.5em]">Sanctuary Total</p>
+                      <p className="text-rose-500 text-[10px] font-black uppercase tracking-[0.5em]">Grand Total</p>
                       <span className="text-6xl font-black italic">Ksh {total.toLocaleString()}</span>
                    </div>
                 </div>
@@ -1688,7 +1690,7 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
                    if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
                       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                       audio.play().catch(()=>{});
-                      showToast(`Protocol #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
+                      showToast(`Order #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
                    }
                  });
               }
@@ -1698,19 +1700,12 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
             .catch(e => console.log("Order sync delayed"));
     
           if (localUser?.role === 'admin') {
-            fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
+            fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
               .then(r => r.ok ? r.json() : [])
               .then(data => {
-                // Check if new orders arrived (for popup and sound globally)
-                if (prevOrdersRef.current.length > 0 && data.length > prevOrdersRef.current.length) {
-                  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                  audio.play().catch(()=>{});
-                  showToast('A new order has been placed!', 'success');
-                }
-                prevOrdersRef.current = data;
-                setOrders(data);
+                 setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []);
               })
-              .catch(e => console.log("Order sync delayed"));
+              .catch(e => console.log("User sync delayed"));
           }
         } catch (e) {
           setIsSynced(false);
@@ -2401,7 +2396,7 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Sync Number</label>
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Phone Number</label>
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                </div>
@@ -2416,7 +2411,7 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                   </div>
                </div>
                <div className="space-y-2">
-                  <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Drop-off Zone</label>
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Delivery Address</label>
                   <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
              <button onClick={() => { 
@@ -2487,7 +2482,7 @@ const [showPicOptions, setShowPicOptions] = useState(false);
           <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Order Tracking</p>
           <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Return Policy</p>
           <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Privacy Protocol</p>
-          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Drop-off Zones</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Delivery Addresses</p>
         </div>
       </div>
       
