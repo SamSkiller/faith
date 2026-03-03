@@ -1397,38 +1397,52 @@ const CartToast = ({ product, onClose }: { product: Product, onClose: () => void
   </div>
 );
 
-const TrackOrderView = ({ orders, currentUser }: any) => {
+const TrackOrderView = ({ orders, currentUser, isModal = false }: any) => {
   const userOrders = orders.filter((o: any) => o.userId === currentUser?._id || o.userId === currentUser?.id);
   const stages = ['Processing', 'Shipped', 'Delivered'];
 
   return (
-    <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
-       <h2 className="text-4xl md:text-6xl font-serif italic font-bold text-slate-900 dark:text-white mb-10 md:mb-16">Orders View</h2>
-       {userOrders.length === 0 ? <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[64px] italic text-slate-500 font-bold">No active orders.</div> : (
-         <div className="grid gap-10">
+    <div className={isModal ? "w-full animate-fade-in" : "max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in"}>
+       {/* Only show the massive title if we are on the full standalone page, NOT in the modal */}
+       {!isModal && <h2 className="text-4xl md:text-6xl font-serif italic font-bold text-slate-900 dark:text-white mb-10 md:mb-16">Orders View</h2>}
+       
+       {userOrders.length === 0 ? (
+         <div className="text-center py-20 md:py-40 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] md:rounded-[64px] italic text-slate-500 font-bold border border-slate-100 dark:border-white/5 shadow-sm">
+           No active orders.
+         </div>
+       ) : (
+         <div className="grid gap-6 md:gap-8">
            {userOrders.map((order: any) => {
              const currentIdx = stages.indexOf(order.status);
              return (
-               <div key={order._id || order.id} className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-200 dark:border-slate-800 shadow-xl relative overflow-hidden">
-                  <div className="flex flex-col sm:flex-row justify-between mb-8 sm:mb-10 gap-4">
-                     <div>
-                        <span className="px-4 py-1.5 bg-rose-600 text-white text-[10px] font-black uppercase rounded-full">Protocol #{(order._id || order.id).slice(-6)}</span>
-                        <h4 className="text-xl sm:text-2xl font-bold mt-4 text-slate-900 dark:text-white">{order.items.length} Payload(s)</h4>
+               <div key={order._id || order.id} className="bg-white dark:bg-slate-900 p-6 md:p-8 lg:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 dark:border-white/5 shadow-xl relative overflow-hidden group">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                     <div className="min-w-0 flex-1">
+                        <span className="px-4 py-1.5 bg-rose-600 text-white text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-md tracking-widest">
+                          Protocol #{(order._id || order.id).slice(-6)}
+                        </span>
+                        <h4 className="text-lg sm:text-xl md:text-2xl font-bold mt-4 text-slate-900 dark:text-white truncate">
+                          {order.items.length} Payload(s)
+                        </h4>
                      </div>
-                     <div className="sm:text-right">
-                        <p className="text-2xl sm:text-4xl font-black italic text-rose-600">Ksh {order.total.toLocaleString()}</p>
+                     <div className="sm:text-right shrink-0">
+                        <p className="text-xl sm:text-2xl md:text-3xl font-black italic text-rose-600 truncate">
+                          Ksh {order.total.toLocaleString()}
+                        </p>
                      </div>
                   </div>
 
                   {/* Stage Progress Bar */}
-                <div className="flex justify-between mb-4">
+                <div className="flex justify-between mb-3 md:mb-4">
                    {stages.map((s, i) => (
-                     <span key={s} className={`text-[9px] font-black uppercase ${order.status === 'Cancelled' ? 'text-rose-500' : i <= currentIdx ? 'text-emerald-500' : 'text-slate-300'}`}>{order.status === 'Cancelled' && i === 0 ? 'Cancelled' : s}</span>
+                     <span key={s} className={`text-[8px] md:text-[9px] font-black uppercase tracking-wider ${order.status === 'Cancelled' ? 'text-rose-500' : i <= currentIdx ? 'text-emerald-500' : 'text-slate-400'}`}>
+                       {order.status === 'Cancelled' && i === 0 ? 'Cancelled' : s}
+                     </span>
                    ))}
                 </div>
-                <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
+                <div className="h-2 md:h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full flex gap-1 overflow-hidden">
                    {stages.map((_, i) => (
-                     <div key={i} className={`h-full flex-1 transition-all duration-1000 ${order.status === 'Cancelled' ? 'bg-rose-500' : i <= currentIdx ? 'bg-emerald-500 shadow-neon' : 'bg-transparent'}`} />
+                     <div key={i} className={`h-full flex-1 transition-all duration-1000 ${order.status === 'Cancelled' ? 'bg-rose-500' : i <= currentIdx ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-transparent'}`} />
                    ))}
                 </div>
                </div>
@@ -2260,8 +2274,8 @@ onUpdateUser={async (id: any, data: any) => {
 // --- Sub Components ---
 
 
-const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, isDarkMode, setIsDarkMode, activeTab, setActiveTab }: any) => {
-const [showPicOptions, setShowPicOptions] = useState(false);
+const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, activeTab, setActiveTab }: any) => {
+  const [showPicOptions, setShowPicOptions] = useState(false);
   const [editData, setEditData] = useState({ 
     name: user.name, 
     email: user.email, 
@@ -2270,30 +2284,28 @@ const [showPicOptions, setShowPicOptions] = useState(false);
     password: '' 
   });
 
-  // Controls visibility on small screens
   const [showMenuOnMobile, setShowMenuOnMobile] = useState(true);
 
-  
   const handleTabSwitch = (tab: any) => {
     setActiveTab(tab);
-    setShowMenuOnMobile(false); // Hide menu, show content on mobile
+    setShowMenuOnMobile(false); 
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-6 animate-fade-in">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-6 lg:p-8 animate-fade-in">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
       
-      <div className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-5xl bg-white dark:bg-slate-900 md:rounded-[48px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10">
+      <div className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl lg:max-w-5xl bg-white dark:bg-slate-900 md:rounded-[48px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10">
         
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 md:top-8 md:right-8 z-50 p-3 bg-slate-100 dark:bg-slate-800/80 backdrop-blur-md rounded-full transition-all hover:bg-rose-500 hover:text-white"
+          className="absolute top-4 right-4 md:top-6 md:right-6 lg:top-8 lg:right-8 z-[100] p-3 bg-slate-100 dark:bg-slate-800/80 backdrop-blur-md rounded-full transition-all hover:bg-rose-500 hover:text-white shadow-lg"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* SIDEBAR - Hides on mobile when a tab is active */}
-        <aside className={`w-full md:w-80 bg-slate-50 dark:bg-slate-950 p-6 md:p-10 flex-col shrink-0 overflow-y-auto border-r border-slate-200 dark:border-white/5 ${showMenuOnMobile ? 'flex' : 'hidden md:flex'}`}>
+        {/* SIDEBAR */}
+        <aside className={`w-full md:w-64 lg:w-80 bg-slate-50 dark:bg-slate-950 p-6 md:p-8 lg:p-10 flex-col shrink-0 overflow-y-auto border-r border-slate-200 dark:border-white/5 ${showMenuOnMobile ? 'flex' : 'hidden md:flex'}`}>
           <div className="text-center mb-8 mt-8 md:mt-0">
             <div className="relative mx-auto w-24 h-24 mb-4">
               <div className="rotating-border-container w-full h-full relative group cursor-pointer" onClick={() => setShowPicOptions(!showPicOptions)}>
@@ -2321,7 +2333,6 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                   </label>
                   <button onClick={() => {
                     setShowPicOptions(false);
-                    // Generates random IDs to fetch different images
                     const randomId = Math.floor(Math.random() * 1000) + 1;
                     onUpdateUser(user.id || user._id, { profilePic: `https://picsum.photos/id/${randomId}/400/400` });
                   }} className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
@@ -2330,29 +2341,29 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                 </div>
               )}
             </div>
-             <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white">{user.name}</h3>
+             <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white truncate px-2">{user.name}</h3>
              <p className="text-[9px] font-mono uppercase text-rose-500 mt-2 tracking-widest">{user.role}</p>
           </div>
           
           <nav className="space-y-2 flex-1">
-             <button onClick={() => handleTabSwitch('profile')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Activity className="w-4 h-4" /> Dashboard</button>
-            <button onClick={() => handleTabSwitch('orders')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'orders' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Package className="w-4 h-4" /> My Orders</button>
-             <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4" /> Favorites</button>
-             <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4" /> Settings</button>
+             <button onClick={() => handleTabSwitch('profile')} className={`w-full text-left px-5 lg:px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'profile' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Activity className="w-4 h-4 shrink-0" /> <span className="truncate">Dashboard</span></button>
+            <button onClick={() => handleTabSwitch('orders')} className={`w-full text-left px-5 lg:px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'orders' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Package className="w-4 h-4 shrink-0" /> <span className="truncate">My Orders</span></button>
+             <button onClick={() => handleTabSwitch('wishlist')} className={`w-full text-left px-5 lg:px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'wishlist' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Heart className="w-4 h-4 shrink-0" /> <span className="truncate">Favorites</span></button>
+             <button onClick={() => handleTabSwitch('settings')} className={`w-full text-left px-5 lg:px-6 py-4 rounded-[20px] font-mono font-bold uppercase text-[10px] flex items-center gap-4 transition-all ${activeTab === 'settings' ? 'bg-rose-600 text-white shadow-neon' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5'}`}><Settings className="w-4 h-4 shrink-0" /> <span className="truncate">Settings</span></button>
           </nav>
-          <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4" /> Log Out</button>
+          <button onClick={onLogout} className="mt-6 py-4 w-full border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white rounded-2xl font-mono font-bold uppercase text-[10px] flex items-center justify-center gap-3 transition-all"><LogOut className="w-4 h-4 shrink-0" /> Log Out</button>
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className={`flex-1 p-6 md:p-12 overflow-y-auto scrollbar-hide relative ${!showMenuOnMobile ? 'block' : 'hidden md:block'}`}>
+        <main className={`flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide relative min-w-0 ${!showMenuOnMobile ? 'block' : 'hidden md:block'}`}>
           {!showMenuOnMobile && (
              <button onClick={() => setShowMenuOnMobile(true)} className="md:hidden flex items-center gap-2 text-rose-500 font-mono text-[10px] font-bold uppercase mb-6 bg-rose-500/10 px-4 py-2 rounded-full w-max">
                <ArrowLeft className="w-4 h-4"/> Back to Menu
              </button>
           )}
           
-          <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-12 mt-2 md:mt-0">
-            {activeTab === 'profile' && 'Profile Overview'}
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-16 md:pr-20 mt-2 md:mt-0 truncate">
+            {activeTab === 'profile' && 'Overview'}
             {activeTab === 'wishlist' && 'Luxury Favorites'}
             {activeTab === 'settings' && 'Identity Control'}
             {activeTab === 'orders' && 'Orders Hub'}
@@ -2376,7 +2387,7 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                     </div>
                   </div>
                </div>
-               <div className="bg-rose-50 dark:bg-rose-900/10 p-6 md:p-12 rounded-[32px] md:rounded-[56px] border border-rose-100 dark:border-rose-900/30">
+               <div className="bg-rose-50 dark:bg-rose-900/10 p-6 md:p-10 lg:p-12 rounded-[32px] md:rounded-[48px] lg:rounded-[56px] border border-rose-100 dark:border-rose-900/30">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
                     <div className="w-16 h-16 md:w-20 md:h-20 bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl flex items-center justify-center text-rose-600 shadow-xl border border-rose-100 dark:border-rose-900/50 shrink-0"><History className="w-8 h-8 md:w-10 md:h-10" /></div>
                     <div>
@@ -2388,9 +2399,9 @@ const [showPicOptions, setShowPicOptions] = useState(false);
             </div>
           )}
 
-{activeTab === 'settings' && (
+          {activeTab === 'settings' && (
             <div className="space-y-6 md:space-y-8 animate-fade-in pb-10">
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Full Name</label>
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
@@ -2400,7 +2411,7 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                </div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Change Password</label>
                      <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
@@ -2414,28 +2425,28 @@ const [showPicOptions, setShowPicOptions] = useState(false);
                   <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Delivery Address</label>
                   <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Apartment, Street, City" value={editData.address} onChange={e => setEditData({...editData, address: e.target.value})} />
                </div>
-             <button onClick={() => { 
-  onUpdateUser(user.id || user._id, editData); 
-  onClose(); 
-}} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">
-  Save Profile
-</button>
+               <button onClick={() => { 
+                  onUpdateUser(user.id || user._id, editData); 
+                  onClose(); 
+               }} className="w-full py-6 md:py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-3xl md:rounded-[40px] font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95 mt-6 md:mt-10">
+                  Save Profile
+               </button>
             </div>
           )}
 
           {activeTab === 'wishlist' && (
             <div className="space-y-4 md:space-y-6 animate-fade-in pb-10">
-               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-400 italic text-xl md:text-2xl">Sanctuary is empty.</div> : (
+               {wishlistProducts.length === 0 ? <div className="text-center py-20 text-slate-400 italic text-xl md:text-2xl border border-dashed border-slate-200 dark:border-white/5 rounded-[32px]">Sanctuary is empty.</div> : (
                  wishlistProducts.map((p: Product) => (
-                   <div key={p.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-6 group bg-slate-50 dark:bg-slate-800/30 p-6 md:p-8 rounded-[32px] md:rounded-[48px] hover:bg-rose-50 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-transparent hover:border-rose-100">
-                      <img src={p.image} className="w-full sm:w-24 h-48 sm:h-32 rounded-[24px] md:rounded-[32px] object-cover shadow-xl sm:group-hover:scale-110 transition-transform duration-700" />
-                      <div className="flex-1 text-center sm:text-left">
-                        <h4 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{p.name}</h4>
-                        <p className="text-sm font-black italic text-rose-600 mt-2 tracking-widest">Ksh {p.price.toLocaleString()}</p>
+                   <div key={p.id} className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-6 group bg-slate-50 dark:bg-slate-800/30 p-5 md:p-6 lg:p-8 rounded-[32px] md:rounded-[40px] hover:bg-rose-50 dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-transparent hover:border-rose-100">
+                      <img src={p.image} className="w-full sm:w-24 h-48 sm:h-32 rounded-[24px] object-cover shadow-xl sm:group-hover:scale-110 transition-transform duration-700 shrink-0" />
+                      <div className="flex-1 text-center sm:text-left min-w-0">
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white truncate">{p.name}</h4>
+                        <p className="text-sm font-black italic text-rose-600 mt-2 tracking-widest truncate">Ksh {p.price.toLocaleString()}</p>
                       </div>
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <button onClick={() => onAddToCart(p)} className="flex-1 sm:flex-none p-4 md:p-6 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[24px] hover:bg-rose-700 transition-all shadow-xl active:scale-90 flex justify-center"><ShoppingBag className="w-5 h-5 md:w-6 md:h-6" /></button>
-                        <button onClick={() => onRemoveFromWishlist(p.id)} className="flex-1 sm:flex-none p-4 md:p-6 bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-2xl md:rounded-[24px] shadow-md transition-all active:scale-90 flex justify-center"><Trash2 className="w-5 h-5 md:w-6 md:h-6" /></button>
+                      <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                        <button onClick={() => onAddToCart(p)} className="flex-1 sm:flex-none p-4 md:p-5 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[20px] hover:bg-rose-700 transition-all shadow-xl active:scale-90 flex justify-center"><ShoppingBag className="w-5 h-5" /></button>
+                        <button onClick={() => onRemoveFromWishlist(p.id)} className="flex-1 sm:flex-none p-4 md:p-5 bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-2xl md:rounded-[20px] shadow-md transition-all active:scale-90 flex justify-center"><Trash2 className="w-5 h-5" /></button>
                       </div>
                    </div>
                  ))
@@ -2445,12 +2456,8 @@ const [showPicOptions, setShowPicOptions] = useState(false);
 
           {activeTab === 'orders' && (
             <div className="space-y-6 animate-fade-in pb-10">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Active Orders</h3>
-                <button onClick={() => handleTabSwitch('profile')} className="px-6 py-3 border border-slate-200 dark:border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-all">Return</button>
-              </div>
               <div className="w-full overflow-x-hidden">
-                <TrackOrderView orders={orders} currentUser={user} />
+                <TrackOrderView orders={orders} currentUser={user} isModal={true} />
               </div>
             </div>
           )}
