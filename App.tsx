@@ -1376,8 +1376,19 @@ const MainContent = () => {
   const [heroIdx, setHeroIdx] = useState(0);
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // NEW: Track if they have passed the Hero section
+    
+  const playSwoosh = () => {
+  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+  audio.volume = 0.3;
+  audio.play().catch(() => {});
+};
+
+const playClick = () => {
+  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+  audio.volume = 0.4;
+  audio.play().catch(() => {});
+}; 
+ 
   const [hasSeenHero, setHasSeenHero] = useState(false);
 
   const toastTimeoutRef = useRef(null);
@@ -2090,13 +2101,13 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
                     }}/>
                   </label>
                   <button onClick={() => {
-                    setShowPicOptions(false);
-                    const randomId = Math.floor(Math.random() * 1000) + 1;
-                    onUpdateUser(user.id || user._id, { profilePic: `https://picsum.photos/id/${randomId}/400/400` });
-                  }} className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
-                    Generate Random Avatar
-                  </button>
-                </div>
+                  setShowPicOptions(false);
+                  // Uses the user's name as a seed so the avatar is unique but stays the same
+                  const fashionAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}&mood=happy&accessories=eyepatch,prescription01,round`;
+                  onUpdateUser(user.id || user._id, { profilePic: fashionAvatar });
+                }} className="block w-full text-left px-4 py-3 text-[10px] font-black uppercase text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
+                  <Sparkles className="w-3 h-3 inline mr-2 text-rose-500"/> Generate Random Avatar
+                </button>
               )}
             </div>
              <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white truncate px-2">{user.name}</h3>
