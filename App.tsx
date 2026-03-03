@@ -1333,53 +1333,55 @@ const ToastMessage = ({ message, type, onClose }: { message: string, type: 'succ
 
 const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
   return (
-  <div className="fixed inset-0 z-[110] flex animate-fade-in">
+  <div className="fixed inset-0 z-[110] flex animate-fade-in justify-end">
     <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={onClose}></div>
-    <div className="relative ml-auto w-full sm:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-full flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
-       <div className="p-12 border-b border-rose-50 dark:border-slate-800 flex justify-between items-center bg-rose-50/20 dark:bg-slate-800/20">
+    <div className="relative w-[90vw] sm:w-[400px] md:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-full flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
+       <div className="p-6 md:p-10 border-b border-rose-50 dark:border-slate-800 flex justify-between items-center bg-rose-50/20 dark:bg-slate-800/20 shrink-0">
           <div>
-            <h2 className="text-4xl font-serif italic font-bold text-rose-600 mb-1">My Cart</h2>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{cart.length} Items in Cart</p>
+            <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-rose-600 mb-1">My Cart</h2>
+            <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{cart.length} Items in Cart</p>
           </div>
-          <button onClick={onClose} className="p-5 hover:bg-rose-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"><X className="w-8 h-8 text-rose-600" /></button>
+          <button onClick={onClose} className="p-3 md:p-5 hover:bg-rose-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"><X className="w-6 h-6 md:w-8 md:h-8 text-rose-600" /></button>
        </div>
-       <div className="flex-1 overflow-y-auto p-12 space-y-10 scrollbar-hide">
+       
+       <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 md:space-y-8 scrollbar-hide">
           {cart.map((i: any, idx: number) => (
-            <div key={idx} className="flex gap-8 items-center group animate-fade-in bg-slate-50/50 dark:bg-slate-800/30 p-6 rounded-[40px] hover:bg-rose-50/30 transition-all">
-               <div className="w-24 h-32 rounded-[32px] overflow-hidden shadow-2xl shrink-0">
-                  <img src={i.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            <div key={idx} className="flex gap-4 md:gap-6 items-center group animate-fade-in bg-slate-50/80 dark:bg-slate-800/50 p-4 md:p-6 rounded-[24px] md:rounded-[32px] hover:bg-rose-50/50 transition-all border border-slate-100 dark:border-white/5">
+               <div className="w-16 h-20 md:w-24 md:h-32 rounded-[16px] md:rounded-[24px] overflow-hidden shadow-lg shrink-0 bg-slate-200 dark:bg-slate-800">
+                  <img src={i.image} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                </div>
                <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-bold text-base text-slate-900 dark:text-white truncate">{i.name}</h4>
-                    <button onClick={() => setCart(cart.filter((c: any) => c.id !== i.id))} className="text-slate-300 hover:text-rose-600 transition-colors"><Trash className="w-4 h-4" /></button>
+                    <h4 className="font-bold text-sm md:text-base text-slate-900 dark:text-white truncate pr-2">{i.name}</h4>
+                    <button onClick={() => setCart(cart.filter((c: any) => c.id !== i.id))} className="text-slate-300 hover:text-rose-600 transition-colors p-1"><Trash className="w-4 h-4" /></button>
                   </div>
-                  <p className="text-[10px] font-black uppercase text-rose-500 mb-6 tracking-widest">{i.category}</p>
-                  <div className="flex flex-wrap gap-4 justify-between items-center mt-2">
-                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm">
-                       <button onClick={() => setCart(cart.map((c: any) => c.id === i.id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c))}><Minus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
-                       <span className="text-sm font-black text-slate-900 dark:text-white">{i.quantity}</span>
-                       <button onClick={() => setCart(cart.map((c: any) => c.id === i.id ? { ...c, quantity: c.quantity + 1 } : c))}><Plus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
+                  <p className="text-[8px] md:text-[9px] font-black uppercase text-rose-500 mb-3 md:mb-6 tracking-widest truncate">{i.category}</p>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mt-2">
+                    <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm w-max border border-slate-100 dark:border-white/5">
+                       <button onClick={() => setCart(cart.map((c: any) => c.id === i.id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c))} className="p-1"><Minus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
+                       <span className="text-xs md:text-sm font-black text-slate-900 dark:text-white min-w-[12px] text-center">{i.quantity}</span>
+                       <button onClick={() => setCart(cart.map((c: any) => c.id === i.id ? { ...c, quantity: c.quantity + 1 } : c))} className="p-1"><Plus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
                     </div>
-                    <span className="font-black italic text-xl text-slate-900 dark:text-white">Ksh {(i.price * i.quantity).toLocaleString()}</span>
+                    <span className="font-black italic text-sm md:text-lg text-slate-900 dark:text-white truncate">Ksh {(i.price * i.quantity).toLocaleString()}</span>
                   </div>
                </div>
             </div>
           ))}
-          {cart.length === 0 && <div className="text-center py-40 text-slate-300 font-black italic text-2xl">Cart status: Empty.</div>}
+          {cart.length === 0 && <div className="text-center py-20 text-slate-300 font-black italic text-xl md:text-2xl">Cart status: Empty.</div>}
        </div>
+       
        {cart.length > 0 && (
-         <div className="p-12 border-t border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_-30px_60px_rgba(0,0,0,0.05)]">
-            <div className="flex justify-between items-center text-4xl font-black mb-12 italic text-slate-900 dark:text-white">
+         <div className="p-6 md:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
+            <div className="flex justify-between items-center text-xl md:text-3xl font-black mb-6 md:mb-8 italic text-slate-900 dark:text-white">
                <span>Total</span>
-               <span className="text-rose-600">Ksh {cart.reduce((s: any, i: any) => s + (i.price * i.quantity), 0).toLocaleString()}</span>
+               <span className="text-rose-600 truncate max-w-[60%] text-right">Ksh {cart.reduce((s: any, i: any) => s + (i.price * i.quantity), 0).toLocaleString()}</span>
             </div>
-            <button onClick={onCheckout} className="w-full py-8 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl hover:bg-rose-700 transition-all active:scale-95">Proceed to Checkout</button>
+            <button onClick={onCheckout} className="w-full py-5 md:py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] md:rounded-[24px] font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] shadow-xl hover:bg-rose-700 transition-all active:scale-95">Proceed to Checkout</button>
          </div>
        )}
     </div>
   </div>
-);
+  );
 };
   
 const CartToast = ({ product, onClose }: { product: Product, onClose: () => void }) => (
@@ -1461,113 +1463,118 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth, showToast }: any)
   
   const [awaitingMpesa, setAwaitingMpesa] = useState(false);
 
-    const handlePay = async () => {
-      if (!phoneNumber) return showToast('Payment Transaction Failure: Phone number missing.'); 
-      setLoading(true);
-      try {
-        const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem('faith_token')}`
-          },
-          body: JSON.stringify({ phone: phoneNumber, amount: total })
-        });
-        
-        const data = await res.json();
-        if (data.success) {
-          setAwaitingMpesa(true); // Stop auto-completion. Wait for user.
-          setLoading(false);
-        } else { 
-          showToast(data.message, 'error');  
-          setLoading(false); 
-        }
-      } catch (e) {
-        showToast("System sync error. Re-fresh page and try again", 'error');
-        setLoading(false);
-      }
-    };
-
-    const confirmPaymentCompletion = () => {
-      onComplete({ 
-        id: Math.random().toString(36).substr(2, 9).toUpperCase(),
-        userId: currentUser.id || currentUser._id,
-        items: cart, 
-        total, 
-        shippingMethod: shipping.name, 
-        status: 'Processing', 
-        date: new Date().toISOString(), 
-        phoneNumber 
+  const handlePay = async () => {
+    if (!phoneNumber) return showToast('Payment Transaction Failure: Phone number missing.'); 
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/mpesa/stkpush`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('faith_token')}`
+        },
+        body: JSON.stringify({ phone: phoneNumber, amount: total })
       });
-    };
+      
+      const data = await res.json();
+      if (data.success) {
+        setAwaitingMpesa(true);
+        setLoading(false);
+      } else { 
+        showToast(data.message, 'error');  
+        setLoading(false); 
+      }
+    } catch (e) {
+      showToast("System sync error. Re-fresh page and try again", 'error');
+      setLoading(false);
+    }
+  };
 
-if (currentUser && !currentUser.address) {
-  return (
-    <div className="pt-60 text-center animate-future-in">
-      <div className="mx-auto w-24 h-24 mb-8 flex items-center justify-center text-rose-500">
-        <MapPin className="w-12 h-12" />
+  const confirmPaymentCompletion = () => {
+    onComplete({ 
+      id: Math.random().toString(36).substr(2, 9).toUpperCase(),
+      userId: currentUser.id || currentUser._id,
+      items: cart, 
+      total, 
+      shippingMethod: shipping.name, 
+      status: 'Processing', 
+      date: new Date().toISOString(), 
+      phoneNumber 
+    });
+  };
+
+  if (currentUser && !currentUser.address) {
+    return (
+      <div className="pt-32 md:pt-60 text-center animate-future-in px-6">
+        <div className="mx-auto w-16 h-16 md:w-24 md:h-24 mb-6 md:mb-8 flex items-center justify-center text-rose-500">
+          <MapPin className="w-8 h-8 md:w-12 md:h-12" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Delivery Address Missing</h2>
+        <p className="text-sm md:text-base text-slate-400 mt-4 italic">You must configure your Delivery Address in settings before settlement.</p>
+        <button onClick={() => onAuth('profile')} className="mt-8 px-8 md:px-12 py-4 md:py-5 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] shadow-2xl active-scale">
+          Configure Profile
+        </button>
       </div>
-      <h2 className="text-3xl font-serif italic font-bold text-slate-900 dark:text-white">Delivery Address Missing</h2>
-      <p className="text-slate-400 mt-4 italic">You must configure your Delivery Address in settings before settlement.</p>
-      <button onClick={() => onAuth('profile')} className="mt-8 px-12 py-5 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] shadow-2xl active-scale">
-        Configure Profile
-      </button>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto pt-40 pb-32 px-6 animate-future-in">
-       <div className="mb-16">
-          <div className="flex justify-between items-end mb-4">
-             <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Checkout</h2>
-             <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Step 1 of 3: Sync Payment</span>
+    <div className="max-w-6xl mx-auto pt-28 md:pt-40 pb-20 md:pb-32 px-4 md:px-6 animate-future-in">
+       <div className="mb-8 md:mb-16">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 mb-4">
+             <h2 className="text-3xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Checkout</h2>
+             <span className="text-[9px] md:text-[10px] font-black uppercase text-rose-500 tracking-widest">Step 1 of 3: Sync Payment</span>
           </div>
-          <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-1.5 md:h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
              <div className="h-full bg-gradient-to-r from-rose-500 via-emerald-500 to-sky-500 w-1/3 shadow-neon"></div>
           </div>
        </div>
 
-       <div className="grid grid-cols-1 lg:grid-cols-5 gap-20">
-          <div className="lg:col-span-3 space-y-10">
-             <div className="bg-white dark:bg-slate-900 p-12 rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 blur-3xl"></div>
-                <h3 className="text-2xl font-serif italic font-bold mb-10 text-slate-900 dark:text-white flex items-center gap-3"><Smartphone className="w-6 h-6 text-rose-500" /> M-Pesa Settlement</h3>
-                <div className="space-y-8">
-                   <div className="space-y-4">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Enter M-Pesa Phone Number</label>
-                      <input className="w-full p-8 bg-slate-50 dark:bg-slate-800 rounded-[32px] font-black text-4xl outline-none focus:ring-2 focus:ring-rose-200 text-slate-900 dark:text-white transition-all" placeholder="07XX XXX XXX" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
-                      <p className="text-[9px] text-slate-400 italic ml-4 uppercase tracking-tighter">Enter your M-Pesa number to receive the secure push.</p>
+       {/* Mobile: Order Summary is FIRST (order-1), Settlement is LAST (order-2) */}
+       <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 lg:gap-20">
+          
+          {/* M-PESA SETTLEMENT SECTION */}
+          <div className="order-2 lg:order-1 lg:col-span-3 space-y-6 md:space-y-10">
+             <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 md:w-40 md:h-40 bg-rose-500/5 blur-3xl"></div>
+                <h3 className="text-xl md:text-2xl font-serif italic font-bold mb-6 md:mb-10 text-slate-900 dark:text-white flex items-center gap-3"><Smartphone className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> M-Pesa Settlement</h3>
+                <div className="space-y-6 md:space-y-8">
+                   <div className="space-y-3 md:space-y-4">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 ml-2 md:ml-4 tracking-widest">Enter M-Pesa Phone Number</label>
+                      <input className="w-full p-5 md:p-8 bg-slate-50 dark:bg-slate-800 rounded-[20px] md:rounded-[32px] font-black text-2xl md:text-4xl outline-none focus:ring-2 focus:ring-rose-200 text-slate-900 dark:text-white transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder="07XX XXX XXX" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
+                      <p className="text-[8px] md:text-[9px] text-slate-400 italic ml-2 md:ml-4 uppercase tracking-tighter">Enter your M-Pesa number to receive the secure push.</p>
                    </div>
                    
-                   <div className="space-y-4">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Shipping Speed</label>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div className="space-y-3 md:space-y-4">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 ml-2 md:ml-4 tracking-widest">Shipping Speed</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                          {SHIPPING_OPTIONS.map(opt => (
                            <button 
                              key={opt.id} 
                              onClick={() => setShipping(opt)}
-                             className={`p-6 rounded-[32px] border-2 transition-all text-left ${shipping.id === opt.id ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-50 dark:border-slate-800 hover:border-rose-200'}`}
+                             className={`p-4 md:p-6 rounded-[24px] md:rounded-[32px] border-2 transition-all text-left flex sm:flex-col justify-between items-center sm:items-start ${shipping.id === opt.id ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-50 dark:border-slate-800 hover:border-rose-200'}`}
                            >
-                              <p className="font-bold text-sm text-slate-900 dark:text-white">{opt.name}</p>
-                              <p className="text-[9px] text-slate-400 mt-1 uppercase font-bold">{opt.days}</p>
-                              <p className="mt-4 font-black italic text-rose-500 text-sm">Ksh {opt.price}</p>
+                              <div>
+                                <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white">{opt.name}</p>
+                                <p className="text-[8px] md:text-[9px] text-slate-400 mt-1 uppercase font-bold">{opt.days}</p>
+                              </div>
+                              <p className="sm:mt-4 font-black italic text-rose-500 text-sm">Ksh {opt.price}</p>
                            </button>
                          ))}
                       </div>
                    </div>
 
                     {!awaitingMpesa ? (
-                      <button onClick={handlePay} disabled={loading} className="w-full py-8 bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-4 shadow-2xl hover:bg-rose-700 transition-all active-scale disabled:opacity-50">
-                        {loading ? <Loader2 className="animate-spin w-6 h-6" /> : <Shield className="w-6 h-6" />} 
+                      <button onClick={handlePay} disabled={loading} className="w-full py-5 md:py-8 bg-rose-600 text-white rounded-[20px] md:rounded-[32px] font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] flex items-center justify-center gap-3 shadow-xl hover:bg-rose-700 transition-all active-scale disabled:opacity-50">
+                        {loading ? <Loader2 className="animate-spin w-5 h-5 md:w-6 md:h-6" /> : <Shield className="w-5 h-5 md:w-6 md:h-6" />} 
                         {loading ? 'Synchronizing Transaction...' : 'Initiate Secure Payment'}
                       </button>
                     ) : (
-                      <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-[32px] border border-emerald-200 dark:border-emerald-800 text-center animate-fade-in">
-                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mx-auto mb-4" />
-                        <h4 className="text-emerald-600 dark:text-emerald-400 font-bold mb-2">Payment Prompt Sent</h4>
-                        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mb-6">Please check your phone, enter your M-Pesa PIN, and click the button below once payment is successful.</p>
-                        <button onClick={confirmPaymentCompletion} className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-black uppercase text-[10px] shadow-lg hover:bg-emerald-600 transition-all">
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 p-5 md:p-6 rounded-[24px] md:rounded-[32px] border border-emerald-200 dark:border-emerald-800 text-center animate-fade-in">
+                        <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-emerald-500 animate-spin mx-auto mb-3 md:mb-4" />
+                        <h4 className="text-emerald-600 dark:text-emerald-400 font-bold mb-2 text-sm md:text-base">Payment Prompt Sent</h4>
+                        <p className="text-[10px] md:text-xs text-emerald-600/70 dark:text-emerald-400/70 mb-4 md:mb-6">Please check your phone, enter your M-Pesa PIN, and click the button below once payment is successful.</p>
+                        <button onClick={confirmPaymentCompletion} className="w-full py-4 md:py-5 bg-emerald-500 text-white rounded-2xl font-black uppercase text-[9px] md:text-[10px] shadow-lg hover:bg-emerald-600 transition-all">
                           I Have Paid (Confirm)
                         </button>
                       </div>
@@ -1575,34 +1582,40 @@ if (currentUser && !currentUser.address) {
                 </div>
              </div>
           </div>
-          <div className="lg:col-span-2">
-             <div className="bg-slate-950 p-12 rounded-[64px] text-white shadow-2xl sticky top-32 overflow-hidden border border-white/5">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl"></div>
-                <h3 className="text-3xl font-serif italic font-bold mb-12">Order Summary</h3>
-                <div className="space-y-6 mb-12 max-h-64 overflow-y-auto pr-4 scrollbar-hide">
+
+          {/* ORDER SUMMARY SECTION */}
+          <div className="order-1 lg:order-2 lg:col-span-2">
+             <div className="bg-slate-950 p-6 md:p-12 rounded-[32px] md:rounded-[64px] text-white shadow-2xl lg:sticky lg:top-32 overflow-hidden border border-white/5">
+                <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-white/5 blur-3xl"></div>
+                <h3 className="text-2xl md:text-3xl font-serif italic font-bold mb-6 md:mb-12">Order Summary</h3>
+                <div className="space-y-4 md:space-y-6 mb-6 md:mb-12 max-h-48 md:max-h-64 overflow-y-auto pr-2 scrollbar-hide">
                    {cart.map((i: any) => (
                      <div key={i.id} className="flex justify-between items-center group">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-12 rounded-lg overflow-hidden border border-white/10"><img src={i.image} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" /></div>
-                           <span className="font-light text-xs opacity-60">{i.name} <span className="text-rose-400 font-bold ml-1">x{i.quantity}</span></span>
+                        <div className="flex items-center gap-3 md:gap-4 min-w-0 pr-4">
+                           <div className="w-8 h-10 md:w-10 md:h-12 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                             <img src={i.image} loading="lazy" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                           </div>
+                           <span className="font-light text-[10px] md:text-xs opacity-60 truncate">
+                             {i.name} <span className="text-rose-400 font-bold ml-1">x{i.quantity}</span>
+                           </span>
                         </div>
-                        <span className="font-black text-xs">Ksh {(i.price * i.quantity).toLocaleString()}</span>
+                        <span className="font-black text-[10px] md:text-xs shrink-0">Ksh {(i.price * i.quantity).toLocaleString()}</span>
                      </div>
                    ))}
                 </div>
-                <div className="h-px bg-white/5 my-8"></div>
-                <div className="space-y-6">
-                   <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                <div className="h-px bg-white/5 my-6 md:my-8"></div>
+                <div className="space-y-4 md:space-y-6">
+                   <div className="flex justify-between text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest">
                       <span>Subtotal</span>
                       <span>Ksh {cart.reduce((s, i) => s + (i.price * i.quantity), 0).toLocaleString()}</span>
                    </div>
-                   <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                   <div className="flex justify-between text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest">
                       <span>Shipping Fee</span>
                       <span>Ksh {shipping.price}</span>
                    </div>
-                   <div className="space-y-3 pt-6 border-t border-white/5">
-                      <p className="text-rose-500 text-[10px] font-black uppercase tracking-[0.5em]">Grand Total</p>
-                      <span className="text-6xl font-black italic">Ksh {total.toLocaleString()}</span>
+                   <div className="space-y-2 md:space-y-3 pt-4 md:pt-6 border-t border-white/5">
+                      <p className="text-rose-500 text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em]">Grand Total</p>
+                      <span className="text-3xl md:text-5xl lg:text-6xl font-black italic truncate block">Ksh {total.toLocaleString()}</span>
                    </div>
                 </div>
              </div>
@@ -1626,28 +1639,27 @@ const MainContent = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [heroIdx, setHeroIdx] = useState(0);
-const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
+  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // NEW: Track if they have passed the Hero section
+  const [hasSeenHero, setHasSeenHero] = useState(false);
 
-    const toastTimeoutRef = useRef(null);
-
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+  const toastTimeoutRef = useRef(null);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ message, type });
   };
 
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-    }, 300); // Wait 300ms after user stops typing
+    }, 300);
     return () => clearTimeout(handler);
   }, [searchQuery]);
-  
 
-  
   const [showCartToast, setShowCartToast] = useState<Product | null>(null);
   const [isSynced, setIsSynced] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -1658,6 +1670,11 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window.history.pushState({ view }, '', `#${view}`);
+    
+    // Automatically skip the hero image if we navigate away from 'home'
+    if (view !== 'home') {
+      setHasSeenHero(true);
+    }
     
     const handlePopState = (e: any) => {
       if (e.state && e.state.view) {
@@ -1671,81 +1688,74 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     return () => window.removeEventListener('popstate', handlePopState);
   }, [view, selectedProduct]);
 
-    const prevOrdersRef = useRef<any[]>([]);
+  const prevOrdersRef = useRef<any[]>([]);
     
-      const checkBackendSync = async () => {
-        try {
-          const res = await fetch(`${API_BASE}/health`);
-          if (!res.ok) { setIsSynced(false); return; }
-          setIsSynced(true);
-    
-          // FIX: Move Product Fetch ABOVE token check so public users see products!
-          setIsLoadingProducts(true); 
-          fetch(`${API_BASE}/products`)
-            .then(r => r.json())
-            .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
-            .catch(e => console.log("Product sync delayed"))
-            .finally(() => setIsLoadingProducts(false)); 
-    
-          const token = localStorage.getItem('faith_token');
-          if (!token) return;
-    
-          const session = localStorage.getItem('faith_session_active');
-          const localUser = session ? JSON.parse(session) : null;
-    
-          const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
-          fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(r => r.ok ? r.json() : [])
-            .then(data => {
-              // CUSTOMER NOTIFICATION: Delivery Alert
-              if (localUser?.role !== 'admin' && prevOrdersRef.current.length > 0) {
-                 data.forEach((newOrder: any) => {
-                   const oldOrder = prevOrdersRef.current.find(o => (o.id === newOrder._id || o._id === newOrder._id));
-                   if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
-                      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                      audio.play().catch(()=>{});
-                      showToast(`Order #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
-                   }
-                 });
-              }
-              prevOrdersRef.current = data;
-              setOrders(data);
-            })
-            .catch(e => console.log("Order sync delayed"));
-    
-          if (localUser?.role === 'admin') {
-            fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-              .then(r => r.ok ? r.json() : [])
-              .then(data => {
-                 setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []);
-              })
-              .catch(e => console.log("User sync delayed"));
+  const checkBackendSync = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/health`);
+      if (!res.ok) { setIsSynced(false); return; }
+      setIsSynced(true);
+
+      setIsLoadingProducts(true); 
+      fetch(`${API_BASE}/products`)
+        .then(r => r.json())
+        .then(data => setProducts(data.map((p: any) => ({ ...p, id: p._id }))))
+        .catch(e => console.log("Product sync delayed"))
+        .finally(() => setIsLoadingProducts(false)); 
+
+      const token = localStorage.getItem('faith_token');
+      if (!token) return;
+
+      const session = localStorage.getItem('faith_session_active');
+      const localUser = session ? JSON.parse(session) : null;
+
+      const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
+      fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : [])
+        .then(data => {
+          if (localUser?.role !== 'admin' && prevOrdersRef.current.length > 0) {
+              data.forEach((newOrder: any) => {
+                const oldOrder = prevOrdersRef.current.find(o => (o.id === newOrder._id || o._id === newOrder._id));
+                if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
+                  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                  audio.play().catch(()=>{});
+                  showToast(`Order #${(newOrder._id || newOrder.id).slice(-6)} has been Delivered!`, 'success');
+                }
+              });
           }
-        } catch (e) {
-          setIsSynced(false);
-        }
-      };
+          prevOrdersRef.current = data;
+          setOrders(data);
+        })
+        .catch(e => console.log("Order sync delayed"));
+
+      if (localUser?.role === 'admin') {
+        fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
+          .then(r => r.ok ? r.json() : [])
+          .then(data => {
+              setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []);
+          })
+          .catch(e => console.log("User sync delayed"));
+      }
+    } catch (e) {
+      setIsSynced(false);
+    }
+  };
 
   const handleAuth = (user: User, token?: string) => {
-
     const normalizedUser = { 
       ...user, 
       id: (user as any)._id || user.id 
     };
-
     setCurrentUser(normalizedUser);
     localStorage.setItem("faith_session_active", JSON.stringify(normalizedUser));
     if (token) localStorage.setItem("faith_token", token);
-    
     setView("home");
-
     checkBackendSync();
   };
 
   const filteredProducts = useMemo(() => {
     let result = [...(products || [])];
 
-    // USE debouncedSearch HERE
     if (debouncedSearch)
       result = result.filter(p =>
         p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -1756,7 +1766,6 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
       if (selectedCategory === 'Hot Deals') {
         result = result.filter(p => p.category === 'Hot Deals' || p.isHot === true);
       } else {
-        // Matches sub-categories exactly OR matches parent category group
         result = result.filter(p => p.category === selectedCategory || p.category?.startsWith(`${selectedCategory} -`));
       }
     }
@@ -1766,55 +1775,49 @@ const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'de
     else if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
 
     return result;
-  }, [products, selectedCategory, sortBy, searchQuery]);
+  }, [products, selectedCategory, sortBy, debouncedSearch]);
 
-// For New Product Badging
   const [sessionStartTime] = useState(() => Number(localStorage.getItem('faith_last_visit')) || (Date.now() - 86400000));
   
-    useEffect(() => {
-      // Record visit to clear "NEW" badges on next refresh
-      const visitTimer = setTimeout(() => localStorage.setItem('faith_last_visit', Date.now().toString()), 5000);
+  // Cut down HERO IMAGES array for performance if needed
+  const displayHeroes = HERO_IMAGES.slice(0, 4);
 
-      const session = localStorage.getItem('faith_session_active');
-      if (session) setCurrentUser(JSON.parse(session));
+  useEffect(() => {
+    const visitTimer = setTimeout(() => localStorage.setItem('faith_last_visit', Date.now().toString()), 5000);
+    const session = localStorage.getItem('faith_session_active');
+    if (session) setCurrentUser(JSON.parse(session));
 
-      localStorage.removeItem('faith_products_db');
-      localStorage.removeItem('faith_orders_db');
-      localStorage.removeItem('faith_users_db');
+    localStorage.removeItem('faith_products_db');
+    localStorage.removeItem('faith_orders_db');
+    localStorage.removeItem('faith_users_db');
 
-      setProducts(INITIAL_PRODUCTS);
-      
-      // 🔹 Hero interval
-      const interval = setInterval(() => {
-        setHeroIdx(prev => (prev + 1) % HERO_IMAGES.length);
-      }, 7000);
+    setProducts(INITIAL_PRODUCTS);
+    
+    // Only cycle hero index if user hasn't skipped it to save resources
+    const interval = setInterval(() => {
+      if (!hasSeenHero) {
+        setHeroIdx(prev => (prev + 1) % displayHeroes.length);
+      }
+    }, 6000);
 
-      // Initial Sync
+    checkBackendSync();
+    const syncInterval = setInterval(() => {
       checkBackendSync();
-      
-      // Auto-Refresh Sync for both Admin and Customers every 15 seconds
-      const syncInterval = setInterval(() => {
-        checkBackendSync();
-      }, 15000);
+    }, 15000);
 
-      return () => {
-        clearInterval(interval);
-        clearInterval(syncInterval);
-        clearTimeout(visitTimer);
-      };
-    }, []);
-
-
-
-
-
+    return () => {
+      clearInterval(interval);
+      clearInterval(syncInterval);
+      clearTimeout(visitTimer);
+    };
+  }, [hasSeenHero, displayHeroes.length]);
 
   const wishlistProducts = useMemo(() => {
     if (!currentUser || !currentUser.wishlist) return [];
     return products.filter(p => currentUser.wishlist.includes(p.id));
   }, [products, currentUser]);
 
-const toggleWishlist = async (productId: string) => {
+  const toggleWishlist = async (productId: string) => {
     if (!currentUser) return setView('auth');
     
     let nextW = currentUser.wishlist || [];
@@ -1824,7 +1827,6 @@ const toggleWishlist = async (productId: string) => {
     setCurrentUser(nextU);
     localStorage.setItem('faith_session_active', JSON.stringify(nextU));
 
-    // Sync to backend DB
     try {
       await fetch(`${API_BASE}/users/${currentUser.id}`, {
         method: 'PUT',
@@ -1846,20 +1848,15 @@ const toggleWishlist = async (productId: string) => {
     });
     
     setShowCartToast(p);
-    
-    // Clear previous timeout so rapid clicks don't cause visual glitches
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    
     toastTimeoutRef.current = setTimeout(() => setShowCartToast(null), 3000);
   };
 
-const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
-    // 1. Update instantly on screen
+  const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
     const next = orders.map((o: any) => (o._id === id || o.id === id) ? { ...o, ...data } : o);
     setOrders(next);
     sync('faith_orders_db', next);
 
-    // 2. Sync change to Backend Database
     try {
       await fetch(`${API_BASE}/orders/${id}`, {
         method: 'PUT',
@@ -1874,7 +1871,7 @@ const handleOrderUpdate = async (id: string, data: Partial<Order>) => {
     }
   };
 
-const handleAddReview = async (productId: string, review: Review) => {
+  const handleAddReview = async (productId: string, review: Review) => {
     try {
       const res = await fetch(`${API_BASE}/products/${productId}/reviews`, {
         method: 'POST',
@@ -1887,11 +1884,9 @@ const handleAddReview = async (productId: string, review: Review) => {
       
       if (res.ok) {
         const updatedProduct = await res.json();
-        // Replace product in list with updated DB product
         const nextProducts = products.map(p => p.id === productId ? { ...updatedProduct, id: updatedProduct._id } : p);
         setProducts(nextProducts);
         
-        // Update modal view if currently open
         if (selectedProduct && selectedProduct.id === productId) {
            setSelectedProduct({ ...updatedProduct, id: updatedProduct._id });
         }
@@ -1903,7 +1898,7 @@ const handleAddReview = async (productId: string, review: Review) => {
     }
   };
 
-const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
+  const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
     if (type === 'edit' && id && amount) {
       try {
         const res = await fetch(`${API_BASE}/products/${id}`, {
@@ -1912,14 +1907,13 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
           },
-          body: JSON.stringify(amount) // 'amount' is the edited product object here
+          body: JSON.stringify(amount) 
         });
         
         if (res.ok) {
           const updatedProduct = await res.json();
           setProducts(products.map(p => p.id === id ? { ...updatedProduct, id: updatedProduct._id } : p));
         } else {
-          
           showToast("Failed to update entity on server.", "error");
         }
       } catch (e) {
@@ -1933,7 +1927,11 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
       <Navbar 
         cartCount={cart.reduce((s, i) => s + i.quantity, 0)} 
         onOpenCart={() => setIsCartOpen(true)}
-        setView={setView} activeView={view}
+        setView={(v) => {
+          setView(v);
+          if(v !== 'home') setHasSeenHero(true);
+        }} 
+        activeView={view}
         selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory}
         currentUser={currentUser} onOpenProfile={() => setIsProfileOpen(true)}
         searchQuery={searchQuery} setSearchQuery={setSearchQuery}
@@ -1941,104 +1939,125 @@ const handleBulkUpdate = async (type: string, id?: string, amount?: any) => {
         isSynced={isSynced}
       />
       {toast && <ToastMessage message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
       {showCartToast && <CartToast product={showCartToast} onClose={() => setShowCartToast(null)} />}
 
       <main className="flex-1">
         {view === 'home' && (
           <div>
-            <section className="relative h-[90vh] bg-slate-950 flex items-center justify-center overflow-hidden">
-               {/* Animated Cyber Grid Background */}
-               <div className="absolute inset-0 bg-[linear-gradient(rgba(225,29,72,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(225,29,72,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0"></div>
-               
-               {/* Glowing Ambient Orbs */}
-               <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none animate-pulse"></div>
-               <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none"></div>
+            {!hasSeenHero ? (
+              <section className="relative h-[90vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+                 <div className="absolute inset-0 bg-[linear-gradient(rgba(225,29,72,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(225,29,72,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0"></div>
+                 
+                 <div className="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-rose-600/20 rounded-full blur-[80px] md:blur-[120px] mix-blend-screen pointer-events-none animate-pulse"></div>
+                 <div className="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 bg-purple-600/20 rounded-full blur-[80px] md:blur-[120px] mix-blend-screen pointer-events-none"></div>
 
-               {HERO_IMAGES.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover hero-img transition-all duration-[4000ms] ${heroIdx === i ? 'opacity-30 scale-100' : 'opacity-0 scale-110'}`} />)}
-               
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/80"></div>
-               
-               <div className="relative text-center text-white px-6 pt-20 animate-future-in z-10 backdrop-blur-sm p-12 rounded-[64px] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-                  <span className="px-6 py-2 bg-rose-600/10 backdrop-blur-md rounded-full font-mono text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/30 shadow-[0_0_15px_rgba(225,29,72,0.5)] flex items-center gap-2 w-max mx-auto mb-8">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> System Online
-                  </span>
-                  <h1 className="text-6xl md:text-[8rem] font-serif italic font-bold mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Faith.</span></h1>
-                  <p className="text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-16 tracking-widest text-[10px] uppercase">Shop the Nairobi Collection</p>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                    <button onClick={() => document.getElementById('shop')?.scrollIntoView()} className="px-16 py-6 bg-white text-slate-900 rounded-full font-black uppercase tracking-[0.2em] text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.6)] active:scale-95">Initialize Store</button>
-                    <button onClick={() => setView('track-order')} className="px-12 py-6 bg-transparent text-white border-2 border-white/10 rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center gap-2"><Terminal className="w-4 h-4"/> Track Order</button>
-                  </div>
-               </div>
-            </section>
-
-            <section id="shop" className="max-w-7xl mx-auto px-6 py-32 space-y-16">
-               <div className="flex flex-col md:flex-row justify-between items-end gap-10">
-                  <div className="space-y-4"><h2 className="text-6xl font-serif italic font-bold text-slate-900 dark:text-white">{selectedCategory}</h2><div className="h-1.5 w-24 bg-rose-500 rounded-full shadow-lg"></div></div>
-                  <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-3 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-full shadow-sm text-slate-400">
-                      <ArrowUpDown className="w-4 h-4" />
-                      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white">
-                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="default">Sort: Default</option>
-                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-asc">Price: Low to High</option>
-                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-desc">Price: High to Low</option>
-                        <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="rating">Top Rated</option>
-                      </select>
+                 {displayHeroes.map((img, i) => (
+                   <img 
+                     key={i} 
+                     src={img} 
+                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${heroIdx === i ? 'opacity-30' : 'opacity-0'}`} 
+                     style={{ willChange: 'opacity' }}
+                   />
+                 ))}
+                 
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/80"></div>
+                 
+                 <div className="relative text-center text-white px-4 md:px-6 animate-future-in z-10 backdrop-blur-sm py-10 px-6 md:p-12 rounded-[40px] md:rounded-[64px] border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-[90vw] md:max-w-none">
+                    <span className="px-4 md:px-6 py-2 bg-rose-600/10 backdrop-blur-md rounded-full font-mono text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/30 shadow-[0_0_15px_rgba(225,29,72,0.5)] flex items-center gap-2 w-max mx-auto mb-6 md:mb-8">
+                      <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-rose-500 animate-pulse"></span> System Online
+                    </span>
+                    <h1 className="text-5xl md:text-[8rem] font-serif italic font-bold mb-4 md:mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Faith.</span></h1>
+                    <p className="text-sm md:text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-10 md:mb-16 tracking-widest text-[9px] md:text-[10px] uppercase">Shop the Nairobi Collection</p>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
+                      <button onClick={() => setHasSeenHero(true)} className="w-full md:w-auto px-8 md:px-16 py-5 md:py-6 bg-white text-slate-900 rounded-[20px] md:rounded-full font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.6)] active:scale-95">
+                        Initialize Store
+                      </button>
+                      <button onClick={() => { setHasSeenHero(true); setView('track-order'); }} className="w-full md:w-auto px-8 md:px-12 py-5 md:py-6 bg-transparent text-white border-2 border-white/10 rounded-[20px] md:rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[10px] md:text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <Terminal className="w-4 h-4"/> Track Order
+                      </button>
                     </div>
-                  </div>
-               </div>
-              <div className="amazon-grid">
-                  {isLoadingProducts ? (
-                    [...Array(6)].map((_, i) => <ProductSkeleton key={i} />)
-                  ) : filteredProducts.length > 0 ? (
-                    filteredProducts.map(p => (
-                      <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] hover:-translate-y-2 transition-all duration-500 flex flex-col cursor-pointer p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
-                         <div className="aspect-[3/4] rounded-[40px] overflow-hidden mb-8 relative shadow-lg">
-                            
-                            <div className="absolute top-6 left-6 z-10 flex flex-col gap-2 items-start">
-                              {(Date.now() - new Date(p.createdAt || p.date || Date.now()).getTime() < 86400000) && (
-                                <div className="px-4 py-2 bg-emerald-500/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)] animate-pulse">
-                                    New
-                                </div>
-                              )}
-                              {p.isHot && (
-                                <div className="px-4 py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-2">
-                                    <Sparkles className="w-3 h-3 animate-pulse" /> Hot
-                                </div>
-                              )}
-                            </div>
-                            <img src={p.image} className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" />
-                            <div className="absolute top-6 right-6 flex flex-col gap-2 z-20">
-                              <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/80 text-white opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}><Heart className={`w-5 h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} /></button>
-                            </div>
-                            <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                               <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
-                                 <Terminal className="w-4 h-4" /> Quick View
-                               </button>
-                            </div>
-                          </div>
-                          <div className="px-4 pb-4 flex-1 flex flex-col text-center">
-                            <p className="font-mono text-[9px] uppercase tracking-[0.4em] text-rose-500 mb-3">{p.category}</p>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 line-clamp-1">{p.name}</h3>
-                            <div className="mt-auto flex justify-between items-center border-t border-slate-100 dark:border-white/5 pt-6">
-                              <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</span>
-                              <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-14 h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[24px] flex items-center justify-center hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all active:scale-90"><Plus className="w-6 h-6" /></button>
-                            </div>
-                          </div>
-                      </div>
-                    ))
-                  ) : null}
-               </div>
-               
-              {/* Only show "No entities detected" if we are DONE loading and there are 0 products */}
-               {!isLoadingProducts && filteredProducts.length === 0 && (
-                 <div className="text-center py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[64px] italic text-slate-300 dark:text-slate-500">
-                   No entities detected matching this search result.
                  </div>
-               )}
-            </section>
+              </section>
+            ) : (
+              <section id="shop" className="max-w-7xl mx-auto px-4 md:px-6 pt-10 md:pt-32 pb-20 md:pb-32 space-y-8 md:space-y-16 animate-fade-in">
+                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-10">
+                    <div className="space-y-2 md:space-y-4">
+                      <h2 className="text-4xl md:text-6xl font-serif italic font-bold text-slate-900 dark:text-white">{selectedCategory}</h2>
+                      <div className="h-1.5 w-16 md:w-24 bg-rose-500 rounded-full shadow-lg"></div>
+                    </div>
+                    <div className="w-full md:w-auto flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-2 md:p-3 rounded-2xl md:rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-sm">
+                      <div className="flex flex-1 md:flex-none items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-xl md:rounded-full shadow-sm text-slate-400">
+                        <ArrowUpDown className="w-4 h-4" />
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full text-[9px] md:text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white">
+                          <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="default">Sort: Default</option>
+                          <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-asc">Price: Low to High</option>
+                          <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-desc">Price: High to Low</option>
+                          <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="rating">Top Rated</option>
+                        </select>
+                      </div>
+                    </div>
+                 </div>
+                 
+                 {/* RESPONSIVE MOBILE PRODUCT GRID */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                    {isLoadingProducts ? (
+                      [...Array(8)].map((_, i) => <ProductSkeleton key={i} />)
+                    ) : filteredProducts.length > 0 ? (
+                      filteredProducts.map(p => (
+                        <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[24px] md:rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all duration-300 flex flex-col cursor-pointer p-3 md:p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                           <div className="aspect-[3/4] rounded-[16px] md:rounded-[40px] overflow-hidden mb-4 md:mb-8 relative shadow-sm md:shadow-lg">
+                              
+                              <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 flex flex-col gap-1 md:gap-2 items-start">
+                                {(Date.now() - new Date(p.createdAt || p.date || Date.now()).getTime() < 86400000) && (
+                                  <div className="px-2 md:px-4 py-1 md:py-2 bg-emerald-500/90 backdrop-blur-md text-white font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)]">
+                                      New
+                                  </div>
+                                )}
+                                {p.isHot && (
+                                  <div className="px-2 md:px-4 py-1 md:py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-1 md:gap-2">
+                                      <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:block">Hot</span>
+                                  </div>
+                                )}
+                              </div>
+                              <img src={p.image} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ willChange: 'transform' }} />
+                              
+                              <div className="absolute top-2 right-2 md:top-6 md:right-6 flex flex-col gap-2 z-20">
+                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-2.5 md:p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/80 text-white opacity-100 md:opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}>
+                                  <Heart className={`w-3.5 h-3.5 md:w-5 md:h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} />
+                                </button>
+                              </div>
+
+                              <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center">
+                                 <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
+                                   <Terminal className="w-4 h-4" /> Quick View
+                                 </button>
+                              </div>
+                            </div>
+                            <div className="px-2 md:px-4 pb-2 md:pb-4 flex-1 flex flex-col text-center">
+                              <p className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.2em] md:tracking-[0.4em] text-rose-500 mb-2 md:mb-3 truncate">{p.category}</p>
+                              <h3 className="text-xs md:text-xl font-bold text-slate-900 dark:text-white mb-3 md:mb-6 line-clamp-2 md:line-clamp-1 h-8 md:h-auto leading-tight">{p.name}</h3>
+                              <div className="mt-auto flex justify-between items-center border-t border-slate-100 dark:border-white/5 pt-3 md:pt-6">
+                                <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white truncate pr-2">Ksh {p.price.toLocaleString()}</span>
+                                <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-8 h-8 md:w-14 md:h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[12px] md:rounded-[24px] flex items-center justify-center hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
+                                  <Plus className="w-4 h-4 md:w-6 md:h-6" />
+                                </button>
+                              </div>
+                            </div>
+                        </div>
+                      ))
+                    ) : null}
+                 </div>
+                 
+                 {!isLoadingProducts && filteredProducts.length === 0 && (
+                   <div className="text-center py-20 md:py-40 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] md:rounded-[64px] italic text-slate-500 text-sm md:text-base border border-slate-100 dark:border-white/5">
+                     No entities detected matching this search result.
+                   </div>
+                 )}
+              </section>
+            )}
           </div>
         )}
+
 
 {/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
