@@ -1051,14 +1051,11 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
 };
 
 // --- Custom Notification System (Cyber HUD) ---
-const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
+const ToastMessage = ({ message, type, onClose }: any) => {
   useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
-
   return (
-    <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[200] animate-fade-in flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl backdrop-blur-xl border ${
-      type === 'error' ? 'bg-rose-950/90 border-rose-500/50 text-rose-500' :
-      type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-400' :
-      'bg-slate-900/90 border-slate-700/50 text-white'
+    <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[300] animate-fade-in flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl backdrop-blur-xl border ${
+      type === 'error' ? 'bg-rose-950/90 border-rose-500/50 text-rose-500' : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400'
     }`}>
       <span className="font-mono font-bold text-[10px] uppercase tracking-widest whitespace-nowrap">{message}</span>
       <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full"><X className="w-3 h-3" /></button>
@@ -1388,6 +1385,7 @@ const playClick = () => {
   audio.volume = 0.4;
   audio.play().catch(() => {});
 }; 
+    const getFashionAvatar = (name: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}&mood=happy&accessories=eyepatch,prescription01,round`;
  
   const [hasSeenHero, setHasSeenHero] = useState(false);
 
