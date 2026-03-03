@@ -719,94 +719,101 @@ const salesTrend = useMemo(() => {
          </div>
        )}
 
-      {tab === 'orders' && (
-        <div className="space-y-6 md:space-y-8 animate-fade-in">
-          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
-            <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-            {orders.map((o: any) => {
-              const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
-              const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
-              const isExpanded = expandedOrders.includes(o._id || o.id);
+// Inside AdminVault component, under tab === 'orders'
+{tab === 'orders' && (
+  <div className="space-y-6 md:space-y-8 animate-fade-in">
+    <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
+      <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
+    </h3>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      {orders.map((o: any) => {
+        const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3);
+        const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
+        const isExpanded = expandedOrders.includes(o._id || o.id);
 
-              return (
-                <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] md:rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-sm'} transition-all relative overflow-hidden flex flex-col`}>
-                  <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
-                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 md:w-6 md:h-6 text-slate-400" />}
-                       </div>
-                      <div className="min-w-0">
-                         <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2 truncate">
-                           {o.userName || 'Anonymous'}
-                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>}
-                         </p>
-                         <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5 truncate">
-                           ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
-                         </p>
-                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                      <span className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
-                        o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
-                        o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 
-                        o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                      }`}>{o.status || 'Processing'}</span>
-                      {isDelivered && <ChevronRight className={`w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
-                    </div>
-                  </div>
-
-                  {(!isDelivered || isExpanded) && (
-                    <div className="px-4 pb-4 md:px-6 md:pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-4 md:pt-6">
-                      <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-slate-100 dark:border-white/5">
-                        <div className="flex justify-between items-center mb-3 md:mb-4">
-                          <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value</span>
-                          <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
-                        </div>
-                        {!isDelivered && (
-                            <p className="text-[10px] font-mono text-slate-500 flex items-center gap-2 mb-2">
-                              <MapPin className="w-3 h-3 text-rose-400"/> {o.address || 'Standard Pickup'}
-                            </p>
-                            <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
-                              <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-1.5"><Clock className="w-3 h-3" /> Delivery Est:</span>
-                              <span className="text-[10px] font-bold text-sky-500">{o.deliveryMethod || 'Standard'} • {o.deliveryDays || 3} Days</span>
-                            </div>
-                      
-                            <div className="flex flex-col items-end">
-                              <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1.5 md:gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5">
-                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-sky-400"/> {o.phoneNumber}</p>
-                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 truncate"><MapPin className="w-3 h-3 text-rose-400 shrink-0"/> {o.address || 'N/A'}</p>
-                        </div>
-                      </div>
-                  
-                      {!isDelivered && (
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
-                          <select 
-                            value={o.status || 'Processing'} 
-                            onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
-                            className="flex-1 w-full bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none text-slate-900 dark:text-white"
-                          >
-                            <option value="Processing">Processing</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancel</option>
-                          </select>
-                        </div>
-                      )}
-                    </div>
+        return (
+          <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] md:rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-sm'} transition-all relative overflow-hidden flex flex-col`}>
+            <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
+              <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  {o.userProfilePic || users.find((u: any) => u.id === o.userId || u._id === o.userId)?.profilePic ? (
+                    <img src={users.find((u: any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-4 h-4 md:w-6 md:h-6 text-slate-400" />
                   )}
                 </div>
-              )
-            })}
+                <div className="min-w-0">
+                  <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2 truncate">
+                    {o.userName || 'Anonymous'}
+                    {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>}
+                  </p>
+                  <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5 truncate">
+                    ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                <span className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
+                  o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' :
+                  o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' :
+                  o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                }`}>{o.status || 'Processing'}</span>
+                <ChevronRight className={`w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+              </div>
+            </div>
+
+            {isExpanded && (
+              <div className="px-4 pb-4 md:px-6 md:pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-4 md:pt-6">
+                <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-center mb-3 md:mb-4">
+                    <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value</span>
+                    <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                  </div>
+                  
+                  {!isDelivered && (
+                    <>
+                      <p className="text-[10px] font-mono text-slate-500 flex items-center gap-2 mb-2">
+                        <MapPin className="w-3 h-3 text-rose-400" /> {o.address || 'Standard Pickup'}
+                      </p>
+                      <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
+                        <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-1.5"><Clock className="w-3 h-3" /> Delivery Est:</span>
+                        <span className="text-[10px] font-bold text-sky-500">{o.deliveryMethod || 'Standard'} • {o.deliveryDays || 3} Days</span>
+                      </div>
+                      <div className="flex justify-center mt-4">
+                        <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
+                      </div>
+                    </>
+                  )}
+                  
+                  <div className="flex flex-col gap-1.5 md:gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5 mt-2">
+                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-sky-400" /> {o.phoneNumber}</p>
+                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 truncate"><MapPin className="w-3 h-3 text-rose-400 shrink-0" /> {o.address || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {!isDelivered && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
+                    <select
+                      value={o.status || 'Processing'}
+                      onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
+                      className="flex-1 w-full bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none text-slate-900 dark:text-white"
+                    >
+                      <option value="Processing">Processing</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Delivered">Delivered</option>
+                      <option value="Cancelled">Cancel</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          {orders.length === 0 && <div className="p-20 md:p-40 text-center font-mono text-slate-500 text-xs md:text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-[24px] md:rounded-[32px]">No active data.</div>}
-        </div>
-      )}
+        )
+      })}
+    </div>
+    {orders.length === 0 && <div className="p-20 md:p-40 text-center font-mono text-slate-500 text-xs md:text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-[24px] md:rounded-[32px]">No active data.</div>}
+  </div>
+)}
 
 {tab === 'users' && (
         <div className="space-y-6 md:space-y-8 animate-fade-in relative">
@@ -1063,47 +1070,81 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                   </div>
 
                   {/* RESTORED: Smart Input Section */}
-                  <div className={`p-6 md:p-8 rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
-                      currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview 
-                      ? 'border-transparent bg-slate-50/50 dark:bg-slate-950/50' 
-                      : 'border-dashed border-rose-500/30 bg-rose-50/10'
-                  }`}>
-                    {currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview ? (
-                      <div className="text-center relative z-10 animate-fade-in">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mx-auto mb-4 shadow-[0_0_10px_#10b981]"></div>
-                        <h5 className="font-mono text-[10px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Identity Verified Review</h5>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-6">"{product.reviews.find((r: any) => r.userId === currentUser.id)?.comment}"</p>
-                        <button onClick={() => {
-                          setReviewRating(product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5);
-                          setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
-                          setIsEditingReview(true);
-                        }} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-md border border-slate-200 dark:border-white/5">
-                          <Edit3 className="w-3 h-3" /> Redact Review
-                        </button>
-                      </div>
-                    ) : (
-                      <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); playClick(); }} className="space-y-6 relative z-10">
-                        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                          <Terminal className="w-3 h-3" /> Transmit Resonance: {currentUser?.name || 'Visitor'}
-                        </h5>
-                        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                          <span className="font-mono text-[9px] uppercase text-slate-500 tracking-widest">Intensity:</span>
-                          <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5].map(s => (
-                              <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform hover:scale-125 active:scale-90">
-                                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_10px_#fbbf24]' : 'text-slate-300 dark:text-slate-700'}`} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <textarea required placeholder="Enter narrative experience..." className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10 focus:border-rose-400 transition-all shadow-inner" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
-                        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-neon active:scale-95">
-                          {isEditingReview ? 'Commit Redaction' : 'Transmit Resonance'}
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                </div> 
+// Inside ProductModal, the Review Section
+<div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+  <div className="flex justify-between items-end mb-6">
+    <div>
+      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
+        <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
+      </h4>
+      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
+    </div>
+    {product.reviews?.length > 2 && (
+      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
+        {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
+      </button>
+    )}
+  </div>
+
+  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+    {product.reviews && product.reviews.length > 0 ? (
+      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
+        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
+          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
+            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
+              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
+              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
+                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div>
+    )}
+  </div>
+
+  {/* Review Input Section */}
+  <div className={`p-6 md:p-8 rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
+      currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview
+      ? 'border-transparent bg-slate-50/50 dark:bg-slate-950/50'
+      : 'border-dashed border-rose-500/30 bg-rose-50/10'
+  }`}>
+    {currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview ? (
+      <div className="text-center animate-fade-in">
+        <h5 className="font-mono text-[10px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Reviews</h5>
+        <button onClick={() => setIsEditingReview(true)} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-md border border-slate-200 dark:border-white/5">
+          <Edit3 className="w-3 h-3" /> Redact Review
+        </button>
+      </div>
+    ) : (
+      <form onSubmit={handleReviewSubmit} className="space-y-6">
+        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
+          <Terminal className="w-3 h-3" /> Comments
+        </h5>
+        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map(s => (
+              <button type="button" key={s} onClick={() => setReviewRating(s)}>
+                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+        <textarea required placeholder="Enter narrative experience..." className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
+        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-neon">
+          {isEditingReview ? 'Edit Review' : 'Transmit Review'}
+        </button>
+      </form>
+    )}
+  </div>
+</div>
               </div>
             </div>
           </div>
