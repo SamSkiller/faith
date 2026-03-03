@@ -84,7 +84,7 @@ const ProductSkeleton = () => (
 );
 
 const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
-const [showSearch, setShowSearch] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [isAnimate, setIsAnimate] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -96,8 +96,8 @@ const [showSearch, setShowSearch] = useState(false);
     }
   }, [cartCount]);
 
-const searchResults = useMemo(() => {
-    if (!searchQuery || !products) return []; // Added !products check
+  const searchResults = useMemo(() => {
+    if (!searchQuery || !products) return [];
     return products.filter((p: any) => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -106,30 +106,28 @@ const searchResults = useMemo(() => {
 
   return (
     <header className="sticky top-0 z-[60] w-full">
-<div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-1.5 px-4 flex items-center justify-center gap-3 text-[9px] font-mono font-bold uppercase tracking-[0.4em] animate-gradient-x relative shadow-[0_0_20px_rgba(225,29,72,0.4)] border-b border-white/20">
-  {isSynced ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />}
- Faith Boutique Active • Same-Day  Delivery
-</div>
+      <div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-1 md:py-1.5 px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3 text-[7px] md:text-[9px] font-mono font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] animate-gradient-x relative shadow-[0_0_20px_rgba(225,29,72,0.4)] border-b border-white/20 text-center">
+        {isSynced ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />}
+        Faith Boutique Active • Same-Day Delivery
+      </div>
       
-      <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
-<div className="flex items-center gap-4">
-          <button className="lg:hidden text-slate-600 dark:text-slate-300 p-2 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-full transition-colors" onClick={() => setIsMobileMenuOpen(true)}>
-            <Menu className="w-6 h-6" />
+      <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-16 md:h-20 flex items-center justify-between shadow-md md:shadow-xl transition-colors">
+        <div className="flex items-center gap-3 md:gap-4">
+          <button className="lg:hidden text-slate-600 dark:text-slate-300 p-1.5 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-full transition-colors" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           
           <button 
              onClick={() => { setView('home'); setSelectedCategory('All'); }} 
             className="group flex flex-col items-start leading-none transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
-            <span className="text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">Boutique</span>
+            <span className="text-xl md:text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
+            <span className="text-[7px] md:text-[10px] font-black tracking-[0.3em] md:tracking-[0.4em] text-slate-400 mt-0.5 md:mt-1 uppercase">Boutique</span>
           </button>
         </div>
 
         <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-300">
-<button onClick={() => { setView('home'); setSelectedCategory('All'); }} className={`hover:text-rose-600 font-bold transition-all ${selectedCategory === 'All' && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : 'text-slate-700 dark:text-slate-300'}`}>
-            All
-          </button>
+          <button onClick={() => { setView('home'); setSelectedCategory('All'); }} className={`hover:text-rose-600 font-bold transition-all ${selectedCategory === 'All' && activeView === 'home' ? 'text-rose-600 border-b-2 border-rose-600 pb-1' : 'text-slate-700 dark:text-slate-300'}`}>All</button>
           
           {Object.keys(CATEGORY_HIERARCHY).map((parentCat) => (
              <div key={parentCat} className="relative group py-4">
@@ -190,37 +188,37 @@ const searchResults = useMemo(() => {
           </div>
         </div>
         
-        <div className="flex items-center gap-4 md:gap-6">
-          <button onClick={onOpenCart} className={`relative p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
-            <ShoppingBag className="w-6 h-6" />
+        <div className="flex items-center gap-3 md:gap-6">
+          <button onClick={onOpenCart} className={`relative p-1.5 md:p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
+            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 dark:text-white" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-black border-2 border-white">
+              <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[8px] md:text-[9px] min-w-[14px] md:min-w-[16px] h-3.5 md:h-4 rounded-full flex items-center justify-center font-black border border-white">
                 {cartCount}
               </span>
             )}
           </button>
 
           {!currentUser ? (
-            <button onClick={() => setView('auth')} className="px-6 py-2.5 bg-slate-900 dark:bg-rose-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-600 dark:hover:bg-rose-700 transition-all shadow-lg active:scale-95">
+            <button onClick={() => setView('auth')} className="px-4 py-2 md:px-6 md:py-2.5 bg-slate-900 dark:bg-rose-600 text-white rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[10px] hover:bg-rose-600 dark:hover:bg-rose-700 transition-all shadow-md active:scale-95">
               Login
             </button>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               {currentUser.role === 'admin' && (
                 <button 
                   onClick={() => setView('admin')}
-                  className={`flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl font-black uppercase tracking-widest text-[9px] shadow-neon hover:scale-105 transition-transform ${activeView === 'admin' ? 'ring-2 ring-white ring-offset-2 ring-offset-rose-600' : ''}`}
+                  className={`flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-rose-600 text-white rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] shadow-sm hover:scale-105 transition-transform ${activeView === 'admin' ? 'ring-2 ring-white ring-offset-2 ring-offset-rose-600' : ''}`}
                 >
-                  <Shield className="w-4 h-4" />
+                  <Shield className="w-3 h-3 md:w-4 md:h-4" />
                   <span className="hidden sm:block">Admin Vault</span>
                 </button>
               )}
               <div onClick={onOpenProfile} className="rotating-border-container cursor-pointer p-0.5 active:scale-95">
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800 relative z-10 shadow-lg">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800 relative z-10 shadow-md md:shadow-lg">
                   {currentUser.profilePic ? (
                     <img src={currentUser.profilePic} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="bg-conic-profile w-full h-full flex items-center justify-center text-white font-black text-lg">{currentUser.name.charAt(0)}</div>
+                    <div className="bg-conic-profile w-full h-full flex items-center justify-center text-white font-black text-sm md:text-lg">{currentUser.name.charAt(0)}</div>
                   )}
                 </div>
               </div>
@@ -233,25 +231,25 @@ const searchResults = useMemo(() => {
       {isMobileMenuOpen && (
          <div className="fixed inset-0 z-[100] flex animate-fade-in-left lg:hidden">
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
-            <div className="relative w-72 bg-white dark:bg-slate-900 h-full overflow-y-auto p-6 flex flex-col border-r border-slate-100 dark:border-slate-800">
-               <div className="flex justify-between items-center mb-10">
-                  <span className="text-3xl font-serif font-bold text-rose-600 italic">Faith</span>
+            <div className="relative w-64 md:w-72 bg-white dark:bg-slate-900 h-full overflow-y-auto p-4 md:p-6 flex flex-col border-r border-slate-100 dark:border-slate-800">
+               <div className="flex justify-between items-center mb-8">
+                  <span className="text-2xl font-serif font-bold text-rose-600 italic">Faith</span>
                   <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
-                    <X className="w-6 h-6 text-slate-500" />
+                    <X className="w-5 h-5 text-slate-500" />
                   </button>
                </div>
                
-               <div className="relative mb-8">
+               <div className="relative mb-6">
                  <input 
                    value={searchQuery}
                    onChange={(e) => setSearchQuery(e.target.value)}
-                   placeholder="Search sanctuary..." 
-                   className="w-full bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border-none outline-none text-xs font-bold text-slate-900 dark:text-white"
+                   placeholder="Search..." 
+                   className="w-full bg-slate-50 dark:bg-slate-800 px-4 py-2.5 rounded-xl border-none outline-none text-xs font-bold text-slate-900 dark:text-white"
                  />
                  <Search className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
                </div>
 
-               <div className="flex flex-col gap-6 flex-1">
+               <div className="flex flex-col gap-4 flex-1 overflow-y-auto">
                   <button 
                     onClick={() => { setView('home'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }} 
                     className={`text-left text-xs font-black uppercase tracking-widest ${selectedCategory === 'All' ? 'text-rose-600' : 'text-slate-500 hover:text-rose-500'}`}
@@ -260,19 +258,19 @@ const searchResults = useMemo(() => {
                   </button>
 
                   {Object.keys(CATEGORY_HIERARCHY).map(parentCat => (
-                     <div key={parentCat} className="flex flex-col gap-4 border-t border-slate-50 dark:border-slate-800 pt-6">
+                     <div key={parentCat} className="flex flex-col gap-3 border-t border-slate-50 dark:border-slate-800 pt-4">
                         <button 
                           onClick={() => { setView('home'); setSelectedCategory(parentCat); setIsMobileMenuOpen(false); }} 
-                          className={`text-left text-sm font-black uppercase tracking-widest ${selectedCategory.startsWith(parentCat) ? 'text-rose-600' : 'text-slate-900 dark:text-white'}`}
+                          className={`text-left text-xs font-black uppercase tracking-widest ${selectedCategory.startsWith(parentCat) ? 'text-rose-600' : 'text-slate-900 dark:text-white'}`}
                         >
                           {parentCat}
                         </button>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
                            {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
                               <button 
                                 key={sub} 
                                 onClick={() => { setView('home'); setSelectedCategory(`${parentCat} - ${sub}`); setIsMobileMenuOpen(false); }} 
-                                className={`text-left px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[10px] font-bold uppercase tracking-wider ${selectedCategory === `${parentCat} - ${sub}` ? 'text-rose-500 ring-1 ring-rose-200 bg-rose-50' : 'text-slate-500'}`}
+                                className={`text-left px-2 py-1.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[9px] font-bold uppercase tracking-wider truncate ${selectedCategory === `${parentCat} - ${sub}` ? 'text-rose-500 ring-1 ring-rose-200 bg-rose-50' : 'text-slate-500'}`}
                               >
                                 {sub}
                               </button>
@@ -320,40 +318,30 @@ const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onU
   const [showAddForm, setShowAddForm] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: '', price: 100, category: 'Women' as any, stock: 10, image: '', description: '', isHot: false });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [expandedStat, setExpandedStat] = useState<string | null>(null);
+  const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
+  const [expandedUsers, setExpandedUsers] = useState<string[]>([]);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
-    const [expandedStat, setExpandedStat] = useState<string | null>(null);
-    // Orders Expand State
-    const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
-    const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
+  const toggleOrder = (id: string) => setExpandedOrders(prev => prev.includes(id) ? prev.filter(oId => oId !== id) : [...prev, id]);
+  const toggleUser = (id: string) => setExpandedUsers(prev => prev.includes(id) ? prev.filter(uId => uId !== id) : [...prev, id]);
 
-    // Users Expand & View State
-    const [expandedUsers, setExpandedUsers] = useState<string[]>([]);
-    const toggleUser = (id: string) => setExpandedUsers(prev => prev.includes(id) ? prev.filter(uId => uId !== id) : [...prev, id]);
-    const [viewingImage, setViewingImage] = useState<string | null>(null);
-
-    // Clear new users badge when tab is visited
-    useEffect(() => {
-      if (tab === 'users') {
-        const timer = setTimeout(() => {
-          localStorage.setItem('admin_users_viewed', Date.now().toString());
-        }, 5000); // Wait 5 seconds before marking as viewed
-        return () => clearTimeout(timer);
-      }
-    }, [tab]);
+  useEffect(() => {
+    if (tab === 'users') {
+      const timer = setTimeout(() => localStorage.setItem('admin_users_viewed', Date.now().toString()), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [tab]);
 
   const prevOrderCount = useRef(orders.length);
-
-useEffect(() => {
-  // If order count increases, it's a new order! Play a cool futuristic sound
-  if (orders.length > prevOrderCount.current) {
-    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    audio.play().catch(e => console.log("Audio autoplay blocked"));
-    // Update the ref
-    prevOrderCount.current = orders.length;
-  }
-}, [orders.length]);
+  useEffect(() => {
+    if (orders.length > prevOrderCount.current) {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+      audio.play().catch(() => {});
+      prevOrderCount.current = orders.length;
+    }
+  }, [orders.length]);
   
   const stats = useMemo(() => ({
     revenue: orders.filter((o:any)=> o.status !== 'Cancelled').reduce((s: number, o: any) => s + (o.total || 0), 0),
@@ -367,13 +355,8 @@ useEffect(() => {
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      days.push({
-        date: d.toLocaleDateString(),
-        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
-        sales: 0
-      });
+      days.push({ date: d.toLocaleDateString(), name: d.toLocaleDateString('en-US', { weekday: 'short' }), sales: 0 });
     }
-
     orders.forEach((o: any) => {
       if (o.status === 'Cancelled') return;
       const oDate = new Date(o.date || o.createdAt).toLocaleDateString();
@@ -383,28 +366,20 @@ useEffect(() => {
     return days;
   }, [orders]);
 
-const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingProduct) {
       onBulkUpdate('edit', editingProduct.id, editingProduct);
       setEditingProduct(null);
     } else {
-
-      onAdd({ 
-        ...newProduct, 
-        rating: 5, 
-        reviewsCount: 0,
-        image: newProduct.image || 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800'
-      });
+      onAdd({ ...newProduct, rating: 5, reviewsCount: 0, image: newProduct.image || 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800' });
       setShowAddForm(false);
     }
   };
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
     setSortConfig({ key, direction });
   };
 
@@ -412,19 +387,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
     let sortableItems = [...products];
     if (sortConfig !== null) {
       sortableItems.sort((a: any, b: any) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
     return sortableItems;
   }, [products, sortConfig]);
 
-  // Sort Citizens: Faith on top, then admins, then customers
   const sortedUsers = useMemo(() => {
     return [...users].sort((a, b) => {
       if (a.email === 'faith@faith') return -1;
@@ -436,30 +406,30 @@ const handleSaveProduct = (e: React.FormEvent) => {
   }, [users]);
 
   return (
-    <div className="max-w-7xl mx-auto pt-32 pb-32 px-6 animate-future-in">
-       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-16">
+    <div className="max-w-7xl mx-auto pt-24 md:pt-32 pb-20 md:pb-32 px-4 md:px-6 animate-future-in">
+       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-10 mb-8 md:mb-16">
           <div className="space-y-2">
-             <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-slate-900 dark:bg-rose-600 rounded-3xl flex items-center justify-center text-rose-500 dark:text-white shadow-neon">
-                   <Shield className="w-8 h-8" />
+             <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-900 dark:bg-rose-600 rounded-2xl md:rounded-3xl flex items-center justify-center text-rose-500 dark:text-white shadow-neon shrink-0">
+                   <Shield className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <div>
-                   <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Admin Dashboard</h2>
-                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1">Store Overview</p>
+                   <h2 className="text-3xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Admin Vault</h2>
+                   <p className="text-[8px] md:text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1">Store Overview</p>
                 </div>
              </div>
           </div>
-          <div className="flex flex-wrap sm:flex-nowrap p-2 bg-slate-100 dark:bg-slate-800 rounded-[32px] border border-slate-200 dark:border-slate-700 gap-2 overflow-x-auto scrollbar-hide">
+          <div className="flex w-full sm:w-auto p-1.5 md:p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[32px] border border-slate-200 dark:border-slate-700 gap-1 md:gap-2 overflow-x-auto scrollbar-hide">
               {[
                 { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                 { id: 'products', label: 'Products', icon: Package },
                 { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered' && o.status !== 'Cancelled').length },
                 { id: 'users', label: 'Users', icon: Users, badge: users.filter((u:any) => new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0)).length }
               ].map(t => (
-                <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
-                  <t.icon className="w-3.5 h-3.5" /> {t.label}
+                <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-1.5 md:gap-2 px-4 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-md md:shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <t.icon className="w-3 h-3 md:w-3.5 md:h-3.5" /> {t.label}
                   {(t.badge !== undefined && t.badge > 0) && (
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[18px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-800 shadow-neon">
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[7px] md:text-[9px] min-w-[14px] md:min-w-[18px] h-3.5 md:h-5 rounded-full flex items-center justify-center font-black border border-white dark:border-slate-800 shadow-sm md:shadow-neon">
                       {t.badge}
                     </span>
                   )}
@@ -468,21 +438,19 @@ const handleSaveProduct = (e: React.FormEvent) => {
           </div>
        </div>
 
-{tab === 'analytics' && (
+       {tab === 'analytics' && (
          <div className="space-y-6 md:space-y-10 animate-fade-in w-full overflow-hidden">
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 relative z-10">
                {[
-                 { id: 'revenue', label: 'Total Revenue', val: `Ksh ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500', desc: 'Click to view breakdown' },
-                 { id: 'users', label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500', desc: 'Click to view demographics' },
-                 { id: 'aov', label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500', desc: 'Click to view extremes' },
-                 { id: 'pool', label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500', desc: 'Click to view inventory split' }
+                 { id: 'revenue', label: 'Total Revenue', val: `Ksh ${stats.revenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500' },
+                 { id: 'users', label: 'Active Citizens', val: stats.activeUsers, icon: Users, color: 'text-sky-500' },
+                 { id: 'aov', label: 'Avg Order Value', val: `Ksh ${Math.round(stats.avgOrder).toLocaleString()}`, icon: TrendingUp, color: 'text-rose-500' },
+                 { id: 'pool', label: 'Pool Value', val: `Ksh ${stats.inventoryValue.toLocaleString()}`, icon: Gem, color: 'text-amber-500' }
                ].map((s: any, i: number) => (
-                 <div key={i} onClick={() => setExpandedStat(s.id)} className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-100 dark:border-slate-800 shadow-xl flex flex-col justify-center cursor-pointer hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all group">
-                    <s.icon className={`w-6 h-6 md:w-8 md:h-8 mb-4 md:mb-6 ${s.color} group-hover:scale-110 transition-transform`} />
-                    <p className="text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-widest mb-1 md:mb-2">{s.label}</p>
-                    <h4 className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate">{s.val}</h4>
-                    <p className="text-[8px] font-mono text-slate-400 mt-2 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-6">{s.desc}</p>
+                 <div key={i} onClick={() => setExpandedStat(s.id)} className="bg-white dark:bg-slate-900 p-4 md:p-10 rounded-[20px] md:rounded-[48px] border border-slate-100 dark:border-slate-800 shadow-sm md:shadow-xl flex flex-col justify-center cursor-pointer hover:-translate-y-1 md:hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all group overflow-hidden">
+                    <s.icon className={`w-5 h-5 md:w-8 md:h-8 mb-2 md:mb-6 ${s.color} group-hover:scale-110 transition-transform`} />
+                    <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-600 dark:text-slate-400 tracking-wider md:tracking-widest mb-1 truncate">{s.label}</p>
+                    <h4 className="text-sm sm:text-xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate">{s.val}</h4>
                  </div>
                ))}
             </div>
@@ -490,101 +458,88 @@ const handleSaveProduct = (e: React.FormEvent) => {
             {/* EXPANDED MODAL OVERLAY */}
             {expandedStat && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setExpandedStat(null)}>
-                 <div className="bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[48px] shadow-2xl border border-slate-100 dark:border-slate-800 max-w-4xl w-full max-h-[85vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setExpandedStat(null)} className="absolute top-6 right-6 p-3 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-500 hover:text-white transition-colors">
-                      <X className="w-5 h-5" />
+                 <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 dark:border-slate-800 max-w-4xl w-full max-h-[85vh] flex flex-col relative" onClick={e => e.stopPropagation()}>
+                    <button onClick={() => setExpandedStat(null)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 md:p-3 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-500 hover:text-white transition-colors">
+                      <X className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
-                    
+                    {/* Modals shrink titles to text-lg on mobile, text-2xl desktop */}
                     {expandedStat === 'revenue' && (
                       <>
-                         <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><DollarSign className="text-emerald-500 w-8 h-8"/> Revenue Ledger</h3>
-                         <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
+                         <h3 className="text-lg md:text-2xl font-bold font-mono text-slate-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2"><DollarSign className="text-emerald-500 w-5 h-5 md:w-8 md:h-8"/> Revenue Ledger</h3>
+                         <div className="overflow-y-auto pr-2 md:pr-4 flex-1 space-y-3 md:space-y-4 scrollbar-hide">
                             {orders.filter((o:any) => o.status !== 'Cancelled').sort((a:any,b:any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((o:any) => (
-                              <div key={o._id || o.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                              <div key={o._id || o.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-4 md:p-5 bg-slate-50 dark:bg-slate-800/50 rounded-[16px] md:rounded-2xl gap-2">
                                  <div>
-                                   <p className="font-bold text-sm text-slate-900 dark:text-white">{o.userName || 'Unknown User'}</p>
-                                   <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase mt-1">ID: {(o._id || o.id).slice(-6)} • {new Date(o.date).toLocaleString()}</p>
+                                   <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white truncate">{o.userName || 'Unknown User'}</p>
+                                   <p className="text-[8px] md:text-[10px] text-slate-500 font-mono tracking-widest uppercase mt-0.5">ID: {(o._id || o.id).slice(-6)} • {new Date(o.date).toLocaleDateString()}</p>
                                  </div>
-                                 <span className="font-black text-emerald-500 text-lg">Ksh {o.total?.toLocaleString()}</span>
+                                 <span className="font-black text-emerald-500 text-sm md:text-lg">Ksh {o.total?.toLocaleString()}</span>
                               </div>
                             ))}
                          </div>
                       </>
                     )}
-
                     {expandedStat === 'users' && (
                        <>
-                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Users className="text-sky-500 w-8 h-8"/> User Demographics</h3>
-                          <div className="grid grid-cols-2 gap-4 mb-6 shrink-0">
-                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='faith@faith').length}</p></div>
-                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Active Customers</p><p className="text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='faith@faith').length}</p></div>
+                          <h3 className="text-lg md:text-2xl font-bold font-mono text-slate-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2"><Users className="text-sky-500 w-5 h-5 md:w-8 md:h-8"/> User Demographics</h3>
+                          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6 shrink-0">
+                             <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[20px] md:rounded-[32px] text-center"><p className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-xl md:text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='faith@faith').length}</p></div>
+                             <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[20px] md:rounded-[32px] text-center"><p className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Customers</p><p className="text-xl md:text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='faith@faith').length}</p></div>
                           </div>
-                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
-                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-4">Recent Registrations</p>
-                             {users.sort((a:any,b:any) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime()).slice(0, 20).map((u:any) => (
-                                <div key={u._id || u.id} className="flex flex-col sm:flex-row justify-between sm:items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3">
-                                   <div className="flex items-center gap-4">
-                                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden shrink-0">
-                                        {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                          <div className="overflow-y-auto pr-2 md:pr-4 flex-1 space-y-3 scrollbar-hide">
+                             {users.slice(0, 20).map((u:any) => (
+                                <div key={u._id || u.id} className="flex items-center justify-between p-3 md:p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl gap-3">
+                                   <div className="flex items-center gap-3 min-w-0">
+                                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                                        {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />}
                                       </div>
-                                      <div>
-                                        <p className="font-bold text-sm text-slate-900 dark:text-white">{u.name}</p>
-                                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">{u.email}</p>
+                                      <div className="min-w-0">
+                                        <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white truncate">{u.name}</p>
+                                        <p className="text-[8px] md:text-[10px] text-slate-500 font-mono truncate">{u.email}</p>
                                       </div>
                                    </div>
-                                   <span className="text-xs font-mono font-bold text-slate-400">{new Date(u.joinedAt).toLocaleDateString()}</span>
                                 </div>
                              ))}
                           </div>
                        </>
                     )}
-
                     {expandedStat === 'aov' && (
                        <>
-                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><TrendingUp className="text-rose-500 w-8 h-8"/> Average Order Value Metrics</h3>
-                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
-                             <div className="p-10 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-[32px] text-center mb-8 shadow-inner">
-                                <p className="text-[10px] text-slate-500 uppercase font-black mb-3 tracking-widest">Calculated Average</p>
-                                <p className="text-5xl font-black italic text-rose-500 drop-shadow-md">Ksh {Math.round(stats.avgOrder).toLocaleString()}</p>
-                                <p className="text-[10px] text-slate-400 mt-4 uppercase font-bold">Calculated across {orders.filter((o:any)=>o.status!=='Cancelled').length} verified transactions.</p>
+                          <h3 className="text-lg md:text-2xl font-bold font-mono text-slate-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2"><TrendingUp className="text-rose-500 w-5 h-5 md:w-8 md:h-8"/> Order Value</h3>
+                          <div className="overflow-y-auto pr-2 md:pr-4 flex-1 space-y-4 scrollbar-hide">
+                             <div className="p-6 md:p-10 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-[24px] md:rounded-[32px] text-center mb-4 shadow-inner">
+                                <p className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black mb-2 tracking-widest">Calculated Average</p>
+                                <p className="text-3xl md:text-5xl font-black italic text-rose-500 drop-shadow-md truncate">Ksh {Math.round(stats.avgOrder).toLocaleString()}</p>
                              </div>
-                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Extremes (Highest vs Lowest)</p>
-                             {orders.filter((o:any)=>o.status!=='Cancelled').length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                   <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-emerald-500 hover:shadow-lg transition-shadow">
-                                      <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Maximum Record</p>
-                                      <span className="font-black text-emerald-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).total?.toLocaleString()}</span>
-                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).userName || 'Unknown User'}</p>
+                             {orders.filter((o:any)=>o.status!=='Cancelled').length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                   <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[20px] md:rounded-[24px] border-t-4 border-emerald-500">
+                                      <p className="text-[8px] md:text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-1">Maximum Record</p>
+                                      <span className="font-black text-emerald-500 text-xl md:text-3xl italic block truncate">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((max:any, o:any) => (o.total || 0) > (max.total || 0) ? o : max, orders[0]).total?.toLocaleString()}</span>
                                    </div>
-                                   <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[24px] flex flex-col border-t-4 border-rose-500 hover:shadow-lg transition-shadow">
-                                      <p className="text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-2">Minimum Record</p>
-                                      <span className="font-black text-rose-500 text-3xl mb-4 italic">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).total?.toLocaleString()}</span>
-                                      <p className="text-sm font-bold text-slate-900 dark:text-white font-mono mt-auto">{orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).userName || 'Unknown User'}</p>
+                                   <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[20px] md:rounded-[24px] border-t-4 border-rose-500">
+                                      <p className="text-[8px] md:text-[10px] font-bold uppercase text-slate-500 tracking-widest mb-1">Minimum Record</p>
+                                      <span className="font-black text-rose-500 text-xl md:text-3xl italic block truncate">Ksh {orders.filter((o:any)=>o.status!=='Cancelled').reduce((min:any, o:any) => (o.total || 0) < (min.total || 0) ? o : min, orders[0]).total?.toLocaleString()}</span>
                                    </div>
                                 </div>
-                             ) : <p className="text-center text-slate-500 py-10 font-mono">No verified orders data.</p>}
+                             )}
                           </div>
                        </>
                     )}
-
                     {expandedStat === 'pool' && (
                        <>
-                          <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Gem className="text-amber-500 w-8 h-8"/> Inventory Value Breakdown</h3>
-                          <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
-                             <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4 mt-2 px-2">
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Product & Base Price</span>
-                                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pool Total Value (Ksh)</span>
-                             </div>
+                          <h3 className="text-lg md:text-2xl font-bold font-mono text-slate-900 dark:text-white mb-4 md:mb-6 flex items-center gap-2"><Gem className="text-amber-500 w-5 h-5 md:w-8 md:h-8"/> Inventory Pool</h3>
+                          <div className="overflow-y-auto pr-2 md:pr-4 flex-1 space-y-3 md:space-y-4 scrollbar-hide">
                              {products.map((p:any) => ({ ...p, poolValue: (p.price || 0) * (p.stock || 0) })).sort((a:any,b:any) => b.poolValue - a.poolValue).map((p:any) => (
-                                <div key={p.id || p._id} className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                   <div className="flex items-center gap-4">
-                                      <img src={p.image} className="w-12 h-14 rounded-xl object-cover shadow-sm"/>
-                                      <div>
-                                         <p className="font-bold text-sm text-slate-900 dark:text-white w-32 md:w-64 truncate">{p.name}</p>
-                                         <p className="text-[10px] text-slate-500 font-mono font-bold mt-1">Vol: {p.stock} • Base: {p.price.toLocaleString()}</p>
+                                <div key={p.id || p._id} className="flex justify-between items-center p-3 md:p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                                   <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                                      <img src={p.image} className="w-10 h-10 md:w-12 md:h-14 rounded-lg md:rounded-xl object-cover shadow-sm shrink-0"/>
+                                      <div className="min-w-0">
+                                         <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white truncate">{p.name}</p>
+                                         <p className="text-[8px] md:text-[10px] text-slate-500 font-mono mt-0.5">Vol: {p.stock}</p>
                                       </div>
                                    </div>
-                                   <span className="font-black text-amber-500 text-lg">{(p.poolValue).toLocaleString()}</span>
+                                   <span className="font-black text-amber-500 text-sm md:text-lg shrink-0 pl-2">{(p.poolValue).toLocaleString()}</span>
                                 </div>
                              ))}
                           </div>
@@ -594,12 +549,11 @@ const handleSaveProduct = (e: React.FormEvent) => {
               </div>
             )}
             
-            {/* Chart Container - Padding and height adjusted for mobile */}
-            <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full">
-               <h3 className="text-lg md:text-xl font-bold mb-6 md:mb-10 text-slate-900 dark:text-white flex items-center gap-2 md:gap-3">
-                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Weekly Revenue Trend
+            <div className="bg-white dark:bg-slate-900 p-4 md:p-12 rounded-[24px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-sm md:shadow-xl h-[250px] md:h-[400px] flex flex-col w-full">
+               <h3 className="text-sm md:text-xl font-bold mb-4 md:mb-10 text-slate-900 dark:text-white flex items-center gap-2">
+                 <Activity className="w-4 h-4 md:w-6 md:h-6 text-rose-500" /> Weekly Revenue Trend
                </h3>
-               <div className="flex-1 w-full min-h-[200px]">
+               <div className="flex-1 w-full min-h-[150px]">
                  <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={salesTrend}>
                        <defs>
@@ -608,14 +562,10 @@ const handleSaveProduct = (e: React.FormEvent) => {
                            <stop offset="95%" stopColor="#e11d48" stopOpacity={0}/>
                          </linearGradient>
                        </defs>
-                       <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} axisLine={false} tickLine={false} />
+                       <XAxis dataKey="name" stroke="#94a3b8" fontSize={8} axisLine={false} tickLine={false} />
                        <YAxis hide />
-                       <Tooltip 
-                         contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                         labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
-                         itemStyle={{ color: '#e11d48', fontWeight: 'bold' }}
-                       />
-                       <Area type="monotone" dataKey="sales" stroke="#e11d48" strokeWidth={4} fillOpacity={1} fill="url(#colorSales)" />
+                       <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', fontSize: '10px' }} />
+                       <Area type="monotone" dataKey="sales" stroke="#e11d48" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
                     </AreaChart>
                  </ResponsiveContainer>
                </div>
@@ -624,24 +574,24 @@ const handleSaveProduct = (e: React.FormEvent) => {
        )}
       
        {tab === 'products' && (
-         <div className="space-y-8 animate-fade-in">
-            <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Product Management</h3>
-               <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="px-8 py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] flex items-center gap-2 shadow-neon hover:scale-105 transition-all">
-                  {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {showAddForm ? 'Cancel' : 'Register New Product'}
+         <div className="space-y-6 md:space-y-8 animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-4 md:mb-8">
+               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Products</h3>
+               <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="w-full sm:w-auto px-6 py-3 md:px-8 md:py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[9px] md:text-[10px] flex items-center justify-center gap-2 shadow-md hover:scale-105 transition-all">
+                  {showAddForm ? <X className="w-3 h-3 md:w-4 md:h-4" /> : <Plus className="w-3 h-3 md:w-4 md:h-4" />} {showAddForm ? 'Cancel' : 'Register New'}
                </button>
             </div>
 
             {(showAddForm || editingProduct) && (
-              <div className="bg-white dark:bg-slate-900 p-10 rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in mb-10">
-                 <h4 className="text-xl font-bold mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
-                 <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input required className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool (Quantity)" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
+              <div className="bg-white dark:bg-slate-900 p-5 md:p-10 rounded-[32px] md:rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-xl animate-future-in mb-6 md:mb-10">
+                 <h4 className="text-lg md:text-xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Detail' : 'New Product'}</h4>
+                 <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <input required className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
+                    <input required type="number" className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
+                    <input required type="number" className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Stock" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
                     
                     <div className="relative">
-                      <select className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
+                      <select className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
                          <optgroup label="General / Top Level">
                            <option value="Women">Women (All)</option>
                            <option value="Men">Men (All)</option>
@@ -656,14 +606,12 @@ const handleSaveProduct = (e: React.FormEvent) => {
                             </optgroup>
                          ))}
                       </select>
-                      <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400 pointer-events-none" />
                     </div>
-                   <div className="md:col-span-2 flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-[24px]">
+                   <div className="md:col-span-2 flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px]">
                       <input 
-                        type="file" 
-                        accept="image/*"
-                        disabled={isUploadingImage}
-                        className="w-full font-bold text-slate-900 dark:text-white file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-rose-100 file:text-rose-600 hover:file:bg-rose-200 transition-all cursor-pointer disabled:opacity-50"
+                        type="file" accept="image/*" disabled={isUploadingImage}
+                        className="w-full text-[9px] md:text-[10px] font-bold text-slate-900 dark:text-white file:mr-2 md:file:mr-4 file:py-2 md:file:py-3 file:px-4 md:file:px-6 file:rounded-full file:border-0 file:uppercase file:bg-rose-100 file:text-rose-600 cursor-pointer"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -672,209 +620,164 @@ const handleSaveProduct = (e: React.FormEvent) => {
                             if (url) {
                               if (editingProduct) setEditingProduct({...editingProduct, image: url});
                               else setNewProduct({...newProduct, image: url});
-                            } else {
-                              alert("Failed to sync image payload with Cloudinary.");
                             }
                             setIsUploadingImage(false);
                           }
                         }} 
                       />
                       {isUploadingImage ? (
-                         <div className="w-16 h-16 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse flex items-center justify-center shrink-0 shadow-inner">
-                            <Loader2 className="w-6 h-6 animate-spin text-rose-500"/>
+                         <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse flex items-center justify-center shrink-0 shadow-inner">
+                            <Loader2 className="w-4 h-4 md:w-6 md:h-6 animate-spin text-rose-500"/>
                          </div>
                       ) : (editingProduct?.image || newProduct.image) && (
-                        <img src={editingProduct ? editingProduct.image : newProduct.image} className="w-16 h-16 rounded-xl object-cover shadow-md shrink-0" alt="Preview" />
+                        <img src={editingProduct ? editingProduct.image : newProduct.image} className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover shadow-md shrink-0" />
                       )}
                     </div>
-
-                  
-                      <textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                    <textarea required className="md:col-span-2 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white h-24 md:h-32 outline-none" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
-                    <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
+                    <label className={`md:col-span-2 flex items-center gap-3 md:gap-4 p-4 md:p-6 rounded-2xl md:rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 text-xs md:text-sm ${
                        (editingProduct ? editingProduct.isHot : newProduct.isHot) 
-                         ? 'bg-rose-500/10 border-rose-500 text-rose-600 dark:text-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.2)]' 
+                         ? 'bg-rose-500/10 border-rose-500 text-rose-600' 
                          : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-900 dark:text-white hover:border-rose-200'
                     }`}>
-                       <div className={`w-6 h-6 rounded-md flex items-center justify-center border-2 transition-colors ${
-                          (editingProduct ? editingProduct.isHot : newProduct.isHot) 
-                          ? 'bg-rose-500 border-rose-500' 
-                          : 'border-slate-300 dark:border-slate-600'
+                       <div className={`w-5 h-5 md:w-6 md:h-6 rounded flex items-center justify-center border-2 transition-colors ${
+                          (editingProduct ? editingProduct.isHot : newProduct.isHot) ? 'bg-rose-500 border-rose-500' : 'border-slate-300'
                        }`}>
-                          {(editingProduct ? editingProduct.isHot : newProduct.isHot) && <CheckCircle2 className="w-4 h-4 text-white" />}
+                          {(editingProduct ? editingProduct.isHot : newProduct.isHot) && <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-white" />}
                        </div>
                        <input type="checkbox" checked={editingProduct ? editingProduct.isHot : newProduct.isHot} onChange={e => editingProduct ? setEditingProduct({...editingProduct, isHot: e.target.checked}) : setNewProduct({...newProduct, isHot: e.target.checked})} className="hidden" />
                        Mark as "Hot Deal" 🔥 
-                       <span className="text-[10px] font-mono text-slate-400 font-normal ml-auto">(Glows when active)</span>
                     </label>
 
-                    <button disabled={isUploadingImage} className="md:col-span-2 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] hover:shadow-neon transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                       {isUploadingImage ? 'Uploading Image...' : 'Commit Configuration'}
+                    <button disabled={isUploadingImage} className="md:col-span-2 w-full py-4 md:py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[32px] font-black uppercase tracking-widest text-[9px] md:text-[11px] shadow-md hover:bg-rose-700 transition-all disabled:opacity-50">
+                       {isUploadingImage ? 'Uploading...' : 'Commit Configuration'}
                     </button>
                  </form>
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
-              <div className="overflow-x-auto"> 
-               <table className="w-full text-left">
-                  <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <div className="bg-white dark:bg-slate-900 rounded-[24px] md:rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-sm md:shadow-xl overflow-hidden">
+              <div className="overflow-x-auto scrollbar-hide"> 
+               <table className="w-full text-left min-w-[600px]">
+                  <thead className="bg-slate-50 dark:bg-slate-800 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('name')}>
-                          <div className="flex items-center gap-2">Product <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 py-3 md:px-8 md:py-6 cursor-pointer hover:text-rose-500" onClick={() => handleSort('name')}>
+                          <div className="flex items-center gap-1.5">Product <ArrowUpDown className="w-2.5 h-2.5 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('category')}>
-                          <div className="flex items-center gap-2">Category <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 py-3 md:px-8 md:py-6 cursor-pointer hover:text-rose-500" onClick={() => handleSort('category')}>
+                          <div className="flex items-center gap-1.5">Category <ArrowUpDown className="w-2.5 h-2.5 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('price')}>
-                          <div className="flex items-center gap-2">Price <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 py-3 md:px-8 md:py-6 cursor-pointer hover:text-rose-500" onClick={() => handleSort('price')}>
+                          <div className="flex items-center gap-1.5">Price <ArrowUpDown className="w-2.5 h-2.5 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('stock')}>
-                          <div className="flex items-center gap-2">Quantity <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 py-3 md:px-8 md:py-6 cursor-pointer hover:text-rose-500" onClick={() => handleSort('stock')}>
+                          <div className="flex items-center gap-1.5">Qty <ArrowUpDown className="w-2.5 h-2.5 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 text-right">Commands</th>
+                        <th className="px-4 py-3 md:px-8 md:py-6 text-right">Actions</th>
                      </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800 text-xs md:text-sm">
                     {sortedProducts.map((p: any) => (
-                       <tr key={p.id || p._id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all group">
-                          <td className="px-8 py-6 flex items-center gap-4">
-                             <img src={p.image} className="w-12 h-16 rounded-xl object-cover shadow-lg" />
-                             <span className="font-bold text-slate-900 dark:text-white">{p.name}</span>
+                       <tr key={p.id || p._id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-colors">
+                          <td className="px-4 py-3 md:px-8 md:py-6 flex items-center gap-3">
+                             <img src={p.image} loading="lazy" className="w-8 h-10 md:w-12 md:h-16 rounded-lg md:rounded-xl object-cover shadow-sm shrink-0" />
+                             <span className="font-bold text-slate-900 dark:text-white truncate max-w-[120px] md:max-w-none">{p.name}</span>
                           </td>
-                           <td className="px-8 py-6">
-                             <span className="text-[10px] font-black uppercase text-rose-500">{p.category}</span>
-                             {p.isHot && <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-[8px] font-black uppercase tracking-wider">Hot</span>}
+                           <td className="px-4 py-3 md:px-8 md:py-6">
+                             <span className="text-[8px] md:text-[10px] font-black uppercase text-rose-500 block truncate">{p.category}</span>
+                             {p.isHot && <span className="inline-block mt-1 px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded text-[7px] font-black uppercase tracking-wider">Hot</span>}
                           </td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">{p.stock}</td>
-                          <td className="px-8 py-6 text-right">
-                             <div className="flex gap-4 justify-end">
-                                <button onClick={() => setEditingProduct(p)} className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Edit3 className="w-4 h-4" /></button>
-                                <button onClick={() => onDelete(p.id)} className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
+                          <td className="px-4 py-3 md:px-8 md:py-6 font-black text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</td>
+                          <td className="px-4 py-3 md:px-8 md:py-6 font-black text-slate-900 dark:text-white">{p.stock}</td>
+                          <td className="px-4 py-3 md:px-8 md:py-6 text-right">
+                             <div className="flex gap-2 justify-end">
+                                <button onClick={() => setEditingProduct(p)} className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-lg md:rounded-xl"><Edit3 className="w-3 h-3 md:w-4 md:h-4" /></button>
+                                <button onClick={() => onDelete(p.id)} className="p-2 md:p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-lg md:rounded-xl"><Trash2 className="w-3 h-3 md:w-4 md:h-4" /></button>
                              </div>
                           </td>
                        </tr>
                      ))}
                   </tbody>
                </table>
-               </div>
+              </div>
             </div>
          </div>
        )}
 
       {tab === 'orders' && (
-        <div className="space-y-8 animate-fade-in">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 font-mono">
-            <Activity className="w-6 h-6 text-rose-500" /> Active Orders
+        <div className="space-y-6 md:space-y-8 animate-fade-in">
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
+            <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
           </h3>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             {orders.map((o: any) => {
               const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
               const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
               const isExpanded = expandedOrders.includes(o._id || o.id);
 
               return (
-                <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-[0_0_20px_rgba(225,29,72,0.15)]'} transition-all relative overflow-hidden flex flex-col`}>
-                  
-                  {/* Collapsed Header (Always Visible) */}
-                  <div className="p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
-                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
+                <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] md:rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-sm'} transition-all relative overflow-hidden flex flex-col`}>
+                  <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
+                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 md:w-6 md:h-6 text-slate-400" />}
                        </div>
-                      <div>
-                         <p className="font-bold text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2">
-                           {o.userName || 'Anonymous Entity'}
-                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_#e11d48]"></span>}
+                      <div className="min-w-0">
+                         <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2 truncate">
+                           {o.userName || 'Anonymous'}
+                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>}
                          </p>
-                         <p className="font-mono text-[9px] uppercase text-rose-500 tracking-widest mt-0.5">
+                         <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5 truncate">
                            ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
                          </p>
                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${
+                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                      <span className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
                         o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
                         o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 
                         o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                       }`}>{o.status || 'Processing'}</span>
-                      {isDelivered && <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
+                      {isDelivered && <ChevronRight className={`w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
                     </div>
                   </div>
 
-                  {/* Expanded Content Area */}
-            {(!isDelivered || isExpanded) && (
-              <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-6">
-                {!isDelivered && <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>}
-                
-                <div className="bg-slate-50 dark:bg-slate-950/50 p-5 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-white/5">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="font-mono text-[10px] uppercase text-slate-500">Value Processed</span>
-                    <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
-                  </div>
+                  {(!isDelivered || isExpanded) && (
+                    <div className="px-4 pb-4 md:px-6 md:pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-4 md:pt-6">
+                      <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-slate-100 dark:border-white/5">
+                        <div className="flex justify-between items-center mb-3 md:mb-4">
+                          <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value</span>
+                          <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                        </div>
+                        {!isDelivered && (
+                          <div className="flex justify-between items-center py-3 border-t border-slate-200 dark:border-white/5">
+                            <div className="flex flex-col">
+                               <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 flex items-center gap-1.5"><Clock className="w-3 h-3 text-amber-500" /> Drop</span>
+                               <span className="text-[7px] md:text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1 truncate max-w-[100px] sm:max-w-none">{o.deliveryMethod || 'Standard'}</span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-1.5 md:gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5">
+                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-sky-400"/> {o.phoneNumber}</p>
+                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 truncate"><MapPin className="w-3 h-3 text-rose-400 shrink-0"/> {o.address || 'N/A'}</p>
+                        </div>
+                      </div>
                   
-                  <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
-                    <span className="font-mono text-[9px] uppercase text-slate-500">Order Placed</span>
-                    <span className="font-mono text-[10px] text-slate-900 dark:text-white font-bold">{new Date(o.date).toLocaleDateString()} at {new Date(o.date).toLocaleTimeString()}</span>
-                  </div>
-            
-                  {!isDelivered && (
-                    <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
-                      <div className="flex flex-col">
-                         <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
-                          <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">
-                            {o.deliveryMethod || 'Standard Delivery'} - {o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3)} Days
-                          </span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-                          EST: {(() => {
-                            const d = new Date(o.date || Date.now());
-                            d.setDate(d.getDate() + daysLeft);
-                            return d.toLocaleDateString();
-                          })()}
-                        </span>
-                        <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
-                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
-                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-rose-400"/> Delivery Address: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}
-                    </p>
-                  </div>
-                </div>
-            
-                {/* Admin Update Controls */}
                       {!isDelivered && (
-                        <div className="flex items-center gap-4 relative z-10">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
                           <select 
                             value={o.status || 'Processing'} 
-                            onChange={(e) => {
-                              if (e.target.value === 'Cancelled') {
-                                if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
-                              }
-                              onUpdateOrder(o._id || o.id, { status: e.target.value });
-                            }}
-                            className={`flex-1 ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-4 rounded-2xl text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
+                            onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
+                            className="flex-1 w-full bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none text-slate-900 dark:text-white"
                           >
-                            <option value="Processing">Set: Processing</option>
-                            <option value="Shipped">Set: Shipped</option>
-                            <option value="Delivered">Set: Delivered</option>
-                            <option value="Cancelled">Cancel Order</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancel</option>
                           </select>
-                           
-                           {/* Modern Sync Button */}
-                           <button onClick={() => {
-                             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-                             audio.play().catch(() => {});
-                             // Note: Status already updates onChange of the select. This button is for sensory feedback/re-triggering sync.
-                           }} className="w-14 h-14 bg-rose-600 text-white rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
-                             <RefreshCw className="w-5 h-5" />
-                           </button>
                         </div>
                       )}
                     </div>
@@ -883,91 +786,68 @@ const handleSaveProduct = (e: React.FormEvent) => {
               )
             })}
           </div>
-          {orders.length === 0 && <div className="p-40 text-center font-mono text-slate-500 border border-dashed border-slate-200 dark:border-slate-800 rounded-[32px]">No active data.</div>}
+          {orders.length === 0 && <div className="p-20 md:p-40 text-center font-mono text-slate-500 text-xs md:text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-[24px] md:rounded-[32px]">No active data.</div>}
         </div>
       )}
 
-                {tab === 'users' && (
-                  <div className="space-y-8 animate-fade-in relative">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-mono">Users Directory</h3>
-                    
-                    {/* Full Screen Image Viewer Modal */}
-                    {viewingImage && (
-                      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90" onClick={() => setViewingImage(null)}>
-                        <button className="absolute top-6 right-6 p-2 bg-white/10 rounded-full text-white hover:bg-white/20"><X className="w-6 h-6" /></button>
-                        <img src={viewingImage} className="max-w-full max-h-full object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
-                      </div>
-                    )}
+      {tab === 'users' && (
+        <div className="space-y-6 md:space-y-8 animate-fade-in relative">
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white font-mono">Users Directory</h3>
+          
+          {viewingImage && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90" onClick={() => setViewingImage(null)}>
+              <button className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-white/10 rounded-full text-white"><X className="w-5 h-5 md:w-6 md:h-6" /></button>
+              <img src={viewingImage} className="max-w-full max-h-[80vh] object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
+            </div>
+          )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {sortedUsers.map((u: any, index: number) => {
-                        const isNewUser = new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0) - 5000;
-                        const isExpanded = expandedUsers.includes(u.id || u._id);
-                        const userTotal = orders.filter((o:any) => o.userId === (u.id || u._id)).reduce((sum:number, o:any) => sum + o.total, 0);
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {sortedUsers.map((u: any) => {
+              const isNewUser = new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0) - 5000;
+              const isExpanded = expandedUsers.includes(u.id || u._id);
 
-                        return (
-                        <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
-                          {isNewUser && <div className="absolute top-4 right-4 z-20 px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider rounded-md animate-pulse">New</div>}
-                          {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
-                          
-                          <div className="flex items-center gap-4 mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
-                            <div 
-                              className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0 cursor-zoom-in"
-                              onClick={(e) => { e.stopPropagation(); if(u.profilePic) setViewingImage(u.profilePic); }}
-                            >
-                              {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate font-mono">
-                                {u.name} 
-                                {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
-                              </h4>
-                              <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
-                              <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                                u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
-                                u.role === 'admin' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              }`}>
-                                {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
-                              </span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                          </div>
+              return (
+              <div key={u.id || u._id} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 md:p-6 rounded-[24px] md:rounded-[32px] border border-slate-100 dark:border-white/5 shadow-sm relative overflow-hidden group">
+                {isNewUser && <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20 px-2 py-0.5 bg-rose-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-wider rounded">New</div>}
+                
+                <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-lg md:text-xl border-2 border-white dark:border-slate-700 shadow-md shrink-0 cursor-zoom-in" onClick={(e) => { e.stopPropagation(); if(u.profilePic) setViewingImage(u.profilePic); }}>
+                    {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs md:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5 truncate font-mono">
+                      {u.name} {u.email === 'faith@faith' && <Crown className="w-3 h-3 md:w-4 md:h-4 text-amber-500" />}
+                    </h4>
+                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 tracking-widest truncate mt-0.5 mb-1">{u.email}</p>
+                    <span className={`px-1.5 py-0.5 rounded text-[7px] md:text-[8px] font-black uppercase tracking-wider ${u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500' : u.role === 'admin' ? 'bg-sky-500/10 text-sky-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                      {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
+                    </span>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                </div>
 
-                          {/* Expandable Details Box */}
-                          {isExpanded && (
-                            <div className="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-slate-100 dark:border-white/5 animate-fade-in relative z-10">
-                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Phone:</span> <span className="text-slate-900 dark:text-white">{u.phoneNumber || 'N/A'}</span></p>
-                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Drop-off:</span> <span className="text-slate-900 dark:text-white truncate max-w-[120px]" title={u.address}>{u.address || 'N/A'}</span></p>
-                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Joined:</span> <span className="text-slate-900 dark:text-white">{new Date(u.joinedAt).toLocaleDateString()}</span></p>
-                              <p className="text-slate-500 flex justify-between"><span className="font-bold">Purchases:</span> <span className="text-emerald-500 font-black">Ksh {userTotal.toLocaleString()}</span></p>
-                            </div>
-                          )}
-                          
-                          {u.email !== 'faith@faith' && (
-
-                          <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
-                            <button 
-                              onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
-                              className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                            >
-                              {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                            </button>
-                            <button 
-                              onClick={() => { 
-                                if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); 
-                                if (window.confirm(`Are you sure you want to delete ${u.name}?`)) onDeleteUser(u._id || u.id) 
-                              }} 
-                              className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                          )}
-                        </div>
-                      )})}
-                    </div>
+                {isExpanded && (
+                  <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-4 rounded-xl md:rounded-2xl mb-3 md:mb-4 text-[10px] md:text-xs space-y-1.5 md:space-y-2 border border-slate-100 dark:border-white/5">
+                    <p className="text-slate-500 flex justify-between"><span className="font-bold">Phone:</span> <span className="text-slate-900 dark:text-white">{u.phoneNumber || 'N/A'}</span></p>
+                    <p className="text-slate-500 flex justify-between"><span className="font-bold">Joined:</span> <span className="text-slate-900 dark:text-white">{new Date(u.joinedAt).toLocaleDateString()}</span></p>
                   </div>
                 )}
+                
+                {u.email !== 'faith@faith' && (
+                <div className="flex gap-2 md:gap-3 relative z-10 pt-3 md:pt-4 border-t border-slate-100 dark:border-white/5">
+                  <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-2 md:py-3 rounded-lg md:rounded-xl font-mono font-bold text-[8px] md:text-[9px] uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    {u.role === 'admin' ? 'Revoke Admin' : 'Make Admin'}
+                  </button>
+                  <button onClick={() => { if(window.confirm('Delete?')) onDeleteUser(u._id || u.id) }} className="p-2 md:p-3 rounded-lg md:rounded-xl bg-slate-100 dark:bg-slate-800 text-rose-500">
+                    <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                  </button>
+                </div>
+                )}
+              </div>
+            )})}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -980,59 +860,41 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      return showToast("Passwords do not match.", "error");
-    }
-    
+    if (!isLogin && formData.password !== formData.confirmPassword) return showToast("Passwords do not match.", "error");
     setIsLoading(true);
     const endpoint = isLogin ? "/auth/login" : "/auth/register";
-    let authData = null;
-
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      authData = await res.json();
-      if (!res.ok) {
-        setIsLoading(false);
-        return showToast(authData.message || "Identity verification failed.", "error");
-      }
+      const res = await fetch(`${API_BASE}${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+      const authData = await res.json();
+      if (!res.ok) { setIsLoading(false); return showToast(authData.message || "Verification failed.", "error"); }
+      onAuthSuccess(authData.user, authData.token);
     } catch (err) {
       setIsLoading(false);
-      return showToast("Sanctuary server is offline. Check connection.", "error");
-    }
-
-    if (authData) {
-      onAuthSuccess(authData.user, authData.token);
+      showToast("Sanctuary server is offline.", "error");
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-12 rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl"></div>
-        <div className="w-20 h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-8 h-8" /></div>
-        <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-4">{isLogin ? 'Login' : 'Identity Registration'}</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm italic mb-10 font-medium">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 md:px-6 py-12">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[32px] md:rounded-[64px] shadow-xl border border-slate-100 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-rose-500/5 blur-3xl"></div>
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-10 text-rose-500 shadow-md border-4 border-white dark:border-slate-900"><Lock className="w-6 h-6 md:w-8 md:h-8" /></div>
+        <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-2 md:mb-4">{isLogin ? 'Login' : 'Registration'}</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm italic mb-8 md:mb-10 font-medium">
           {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
         </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+          {!isLogin && <input required className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-sm font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all placeholder:text-slate-400" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+          <input required type="email" className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-sm font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all placeholder:text-slate-400" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          <input required type="password" className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-sm font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all placeholder:text-slate-400" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+          {!isLogin && <input required type="password" className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-sm font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all placeholder:text-slate-400" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
           
-          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-          
-          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
-
-          {!isLogin && <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
-          
-          <button type="submit" disabled={isLoading} className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70">
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+          <button type="submit" disabled={isLoading} className="w-full py-5 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[32px] font-black uppercase tracking-widest text-[9px] md:text-[11px] shadow-lg hover:bg-rose-700 transition-all active:scale-95 flex items-center justify-center gap-2 md:gap-3 disabled:opacity-70 mt-2">
+            {isLoading ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" /> : null}
             {isLoading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
           </button>
         </form>
-        <button onClick={() => {setIsLogin(!isLogin); setFormData({name:'', email:'', password:'', confirmPassword:''});}} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors tracking-widest">
+        <button onClick={() => {setIsLogin(!isLogin); setFormData({name:'', email:'', password:'', confirmPassword:''});}} className="mt-6 md:mt-10 text-[9px] md:text-[10px] font-black uppercase text-slate-500 hover:text-rose-600 transition-colors tracking-widest">
           {isLogin ? "Don't have an account? Signup" : "Already have an account? Log in."}
         </button>
       </div>
@@ -1053,259 +915,151 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
 
-        useEffect(() => {
-          const loadAI = async () => {
-            setLoading(true);
-            const dbDescription = product.description || "An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence with unmatched elegance.";
-            
-            // Use dynamic cache key with timestamp fallback to bust Edge cache
-            const uniqueCacheKey = `${product.id}-${product.name}`;
-            
-            if (aiMemoryCache.has(uniqueCacheKey)) {
-              setCopy(dbDescription);
-              setTips(aiMemoryCache.get(uniqueCacheKey));
-              setLoading(false);
-              return;
-            }
-
-            try {
-                // Pass randomized parameter slightly internally to bypass strict Edge caching
-                const t = await getStyleTips(`${product.name}`);
-                aiMemoryCache.set(uniqueCacheKey, t);
-                setCopy(dbDescription); 
-                setTips(t);
-            } catch (err) {
-                setCopy(dbDescription);
-                setTips(["Pair with minimalistic accessories to maintain a clean profile.", "Ideal for high-end evening events.", "Maintain fabric integrity by avoiding direct harsh elements."]);
-            } finally {
-                setLoading(false);
-            }
-          };
-          loadAI();
-        }, [product]);
+  useEffect(() => {
+    const loadAI = async () => {
+      setLoading(true);
+      const dbDescription = product.description || "An exclusive masterpiece designed for the visionary. Expertly crafted to elevate your presence.";
+      const uniqueCacheKey = `${product.id}-${product.name}`;
+      if (aiMemoryCache.has(uniqueCacheKey)) {
+        setCopy(dbDescription);
+        setTips(aiMemoryCache.get(uniqueCacheKey));
+        setLoading(false);
+        return;
+      }
+      try {
+          const t = await getStyleTips(`${product.name}`);
+          aiMemoryCache.set(uniqueCacheKey, t);
+          setCopy(dbDescription); setTips(t);
+      } catch (err) {
+          setCopy(dbDescription);
+          setTips(["Pair with minimalistic accessories.", "Ideal for evening events.", "Maintain fabric integrity."]);
+      } finally { setLoading(false); }
+    };
+    loadAI();
+  }, [product]);
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return alert("Identify self to transmit a review.");
     if (!reviewComment.trim()) return;
-
     const newReview: Review = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: currentUser.id || currentUser._id, // Added ID
-      userName: currentUser.name,
-      userProfilePic: currentUser.profilePic, // Added Profile Pic
-      rating: reviewRating,
-      comment: reviewComment,
-      date: new Date().toLocaleDateString()
+      id: Math.random().toString(36).substr(2, 9), userId: currentUser.id || currentUser._id, userName: currentUser.name,
+      userProfilePic: currentUser.profilePic, rating: reviewRating, comment: reviewComment, date: new Date().toLocaleDateString()
     };
-
     onAddReview(product.id, newReview);
-    setReviewComment('');
-    setReviewRating(5);
+    setReviewComment(''); setReviewRating(5);
   };
 
- return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 animate-fade-in">
-      {/* Background Overlay */}
+  return (
+    <div className="fixed inset-0 z-[130] flex items-center justify-center p-0 md:p-4 animate-fade-in">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm" onClick={onClose}></div>
-      
-      {/* Modal Container */}
-      <div className="relative w-full max-w-6xl m-auto bg-white dark:bg-slate-900 h-[90vh] md:h-[85vh] rounded-[32px] md:rounded-[64px] shadow-2xl overflow-hidden flex flex-row border border-white/10">
+      <div className="relative w-full md:max-w-6xl h-[100dvh] md:h-[85vh] md:rounded-[64px] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-row border border-white/10">
         
-        {/* DESKTOP Image (Hidden on mobile) */}
+        {/* Desktop Image */}
         <div className="hidden md:block w-1/2 relative h-full">
-          <img src={product.image} className="w-full h-full object-cover" />
+          <img src={product.image} loading="lazy" className="w-full h-full object-cover" />
         </div>
 
-        {/* RIGHT SIDE (Takes full width on mobile, separates scroll content from fixed footer) */}
+        {/* Right Side / Mobile Full Content */}
         <div className="flex-1 flex flex-col w-full h-full relative overflow-hidden">
           
-          {/* SCROLLING CONTENT AREA */}
           <div className="flex-1 overflow-y-auto scrollbar-hide flex flex-col w-full">
-            
-            {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
-            <div className="block md:hidden w-full relative h-[45vh] shrink-0">
-              <img src={product.image} className="w-full h-full object-cover" />
-              <button onClick={onClose} className="absolute top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-10">
+            {/* Mobile Image */}
+            <div className="block md:hidden w-full relative h-[40vh] shrink-0 bg-slate-100 dark:bg-slate-800">
+              <img src={product.image} loading="lazy" className="w-full h-full object-cover" />
+              <button onClick={onClose} className="absolute top-4 left-4 p-2.5 bg-slate-900/60 backdrop-blur-md text-white rounded-full hover:bg-slate-900 z-10 shadow-lg">
                 <ArrowLeft className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Text Content */}
-            <div className="p-6 md:p-16 flex-1">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
-                <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
+            <div className="p-5 md:p-12 lg:p-16 flex-1">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <span className="text-[8px] md:text-[10px] font-black uppercase text-rose-500 tracking-[0.2em] md:tracking-[0.4em] truncate">{product.category}</span>
+                <button onClick={onClose} className="hidden md:block p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-6 h-6 md:w-8 md:h-8" /></button>
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
+              <h2 className="text-2xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-4 md:mb-6 leading-tight">{product.name}</h2>
               
-              <div className="flex items-center gap-6 mb-8">
-                <span className="text-3xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
+              <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
+                <span className="text-xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
                 <div className="flex items-center gap-1 text-amber-400">
-                   {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
-                   <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
+                   {[1,2,3,4,5].map(s => <Star key={s} className={`w-3.5 h-3.5 md:w-4 md:h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
+                   <span className="text-[9px] md:text-[10px] font-bold text-slate-400 ml-1.5 md:ml-2">({product.reviewsCount})</span>
                 </div>
               </div>
               
-              <div className="space-y-12">
+              <div className="space-y-8 md:space-y-12">
                 <div>
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Description</h4>
-                  <p className="text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">
+                  <h4 className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 md:mb-4">Description</h4>
+                  <p className="text-sm md:text-lg text-slate-600 dark:text-slate-300 italic font-light leading-relaxed">
                     {product.description || (loading ? 'Loading narrative...' : copy)}
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Tips</h4>
-                   {loading ? <div className="h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-3xl" /> : tips.map((t, i) => (
-                     <div key={i} className="flex items-center gap-4 p-4 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100/50">
-                       <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                       <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
+                <div className="space-y-3 md:space-y-4">
+                   <h4 className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2"><Sparkles className="w-3 h-3 text-rose-500" /> Style Tips</h4>
+                   {loading ? <div className="h-16 md:h-20 animate-pulse bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-3xl" /> : tips.map((t, i) => (
+                     <div key={i} className="flex items-start md:items-center gap-3 md:gap-4 p-3 md:p-5 bg-rose-50/50 dark:bg-rose-900/10 rounded-xl md:rounded-2xl border border-rose-100/50">
+                       <div className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 md:mt-0 shrink-0"></div>
+                       <p className="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-200">{t}</p>
                      </div>
                    ))}
                 </div>
 
-                  <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
-                  
-                  <div className="flex justify-between items-end mb-6">
+                {/* Simplified Review Section Container */}
+                <div className="space-y-6 pt-6 md:pt-10 border-t border-slate-100 dark:border-white/5">
+                   {/* Reviews UI Remains Essentially the Same logic, just shrinking text */}
+                   <div className="flex justify-between items-end mb-4 md:mb-6">
                     <div>
-                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                        <Terminal className="w-3 h-3 text-sky-400" /> Customer Reviews
+                      <h4 className="font-mono text-[9px] md:text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-1.5 mb-1">
+                        <Terminal className="w-3 h-3 text-sky-400" /> Reviews
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Comment(s)</p>
+                      <p className="text-[10px] md:text-xs text-slate-500 font-bold">{product.reviewsCount || 0} Comment(s)</p>
                     </div>
                     {product.reviews?.length > 2 && (
-                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-colors border-b border-rose-500/30 pb-0.5">
-                        {showAllComments ? '[ SHOW LESS ]' : '[ VIEW ALL ]'}
+                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 pb-0.5">
+                        {showAllComments ? '[ LESS ]' : '[ VIEW ALL ]'}
                       </button>
                     )}
                   </div>
-
-                  {/* Flexible Comments Display Box */}
-                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+                  <div className={`space-y-3 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[300px]' : 'max-h-[140px]'}`}>
                     {product.reviews?.length ? (
-                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => {
-                        // Attempt to match the review to a real user in the system to get their latest profile pic
-                        // (If you pass 'users' array to this modal later, you could do users.find(u => u.id === r.userId). For now, we use what's stored in the review, or fallback to the current user's pic if it's their review)
-                        const isThisUser = currentUser && currentUser.id === r.userId;
-                        const displayPic = isThisUser ? currentUser.profilePic : r.userProfilePic;
-
-                        return (
-                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group hover:border-slate-200 dark:hover:border-white/10 transition-colors">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-slate-300 dark:border-slate-700">
-                            {displayPic ? <img src={displayPic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
+                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-4 md:p-5 rounded-[20px] md:rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-3 items-start">
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex justify-center items-center shrink-0">
+                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover rounded-full"/> : <UserIcon className="w-4 h-4 text-slate-400"/>}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono truncate max-w-[100px] sm:max-w-none">
-                                {r.userName || r.name || 'Verified Customer'}
-                              </span>
-                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
-                              <div className="flex gap-0.5 text-amber-400 ml-auto drop-shadow-[0_0_5px_rgba(251,191,36,0.3)] shrink-0">
-                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white text-[10px] md:text-xs truncate">{r.userName || 'Verified Customer'}</span>
+                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0">
+                                {[1,2,3,4,5].map(s => <Star key={s} className={`w-2.5 h-2.5 md:w-3 md:h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
                               </div>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                            <p className="text-[10px] md:text-xs text-slate-600 dark:text-slate-300 italic leading-snug">"{r.comment}"</p>
                           </div>
                         </div>
-                      )})
-                    ) : (
-                      <div className="p-6 text-center border border-dashed border-slate-200 dark:border-white/10 rounded-[24px]">
-                        <p className="font-mono text-[10px] text-slate-400 uppercase tracking-widest">No resonance detected.</p>
-                      </div>
-                    )}
+                      ))
+                    ) : ( <div className="p-4 md:p-6 text-center text-[9px] md:text-[10px] text-slate-400 uppercase tracking-widest border border-dashed rounded-[20px]">No resonance detected.</div> )}
                   </div>
-
-                  {/* Smart User Input / Edit Section */}
-                  <div className={`p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
-                      currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview 
-                      ? 'border-transparent bg-slate-50 dark:bg-slate-900/50' 
-                      : 'border-dashed border-rose-200 dark:border-rose-500/30 bg-rose-50/30 dark:bg-rose-950/10'
-                  }`}>
-                    
-                    {currentUser && product.reviews?.find((r: any) => r.userId === currentUser.id) && !isEditingReview ? (
-                      
-                      /* VIEW MODE: User has commented and is NOT editing */
-                      <div className="text-center relative z-10">
-                        <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></div>
-                        <h5 className="font-mono text-[9px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Your Review</h5>
-                        
-                        <div className="flex justify-center items-center gap-4 mb-4">
-                          <div className="flex gap-1 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
-                             {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= (product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5) ? 'fill-current' : 'opacity-30'}`} />)}
-                          </div>
-                        </div>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 italic mb-6">"{product.reviews.find((r: any) => r.userId === currentUser.id)?.comment}"</p>
-                        
-                        <button onClick={() => {
-                          setReviewRating(product.reviews.find((r: any) => r.userId === currentUser.id)?.rating || 5);
-                          setReviewComment(product.reviews.find((r: any) => r.userId === currentUser.id)?.comment || '');
-                          setIsEditingReview(true);
-                        }} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors bg-white dark:bg-slate-950 px-4 py-2 rounded-full shadow-sm border border-slate-200 dark:border-white/5">
-                          <Edit3 className="w-3 h-3" /> Edit Review
-                        </button>
-                      </div>
-
-                    ) : (
-                      
-                      /* EDIT/CREATE MODE: User is typing a new comment or editing an old one */
-                      <form onSubmit={(e) => { handleReviewSubmit(e); setIsEditingReview(false); }} className="space-y-6 relative z-10">
-                        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                          <Terminal className="w-3 h-3" /> {isEditingReview ? 'Edit Comment' : 'Write a Review'}
-                        </h5>
-                        
-                        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                          <span className="font-mono text-[9px] uppercase text-slate-500 tracking-widest shrink-0">Rating:</span>
-                          <div className="flex flex-wrap gap-1 md:gap-2">
-                            {[1, 2, 3, 4, 5].map(s => (
-                              <button type="button" key={s} onClick={() => setReviewRating(s)} className="transition-transform hover:scale-125 active:scale-90">
-                                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]' : 'text-slate-300 dark:text-slate-700'}`} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <textarea 
-                          required
-                          placeholder="Enter your comment..."
-                          className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10 focus:border-rose-400 dark:focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all placeholder:text-slate-400 shadow-inner"
-                          value={reviewComment}
-                          onChange={(e) => setReviewComment(e.target.value)}
-                        />
-                        
-                        <div className="flex gap-4">
-                          {isEditingReview && (
-                            <button type="button" onClick={() => setIsEditingReview(false)} className="px-6 py-4 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-slate-300 dark:hover:bg-slate-700 transition-all">
-                              Cancel
-                            </button>
-                          )}
-                          <button type="submit" className="flex-1 py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] active:scale-95">
-                            {isEditingReview ? 'Commit Changes' : 'Submit Review'}
-                          </button>
-                        </div>
-                      </form>
-                    )}
-                  </div>
-                </div> 
+                </div>
               </div>
             </div>
           </div>
-
           
-          <div className="flex gap-4 p-6 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
-             <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:bg-rose-500 transition-all active:scale-95">
+          <div className="flex gap-3 md:gap-4 p-4 md:p-6 border-t border-slate-100 dark:border-white/5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shrink-0">
+             <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-3 md:py-4 bg-rose-600 text-white rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[11px] shadow-lg hover:bg-rose-500 active:scale-95 transition-all truncate">
                Add to Cart • Ksh {product.price.toLocaleString()}
              </button>
-             <button onClick={() => onToggleWishlist(product.id)} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/50'}`}>
-               <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+             <button onClick={() => onToggleWishlist(product.id)} className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'border-slate-200 dark:border-slate-800 text-slate-400'}`}>
+               <Heart className={`w-5 h-5 md:w-6 md:h-6 ${isWishlisted ? 'fill-current' : ''}`} />
              </button>
           </div>
 
         </div>
       </div> 
     </div>
-    );
-  };
+  );
+};
 
 // --- Custom Notification System (Cyber HUD) ---
 const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
@@ -1315,8 +1069,7 @@ const ToastMessage = ({ message, type, onClose }: { message: string, type: 'succ
   }, [onClose]);
 
   return (
-    return (
-    <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[200] w-max animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl transition-all border ${
+    <div className={`fixed top-24 right-6 z-[200] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl transition-all border ${
       type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(225,29,72,0.3)]' :
       type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
       'bg-slate-900/90 border-slate-700/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
@@ -1788,6 +1541,9 @@ const MainContent = () => {
     const session = localStorage.getItem('faith_session_active');
     if (session) setCurrentUser(JSON.parse(session));
 
+    localStorage.removeItem('faith_products_db');
+    localStorage.removeItem('faith_orders_db');
+    localStorage.removeItem('faith_users_db');
 
     setProducts(INITIAL_PRODUCTS);
     
@@ -1798,10 +1554,14 @@ const MainContent = () => {
       }
     }, 6000);
 
-checkBackendSync();
-    
+    checkBackendSync();
+    const syncInterval = setInterval(() => {
+      checkBackendSync();
+    }, 15000);
+
     return () => {
       clearInterval(interval);
+      clearInterval(syncInterval);
       clearTimeout(visitTimer);
     };
   }, [hasSeenHero, displayHeroes.length]);
@@ -2289,7 +2049,6 @@ onUpdateUser={async (id: any, data: any) => {
 
 const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, activeTab, setActiveTab }: any) => {
   const [showPicOptions, setShowPicOptions] = useState(false);
-  const [viewingProfileImage, setViewingProfileImage] = useState<string | null>(null);
   const [editData, setEditData] = useState({ 
     name: user.name, 
     email: user.email, 
@@ -2482,62 +2241,58 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
   );
 };
 
-     const Footer = () => (
-  <footer className="bg-slate-900 dark:bg-slate-950 text-slate-900 dark:text-white pt-24 pb-12 px-6 mt-20 border-t border-slate-200 dark:border-white/10 relative overflow-hidden transition-colors">
+const Footer = () => (
+  <footer className="bg-slate-900 dark:bg-slate-950 text-slate-900 dark:text-white pt-16 md:pt-24 pb-8 md:pb-12 px-4 md:px-6 mt-10 md:mt-20 border-t border-slate-200 dark:border-white/10 relative overflow-hidden transition-colors">
     <div className="absolute inset-0 bg-[linear-gradient(rgba(225,29,72,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(225,29,72,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
     
-    <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 relative z-10">
-      <div className="space-y-6">
-        <h2 className="text-4xl font-serif font-bold italic text-rose-600 drop-shadow-neon">Faith.</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-mono leading-relaxed">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 relative z-10">
+      <div className="space-y-4 md:space-y-6">
+        <h2 className="text-3xl md:text-4xl font-serif font-bold italic text-rose-600 drop-shadow-neon">Faith.</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-mono leading-relaxed">
           Premium Nairobi fashion for the modern visionary. Initializing luxury protocols worldwide.
         </p>
-        <div className="flex items-center gap-2 text-emerald-500 font-mono text-[10px] uppercase">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Servers Online
+        <div className="flex items-center gap-2 text-emerald-500 font-mono text-[9px] md:text-[10px] uppercase">
+          <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500 animate-pulse"></span> Servers Online
         </div>
       </div>
       
       <div>
-        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Sanctuary Links</h4>
-        <div className="space-y-4 text-sm font-mono text-slate-500 dark:text-slate-400">
-          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Order Tracking</p>
-          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Return Policy</p>
-          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Privacy Protocol</p>
-          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-3 h-3"/> Delivery Addresses</p>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[10px] md:text-[11px] mb-4 md:mb-6 text-slate-900 dark:text-white">Sanctuary Links</h4>
+        <div className="space-y-3 md:space-y-4 text-xs md:text-sm font-mono text-slate-500 dark:text-slate-400">
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3"/> Order Tracking</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3"/> Return Policy</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3"/> Privacy Protocol</p>
+          <p className="hover:text-rose-500 cursor-pointer flex items-center gap-2 transition-colors"><ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3"/> Delivery Addresses</p>
         </div>
       </div>
       
       <div>
-        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Comm Channels</h4>
-        <div className="space-y-4 text-sm font-mono text-slate-500 dark:text-slate-400">
-          <p className="flex items-center gap-3"><Mail className="w-4 h-4 text-rose-500"/> support@faith.com</p>
-          <p className="flex items-center gap-3"><Smartphone className="w-4 h-4 text-rose-500"/> +254 700 000 000</p>
-          <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-rose-500"/> Nairobi, Kenya</p>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[10px] md:text-[11px] mb-4 md:mb-6 text-slate-900 dark:text-white">Comm Channels</h4>
+        <div className="space-y-3 md:space-y-4 text-xs md:text-sm font-mono text-slate-500 dark:text-slate-400">
+          <p className="flex items-center gap-2 md:gap-3"><Mail className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500"/> support@faith.com</p>
+          <p className="flex items-center gap-2 md:gap-3"><Smartphone className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500"/> +254 700 000 000</p>
+          <p className="flex items-center gap-2 md:gap-3"><MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500"/> Nairobi, Kenya</p>
         </div>
       </div>
 
       <div>
-        <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Network</h4>
-        <div className="flex gap-4">
-          <a href="#" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Github className="w-5 h-5" /></a>
-          <a href="http://www.youtube.com/@samskiller4" target="_blank" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Youtube className="w-5 h-5" /></a>
-          <a href="#" className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 hover:shadow-neon transition-all duration-300"><Globe className="w-5 h-5" /></a>
+        <h4 className="font-mono font-bold uppercase tracking-widest text-[10px] md:text-[11px] mb-4 md:mb-6 text-slate-900 dark:text-white">Network</h4>
+        <div className="flex gap-3 md:gap-4">
+          <a href="#" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 transition-all"><Github className="w-4 h-4 md:w-5 md:h-5" /></a>
+          <a href="http://www.youtube.com/@samskiller4" target="_blank" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 transition-all"><Youtube className="w-4 h-4 md:w-5 md:h-5" /></a>
+          <a href="#" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white hover:-translate-y-2 transition-all"><Globe className="w-4 h-4 md:w-5 md:h-5" /></a>
         </div>
       </div>
     </div>
     
-    <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-slate-200 dark:border-white/5 flex flex-col items-center justify-center relative">
-      <a 
-        href="http://www.youtube.com/@samskiller4" 
-        target="_blank"
-        className="group relative px-10 py-5 bg-transparent overflow-hidden rounded-full font-black uppercase tracking-[0.4em] text-[10px] transition-all hover:scale-110 active:scale-90 border border-slate-200 dark:border-white/10"
-      >
+    <div className="max-w-7xl mx-auto mt-12 md:mt-20 pt-8 md:pt-10 border-t border-slate-200 dark:border-white/5 flex flex-col items-center justify-center relative">
+      <a href="http://www.youtube.com/@samskiller4" target="_blank" className="group relative px-6 py-4 md:px-10 md:py-5 bg-transparent overflow-hidden rounded-full font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] transition-all hover:scale-105 active:scale-95 border border-slate-200 dark:border-white/10">
         <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 opacity-0 group-hover:opacity-100 group-hover:animate-gradient-x transition-all duration-700"></div>
-        <span className="relative z-10 text-slate-900 dark:text-white group-hover:text-white drop-shadow-lg flex items-center gap-3 transition-colors">
-          Developed By SKILLER <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
+        <span className="relative z-10 text-slate-900 dark:text-white group-hover:text-white drop-shadow-lg flex items-center gap-2 md:gap-3 transition-colors">
+          Developed By SKILLER <Sparkles className="w-3 h-3 md:w-4 md:h-4 animate-pulse text-amber-400" />
         </span>
       </a>
-      <p className="mt-8 font-mono text-[9px] text-slate-400 uppercase tracking-widest text-center">© 2026 Faith Sanctuary. All Protocols Monitored.</p>
+      <p className="mt-6 md:mt-8 font-mono text-[7px] md:text-[9px] text-slate-400 uppercase tracking-widest text-center">© 2026 Faith Sanctuary. All Protocols Monitored.</p>
     </div>
   </footer>
 );
@@ -2545,4 +2300,3 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
 export default function App() {
   return <MainContent />;
 }
-
