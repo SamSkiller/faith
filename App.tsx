@@ -1345,8 +1345,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+
 
       <div className="flex gap-4 p-6 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
          <button onClick={() => { onAddToCart(product); onClose(); playSwoosh(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-neon hover:bg-rose-500 transition-all active:scale-95">
