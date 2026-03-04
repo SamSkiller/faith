@@ -2195,6 +2195,7 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
                 }} className="block w-full text-left px-4 py-3 text-[10px] font-black uppercase text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
                   <Sparkles className="w-3 h-3 inline mr-2 text-rose-500"/> Generate Random Avatar
                 </button>
+                </div>
               )}
             </div>
              <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white truncate px-2">{user.name}</h3>
