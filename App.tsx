@@ -288,33 +288,29 @@ const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, 
 };
 
 const OrderCountdown = ({ orderDate, deliveryDays }: { orderDate: string, deliveryDays: number }) => {
-  const [percent, setPercent] = useState(100);
-  const radius = 20;
-  const circumference = 2 * Math.PI * radius;
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const start = new Date(orderDate).getTime();
-      const end = start + (deliveryDays * 86400000);
-      const now = Date.now();
-      const p = Math.max(0, Math.min(100, ((end - now) / (end - start)) * 100));
-      setPercent(p);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [orderDate, deliveryDays]);
-
-  return (
-    <div className="relative w-14 h-14 flex items-center justify-center group">
-      <svg className="w-full h-full -rotate-90">
-        <circle cx="28" cy="28" r={radius} fill="transparent" stroke="currentColor" strokeWidth="4" className="text-slate-100 dark:text-slate-800" />
-        <circle cx="28" cy="28" r={radius} fill="transparent" stroke="currentColor" strokeWidth="4" strokeDasharray={circumference} strokeDashoffset={circumference - (percent / 100) * circumference} className="text-rose-500 transition-all duration-1000 drop-shadow-[0_0_8px_#e11d48]" strokeLinecap="round" />
-      </svg>
-      <div className="absolute flex flex-col items-center leading-none">
-        <span className="text-[10px] font-black font-mono">{Math.ceil(percent)}%</span>
-      </div>
-    </div>
-  );
-};
+    const [timeLeft, setTimeLeft] = useState('');
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const target = new Date(orderDate).getTime() + (deliveryDays * 24 * 60 * 60 * 1000);
+        const now = new Date().getTime();
+        const diff = target - now;
+        if (diff <= 0) { setTimeLeft('EXPIRED'); return; }
+        
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        let timeString = '';
+        if (d > 0) timeString += `${d}d `;
+        timeString += `${h}h ${m}m ${s}s`;
+        
+        setTimeLeft(timeString);
+      }, 1000);
+      return () => clearInterval(interval);
+    }, [orderDate, deliveryDays]);
+    return <span className="text-rose-500 font-bold ml-2 animate-pulse">{timeLeft}</span>;
+  };
 
 // --- Admin Dashboard Component ---
 const AdminVault = ({ currentUser, products, orders, users, onAdd, onDelete, onUpdateUser, onDeleteUser, onUpdateOrder, onBulkUpdate }: any) => {
@@ -360,10 +356,9 @@ const salesTrend = useMemo(() => {
     const today = new Date();
     const result = [];
 
-    // Calculate the start of the week (last Sunday)
-    for (let i = 0; i < 7; i++) {
+    for (let i = 6; i >= 0; i--) {
       const d = new Date();
-      d.setDate(today.getDate() - today.getDay() + i); // Logic to start from Sunday
+      d.setDate(today.getDate() - i);
       const dayName = daysArr[d.getDay()];
       
       let daySales = 0;
@@ -373,7 +368,7 @@ const salesTrend = useMemo(() => {
         }
       });
 
-      result.push({ name: dayName, sales: daySales, date: d.toLocaleDateString() });
+      result.push({ name: dayName, sales: daySales, fullDate: d.toLocaleDateString() });
     }
     return result;
   }, [orders]);
@@ -595,11 +590,12 @@ const salesTrend = useMemo(() => {
             </div>
 
 {(showAddForm || editingProduct) && (
-              <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 backdrop-blur-md bg-slate-950/80 animate-fade-in">
-                <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 p-8 md:p-10 rounded-[40px] md:rounded-[56px] shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto scrollbar-hide">
-                 <button onClick={() => { setShowAddForm(false); setEditingProduct(null); }} className="absolute top-6 right-6 p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-500 hover:text-white transition-all"><X className="w-5 h-5" /></button>
-                 <h4 className="text-xl font-bold mb-8 font-mono uppercase tracking-widest text-rose-500">{editingProduct ? 'Adjusting Detail' : 'New Product'}</h4>
-                 <form onSubmit={(e) => { handleSaveProduct(e); setShowAddForm(false); setEditingProduct(null); }} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+  <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => { setShowAddForm(false); setEditingProduct(null); }}></div>
+    <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] shadow-2xl animate-future-in max-h-[90vh] overflow-y-auto">
+      <button onClick={() => { setShowAddForm(false); setEditingProduct(null); }} className="absolute top-6 right-6 p-2 text-slate-400 hover:text-rose-500"><X className="w-6 h-6" /></button>
+      <h4 className="text-xl font-bold mb-6 text-slate-900 dark:text-white">{editingProduct ? 'Edit Entity' : 'New Entity'}</h4>
+      <form onSubmit={(e) => { handleSaveProduct(e); setShowAddForm(false); setEditingProduct(null); }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input required className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
                     <input required type="number" className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
                     <input required type="number" className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] text-xs md:text-sm font-bold text-slate-900 dark:text-white outline-none" placeholder="Stock" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
@@ -625,7 +621,7 @@ const salesTrend = useMemo(() => {
                    <div className="md:col-span-2 flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px]">
                       <input 
                         type="file" accept="image/*" disabled={isUploadingImage}
-                        className="w-full text-[9px] md:text-[10px] font-bold text-slate-900 dark:text-white file:mr-2 md:file:mr-4 file:py-2 md:file:py-3 file:px-4 md:file:py-3 file:px-6 file:rounded-full file:border-0 file:uppercase file:bg-rose-100 file:text-rose-600 cursor-pointer"
+                        className="w-full text-[9px] md:text-[10px] font-bold text-slate-900 dark:text-white file:mr-2 md:file:mr-4 file:py-2 md:file:py-3 file:px-4 md:file:px-6 file:rounded-full file:border-0 file:uppercase file:bg-rose-100 file:text-rose-600 cursor-pointer"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -663,11 +659,10 @@ const salesTrend = useMemo(() => {
                        Mark as "Hot Deal" 🔥 
                     </label>
 
-                    <button disabled={isUploadingImage} className="md:col-span-2 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-neon transition-all">
+                    <button disabled={isUploadingImage} className="md:col-span-2 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-neon">
                        {isUploadingImage ? 'Uploading...' : 'Commit Configuration'}
                     </button>
                  </form>
-              </div>
               </div>
             )}
 
@@ -719,161 +714,129 @@ const salesTrend = useMemo(() => {
          </div>
        )}
 
-// Inside AdminVault component, under tab === 'orders'
-{tab === 'orders' && (
-  <div className="space-y-6 md:space-y-8 animate-fade-in">
-    <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
-      <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
-    </h3>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-      {orders.map((o: any) => {
-        const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3);
-        const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
-        const isExpanded = expandedOrders.includes(o._id || o.id);
-
-        return (
-          <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] md:rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-sm'} transition-all relative overflow-hidden flex flex-col`}>
-            <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
-              <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                  {o.userProfilePic || users.find((u: any) => u.id === o.userId || u._id === o.userId)?.profilePic ? (
-                    <img src={users.find((u: any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" />
-                  ) : (
-                    <UserIcon className="w-4 h-4 md:w-6 md:h-6 text-slate-400" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2 truncate">
-                    {o.userName || 'Anonymous'}
-                    {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>}
-                  </p>
-                  <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5 truncate">
-                    ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                <span className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
-                  o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' :
-                  o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' :
-                  o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                }`}>{o.status || 'Processing'}</span>
-                <ChevronRight className={`w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-              </div>
-            </div>
-
-            {isExpanded && (
-              <div className="px-4 pb-4 md:px-6 md:pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-4 md:pt-6">
-                <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-slate-100 dark:border-white/5">
-                  <div className="flex justify-between items-center mb-3 md:mb-4">
-                    <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value</span>
-                    <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
-                  </div>
-                  
-                  {!isDelivered && (
-                    <>
-                      <p className="text-[10px] font-mono text-slate-500 flex items-center gap-2 mb-2">
-                        <MapPin className="w-3 h-3 text-rose-400" /> {o.address || 'Standard Pickup'}
-                      </p>
-                      <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
-                        <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-1.5"><Clock className="w-3 h-3" /> Delivery Est:</span>
-                        <span className="text-[10px] font-bold text-sky-500">{o.deliveryMethod || 'Standard'} • {o.deliveryDays || 3} Days</span>
-                      </div>
-                      <div className="flex justify-center mt-4">
-                        <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
-                      </div>
-                    </>
-                  )}
-                  
-                  <div className="flex flex-col gap-1.5 md:gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5 mt-2">
-                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-sky-400" /> {o.phoneNumber}</p>
-                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 truncate"><MapPin className="w-3 h-3 text-rose-400 shrink-0" /> {o.address || 'N/A'}</p>
-                  </div>
-                </div>
-
-                {!isDelivered && (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
-                    <select
-                      value={o.status || 'Processing'}
-                      onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
-                      className="flex-1 w-full bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none text-slate-900 dark:text-white"
-                    >
-                      <option value="Processing">Processing</option>
-                      <option value="Shipped">Shipped</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Cancelled">Cancel</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-    {orders.length === 0 && <div className="p-20 md:p-40 text-center font-mono text-slate-500 text-xs md:text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-[24px] md:rounded-[32px]">No active data.</div>}
-  </div>
-)}
-
-{tab === 'users' && (
-        <div className="space-y-6 md:space-y-8 animate-fade-in relative">
-          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white font-mono">Directory Nodes</h3>
-          
-          {viewingImage && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90" onClick={() => setViewingImage(null)}>
-              <button className="absolute top-4 right-4 md:top-6 md:right-6 p-2 bg-white/10 rounded-full text-white"><X className="w-5 h-5 md:w-6 md:h-6" /></button>
-              <img src={viewingImage} className="max-w-full max-h-[80vh] object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {sortedUsers.map((u: any) => {
-              const isNewUser = (Date.now() - new Date(u.joinedAt).getTime()) < 86400000; // Exact 1 Day Logic
-              const isExpanded = expandedUsers.includes(u.id || u._id);
+      {tab === 'orders' && (
+        <div className="space-y-6 md:space-y-8 animate-fade-in">
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
+            <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            {orders.map((o: any) => {
+              const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
+              const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
+              const isExpanded = expandedOrders.includes(o._id || o.id);
 
               return (
-              <div key={u.id || u._id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 rounded-[32px] border transition-all relative overflow-hidden ${u.role === 'admin' ? 'border-sky-500/30 shadow-[0_0_20px_rgba(14,165,233,0.1)]' : 'border-slate-100 dark:border-white/5 shadow-sm'}`}>
-                {isNewUser && <div className="absolute top-3 right-3 z-20 px-2 py-0.5 bg-rose-500 text-white text-[7px] font-black uppercase tracking-wider rounded animate-pulse shadow-neon">NEW NODE</div>}
-                
-                <div className="flex items-center gap-4 mb-4 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
-                  <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-xl shrink-0 overflow-hidden cursor-zoom-in" onClick={(e) => { e.stopPropagation(); if(u.profilePic) setViewingImage(u.profilePic); }}>
-                    {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : <div className="text-slate-400 font-mono text-xl">{u.name?.charAt(0)}</div>}
+                <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[24px] md:rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-sm'} transition-all relative overflow-hidden flex flex-col`}>
+                  <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
+                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-4 h-4 md:w-6 md:h-6 text-slate-400" />}
+                       </div>
+                      <div className="min-w-0">
+                         <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2 truncate">
+                           {o.userName || 'Anonymous'}
+                           {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>}
+                         </p>
+                         <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5 truncate">
+                           ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
+                         </p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                      <span className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
+                        o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
+                        o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 
+                        o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      }`}>{o.status || 'Processing'}</span>
+                      {isDelivered && <ChevronRight className={`w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5 truncate font-mono">
-                      {u.name} {u.email === 'faith@faith' && <Crown className="w-3 h-3 text-amber-500 drop-shadow-neon" />}
-                    </h4>
-                    <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate">{u.email}</p>
-                    <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-wider mt-1 inline-block ${u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500' : u.role === 'admin' ? 'bg-sky-500/10 text-sky-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                      {u.email === 'faith@faith' ? 'Supreme Manager' : u.role}
-                    </span>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                </div>
 
-                {isExpanded && (
-                  <div className="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-2xl mb-3 text-[10px] space-y-2 border border-slate-100 dark:border-white/5 animate-fade-in-up">
-                    <p className="text-slate-500 flex justify-between"><span className="font-bold uppercase tracking-tighter">Sync No:</span> <span className="text-slate-900 dark:text-white font-mono">{u.phoneNumber || 'N/A'}</span></p>
-                    <p className="text-slate-500 flex justify-between"><span className="font-bold uppercase tracking-tighter">Established:</span> <span className="text-slate-900 dark:text-white">{new Date(u.joinedAt).toLocaleDateString()}</span></p>
-                    <p className="text-slate-500 flex justify-between gap-4"><span className="font-bold uppercase tracking-tighter shrink-0">Drop-off:</span> <span className="text-slate-900 dark:text-white truncate" title={u.address}>{u.address || 'Standard'}</span></p>
-                  </div>
-                )}
-                
-                {u.email !== 'faith@faith' && (
-                <div className="flex gap-2 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
-                  <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className={`flex-1 py-2 rounded-xl font-mono font-bold text-[8px] uppercase tracking-widest transition-all ${u.role === 'admin' ? 'bg-rose-500/10 text-rose-500' : 'bg-slate-900 text-white'}`}>
-                    {u.role === 'admin' ? 'Revoke Admin' : 'Make Admin'}
-                  </button>
-                  <button onClick={() => { if(window.confirm('Delete Entity?')) onDeleteUser(u._id || u.id) }} className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {(!isDelivered || isExpanded) && (
+                    <div className="px-4 pb-4 md:px-6 md:pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-4 md:pt-6">
+                      <div className="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-5 rounded-xl md:rounded-2xl mb-4 md:mb-6 border border-slate-100 dark:border-white/5">
+                        <div className="flex justify-between items-center mb-3 md:mb-4">
+                          <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value</span>
+                          <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                        </div>
+                        {!isDelivered && (
+                            <p className="text-[10px] font-mono text-slate-500 flex items-center gap-2 mb-2">
+                              <MapPin className="w-3 h-3 text-rose-400"/> {o.address || 'Standard Pickup'}
+                            </p>
+                            <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
+                              <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-1.5"><Clock className="w-3 h-3" /> Delivery Est:</span>
+                              <span className="text-[10px] font-bold text-sky-500">{o.deliveryMethod || 'Standard'} • {o.deliveryDays || 3} Days</span>
+                            </div>
+                      
+                            <div className="flex flex-col items-end">
+                              <OrderCountdown orderDate={o.date} deliveryDays={daysLeft} />
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-1.5 md:gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5">
+                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-sky-400"/> {o.phoneNumber}</p>
+                          <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 truncate"><MapPin className="w-3 h-3 text-rose-400 shrink-0"/> {o.address || 'N/A'}</p>
+                        </div>
+                      </div>
+                  
+                      {!isDelivered && (
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
+                          <select 
+                            value={o.status || 'Processing'} 
+                            onChange={(e) => onUpdateOrder(o._id || o.id, { status: e.target.value })}
+                            className="flex-1 w-full bg-slate-100 dark:bg-slate-800 p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none text-slate-900 dark:text-white"
+                          >
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancel</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                )}
-              </div>
-            )})}
+              )
+            })}
           </div>
+          {orders.length === 0 && <div className="p-20 md:p-40 text-center font-mono text-slate-500 text-xs md:text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-[24px] md:rounded-[32px]">No active data.</div>}
         </div>
       )}
+
+{tab === 'users' && (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 animate-fade-in">
+    {sortedUsers.map((u: any) => {
+      const isNewUser = (Date.now() - new Date(u.joinedAt).getTime()) < 86400000; // 1 Day
+      return (
+        <div key={u.id || u._id} className={`p-4 rounded-[24px] border transition-all ${u.email === 'faith@faith' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-white/80 dark:bg-slate-900/80'} shadow-sm relative group`}>
+          {isNewUser && <div className="absolute top-3 right-3 px-2 py-0.5 bg-rose-500 text-white text-[7px] font-black uppercase rounded">NEW</div>}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-slate-800 overflow-hidden shrink-0 shadow-md">
+              <img src={u.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}&mood=happy`} className="w-full h-full object-cover" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate flex items-center gap-1">
+                {u.name} {u.email === 'faith@faith' && <Crown className="w-3 h-3 text-amber-500" />}
+              </h4>
+              <p className="text-[9px] font-mono text-slate-500 truncate">{u.email}</p>
+              <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded mt-1 inline-block ${u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'}`}>
+                {u.email === 'faith@faith' ? 'Supreme Architect' : u.role}
+              </span>
+            </div>
+          </div>
+          {u.email !== 'faith@faith' && (
+            <div className="flex gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-white/5">
+              <button onClick={() => onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' })} className="flex-1 py-1.5 bg-slate-900 dark:bg-rose-600 text-white rounded-lg text-[8px] font-bold uppercase tracking-tighter">
+                {u.role === 'admin' ? 'Revoke Admin' : 'Make Admin'}
+              </button>
+              <button onClick={() => onDeleteUser(u._id || u.id)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          )}
+        </div>
+      );
+    })}
+  </div>
+)}
     </div>
   );
 };
@@ -1031,211 +994,56 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                    ))}
                 </div>
 
-                          {/* Simplified Review Section Container */}
-              <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
-                  <div className="flex justify-between items-end mb-6">
+                {/* Simplified Review Section Container */}
+                <div className="space-y-6 pt-6 md:pt-10 border-t border-slate-100 dark:border-white/5">
+                   {/* Reviews UI Remains Essentially the Same logic, just shrinking text */}
+                   <div className="flex justify-between items-end mb-4 md:mb-6">
                     <div>
-                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                        <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
+                      <h4 className="font-mono text-[9px] md:text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-1.5 mb-1">
+                        <Terminal className="w-3 h-3 text-sky-400" /> Reviews
                       </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
+                      <p className="text-[10px] md:text-xs text-slate-500 font-bold">{product.reviewsCount || 0} Comment(s)</p>
                     </div>
                     {product.reviews?.length > 2 && (
-                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
-                        {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
+                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 pb-0.5">
+                        {showAllComments ? '[ LESS ]' : '[ VIEW ALL ]'}
                       </button>
                     )}
                   </div>
-
-                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+                  <div className={`space-y-3 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[300px]' : 'max-h-[140px]'}`}>
                     {product.reviews?.length ? (
                       (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
-                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
-                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-4 md:p-5 rounded-[20px] md:rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-3 items-start">
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex justify-center items-center shrink-0">
+                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover rounded-full"/> : <UserIcon className="w-4 h-4 text-slate-400"/>}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
-                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
-                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
-                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white text-[10px] md:text-xs truncate">{r.userName || 'Verified Customer'}</span>
+                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0">
+                                {[1,2,3,4,5].map(s => <Star key={s} className={`w-2.5 h-2.5 md:w-3 md:h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
                               </div>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                            <p className="text-[10px] md:text-xs text-slate-600 dark:text-slate-300 italic leading-snug">"{r.comment}"</p>
                           </div>
                         </div>
                       ))
-                    ) : ( <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div> )}
+                    ) : ( <div className="p-4 md:p-6 text-center text-[9px] md:text-[10px] text-slate-400 uppercase tracking-widest border border-dashed rounded-[20px]">No resonance detected.</div> )}
                   </div>
-
-                  {/* RESTORED: Smart Input Section */}
-          // Inside ProductModal, the Review Section
-          <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
-            <div className="flex justify-between items-end mb-6">
-              <div>
-                <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                  <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
-              </div>
-              {product.reviews?.length > 2 && (
-                <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
-                  {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
-                </button>
-              )}
-            </div>
-          
-            <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
-              {product.reviews && product.reviews.length > 0 ? (
-                (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
-                  <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
-                      {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
-                        <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
-                        <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
-                          {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div>
-              )}
-            </div>
-          
-            {/* Review Input Section */}
-            <div className={`p-6 md:p-8 rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
-                currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview
-                ? 'border-transparent bg-slate-50/50 dark:bg-slate-950/50'
-                : 'border-dashed border-rose-500/30 bg-rose-50/10'
-            }`}>
-              {currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview ? (
-                <div className="text-center animate-fade-in">
-                  <h5 className="font-mono text-[10px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Reviews</h5>
-                  <button onClick={() => setIsEditingReview(true)} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-md border border-slate-200 dark:border-white/5">
-                    <Edit3 className="w-3 h-3" /> Redact Review
-                  </button>
                 </div>
-              ) : (
-                <form onSubmit={handleReviewSubmit} className="space-y-6">
-                  <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                    <Terminal className="w-3 h-3" /> Comments
-                  </h5>
-                  <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <button type="button" key={s} onClick={() => setReviewRating(s)}>
-                          <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <textarea required placeholder="Enter narrative experience..." className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
-                  <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-neon">
-                    {isEditingReview ? 'Edit Review' : 'Transmit Review'}
-                  </button>
-                </form>
-                )}
               </div>
             </div>
           </div>
-        </div> 
-      </div> 
-====
-                {/* Simplified Review Section Container */}
-                <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
-                  <div className="flex justify-between items-end mb-6">
-                    <div>
-                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
-                        <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
-                    </div>
-                    {product.reviews?.length > 2 && (
-                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
-                        {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
-                      </button>
-                    )}
-                  </div>
-
-                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
-                    {product.reviews && product.reviews.length > 0 ? (
-                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
-                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
-                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
-                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
-                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
-                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
-                              </div>
-                            </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div>
-                    )}
-                  </div>
           
-                  {/* Review Input Section */}
-                  <div className={`p-6 md:p-8 rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
-                      currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview
-                      ? 'border-transparent bg-slate-50/50 dark:bg-slate-950/50'
-                      : 'border-dashed border-rose-500/30 bg-rose-50/10'
-                  }`}>
-                    {currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview ? (
-                      <div className="text-center animate-fade-in">
-                        <h5 className="font-mono text-[10px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Reviews</h5>
-                        <button onClick={() => setIsEditingReview(true)} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-md border border-slate-200 dark:border-white/5">
-                          <Edit3 className="w-3 h-3" /> Redact Review
-                        </button>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleReviewSubmit} className="space-y-6">
-                        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
-                          <Terminal className="w-3 h-3" /> Comments
-                        </h5>
-                        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                          <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5].map(s => (
-                              <button type="button" key={s} onClick={() => setReviewRating(s)}>
-                                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <textarea required placeholder="Enter narrative experience..." className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
-                        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-neon">
-                          {isEditingReview ? 'Edit Review' : 'Transmit Review'}
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> 
-
-      <div className="flex gap-4 p-6 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
-         <button onClick={() => { onAddToCart(product); onClose(); playSwoosh(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-neon hover:bg-rose-500 transition-all active:scale-95">
-           Add to payload • Ksh {product.price.toLocaleString()}
-         </button>
-             <button onClick={() => { toggleWishlist(product.id); playClick(); }} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500 shadow-neon' : 'border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500'}`}>
-               <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+          <div className="flex gap-3 md:gap-4 p-4 md:p-6 border-t border-slate-100 dark:border-white/5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shrink-0">
+             <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-3 md:py-4 bg-rose-600 text-white rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[11px] shadow-lg hover:bg-rose-500 active:scale-95 transition-all truncate">
+               Add to Cart • Ksh {product.price.toLocaleString()}
+             </button>
+             <button onClick={() => onToggleWishlist(product.id)} className={`p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'border-slate-200 dark:border-slate-800 text-slate-400'}`}>
+               <Heart className={`w-5 h-5 md:w-6 md:h-6 ${isWishlisted ? 'fill-current' : ''}`} />
              </button>
           </div>
+
         </div>
       </div> 
     </div>
@@ -1244,24 +1052,16 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
 
 // --- Custom Notification System (Cyber HUD) ---
 const ToastMessage = ({ message, type, onClose }: { message: string, type: 'success' | 'error' | 'info', onClose: () => void }) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
+  useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
 
   return (
-    <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[300] animate-fade-in flex items-center gap-4 px-6 py-4 rounded-full shadow-2xl backdrop-blur-xl transition-all border ${
-      type === 'error' ? 'bg-rose-950/80 border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(225,29,72,0.3)]' :
-      type === 'success' ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' :
-      'bg-slate-900/90 border-slate-700/50 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+    <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[200] animate-fade-in flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl backdrop-blur-xl border ${
+      type === 'error' ? 'bg-rose-950/90 border-rose-500/50 text-rose-500' :
+      type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-400' :
+      'bg-slate-900/90 border-slate-700/50 text-white'
     }`}>
-      {type === 'error' ? <AlertCircle className="w-5 h-5 animate-pulse" /> : 
-       type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
-       <Terminal className="w-5 h-5" />}
       <span className="font-mono font-bold text-[10px] uppercase tracking-widest whitespace-nowrap">{message}</span>
-      <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors ml-4">
-        <X className="w-4 h-4 opacity-70" />
-      </button>
+      <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full"><X className="w-3 h-3" /></button>
     </div>
   );
 };
@@ -1576,20 +1376,8 @@ const MainContent = () => {
   const [heroIdx, setHeroIdx] = useState(0);
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
-    
-  const playSwoosh = () => {
-  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-  audio.volume = 0.3;
-  audio.play().catch(() => {});
-};
-
-const playClick = () => {
-  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-  audio.volume = 0.4;
-  audio.play().catch(() => {});
-}; 
-    const getFashionAvatar = (name: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}&mood=happy&accessories=eyepatch,prescription01,round`;
- 
+  
+  // NEW: Track if they have passed the Hero section
   const [hasSeenHero, setHasSeenHero] = useState(false);
 
   const toastTimeoutRef = useRef(null);
@@ -1950,22 +1738,18 @@ const playClick = () => {
                  </div>
                  
                  {/* RESPONSIVE MOBILE PRODUCT GRID */}
-<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                     {isLoadingProducts ? (
                       [...Array(8)].map((_, i) => <ProductSkeleton key={i} />)
                     ) : filteredProducts.length > 0 ? (
-                      filteredProducts.map(p => {
-                        const isNewProduct = p.createdAt && (Date.now() - new Date(p.createdAt).getTime() < 259200000); // Exact 3 Day Logic
-                        return (
-                        <div key={p.id} 
-                          className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[24px] md:rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_40px_rgba(225,29,72,0.2)] transition-all duration-700 flex flex-col cursor-pointer p-3 md:p-5 overflow-hidden [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(4deg)_rotateY(-4deg)]" 
-                          onClick={() => { playClick(); setSelectedProduct(p); }}>
-                           <div className="aspect-[3/4] rounded-[16px] md:rounded-[40px] overflow-hidden mb-4 md:mb-8 relative shadow-sm md:shadow-lg [transform:translateZ(30px)]">
+                      filteredProducts.map(p => (
+                        <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[24px] md:rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all duration-300 flex flex-col cursor-pointer p-3 md:p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                           <div className="aspect-[3/4] rounded-[16px] md:rounded-[40px] overflow-hidden mb-4 md:mb-8 relative shadow-sm md:shadow-lg">
                               
                               <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 flex flex-col gap-1 md:gap-2 items-start">
-                                {isNewProduct && (
+                                {(Date.now() - new Date(p.createdAt || p.date || Date.now()).getTime() < 86400000) && (
                                   <div className="px-2 md:px-4 py-1 md:py-2 bg-emerald-500/90 backdrop-blur-md text-white font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)]">
-                                      NEW
+                                      New
                                   </div>
                                 )}
                                 {p.isHot && (
@@ -1974,32 +1758,32 @@ const playClick = () => {
                                   </div>
                                 )}
                               </div>
-                              <img src={p.image} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                              <img src={p.image} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ willChange: 'transform' }} />
                               
                               <div className="absolute top-2 right-2 md:top-6 md:right-6 flex flex-col gap-2 z-20">
-                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-2.5 md:p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-neon' : 'bg-slate-900/80 text-white hover:bg-rose-500/50'}`}>
+                                <button onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }} className={`p-2.5 md:p-4 rounded-full backdrop-blur-md transition-all border border-white/10 ${currentUser?.wishlist?.includes(p.id) ? 'bg-rose-500/90 text-white shadow-[0_0_15px_rgba(225,29,72,0.5)]' : 'bg-slate-900/80 text-white opacity-100 md:opacity-0 group-hover:opacity-100 hover:bg-rose-500/50'}`}>
                                   <Heart className={`w-3.5 h-3.5 md:w-5 md:h-5 ${currentUser?.wishlist?.includes(p.id) ? 'fill-current' : ''}`} />
                                 </button>
                               </div>
 
                               <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center">
-                                 <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-neon flex items-center gap-2">
+                                 <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
                                    <Terminal className="w-4 h-4" /> Quick View
                                  </button>
                               </div>
                             </div>
-                            <div className="px-2 md:px-4 pb-2 md:pb-4 flex-1 flex flex-col text-center [transform:translateZ(10px)]">
+                            <div className="px-2 md:px-4 pb-2 md:pb-4 flex-1 flex flex-col text-center">
                               <p className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.2em] md:tracking-[0.4em] text-rose-500 mb-2 md:mb-3 truncate">{p.category}</p>
-                              <h3 className="text-xs md:text-xl font-bold text-slate-900 dark:text-white mb-3 md:mb-6 line-clamp-2 leading-tight">{p.name}</h3>
+                              <h3 className="text-xs md:text-xl font-bold text-slate-900 dark:text-white mb-3 md:mb-6 line-clamp-2 md:line-clamp-1 h-8 md:h-auto leading-tight">{p.name}</h3>
                               <div className="mt-auto flex justify-between items-center border-t border-slate-100 dark:border-white/5 pt-3 md:pt-6">
                                 <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white truncate pr-2">Ksh {p.price.toLocaleString()}</span>
-                                <button onClick={(e) => { e.stopPropagation(); playSwoosh(); handleAddToCart(p); }} className="w-8 h-8 md:w-14 md:h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[12px] md:rounded-[24px] flex items-center justify-center hover:bg-rose-500 shadow-neon transition-all active:scale-90 shrink-0">
+                                <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-8 h-8 md:w-14 md:h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[12px] md:rounded-[24px] flex items-center justify-center hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
                                   <Plus className="w-4 h-4 md:w-6 md:h-6" />
                                 </button>
                               </div>
                             </div>
                         </div>
-                      )})
+                      ))
                     ) : null}
                  </div>
                  
@@ -2306,13 +2090,13 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
                     }}/>
                   </label>
                   <button onClick={() => {
-                  setShowPicOptions(false);
-                  // Uses the user's name as a seed so the avatar is unique but stays the same
-                  const fashionAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}&mood=happy&accessories=eyepatch,prescription01,round`;
-                  onUpdateUser(user.id || user._id, { profilePic: fashionAvatar });
-                }} className="block w-full text-left px-4 py-3 text-[10px] font-black uppercase text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
-                  <Sparkles className="w-3 h-3 inline mr-2 text-rose-500"/> Generate Random Avatar
-                </button>
+                    setShowPicOptions(false);
+                    const randomId = Math.floor(Math.random() * 1000) + 1;
+                    onUpdateUser(user.id || user._id, { profilePic: `https://picsum.photos/id/${randomId}/400/400` });
+                  }} className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
+                    Generate Random Avatar
+                  </button>
+                </div>
               )}
             </div>
              <h3 className="text-xl font-serif italic font-bold text-slate-900 dark:text-white truncate px-2">{user.name}</h3>
