@@ -719,7 +719,7 @@ const salesTrend = useMemo(() => {
          </div>
        )}
 
-// Inside AdminVault component, under tab === 'orders'
+
 {tab === 'orders' && (
   <div className="space-y-6 md:space-y-8 animate-fade-in">
     <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 font-mono">
@@ -1069,6 +1069,45 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                     ) : ( <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div> )}
                   </div>
 
+
+{/* Simplified Review Section Container */}
+              <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-end mb-6">
+                    <div>
+                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
+                        <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
+                    </div>
+                    {product.reviews?.length > 2 && (
+                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
+                        {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+                    {product.reviews?.length ? (
+                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
+                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
+                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
+                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
+                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
+                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
+                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
+                              </div>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : ( <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div> )}
+                  </div>
+
                   {/* RESTORED: Smart Input Section */}
           // Inside ProductModal, the Review Section
           <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
@@ -1226,7 +1265,88 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                 </div>
               </div>
             </div>
-          </div> 
+          </div>
+\```
+
+\```with
+                {/* Simplified Review Section Container */}
+                <div className="space-y-6 pt-10 border-t border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-end mb-6">
+                    <div>
+                      <h4 className="font-mono text-[10px] uppercase text-slate-400 tracking-widest flex items-center gap-2 mb-1">
+                        <Terminal className="w-3 h-3 text-sky-400" /> Data Resonance
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">{product.reviewsCount || 0} Review(s)</p>
+                    </div>
+                    {product.reviews?.length > 2 && (
+                      <button onClick={() => setShowAllComments(!showAllComments)} className="font-mono text-[9px] font-bold uppercase tracking-widest text-rose-500 hover:text-rose-400 transition-all">
+                        {showAllComments ? '[ MINIMIZE ]' : '[ VIEW ALL ]'}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={`space-y-4 transition-all duration-500 overflow-y-auto scrollbar-hide pr-2 ${showAllComments ? 'max-h-[400px]' : 'max-h-[180px]'}`}>
+                    {product.reviews && product.reviews.length > 0 ? (
+                      (showAllComments ? product.reviews : product.reviews.slice(0, 2)).map((r: any) => (
+                        <div key={r.id || r.userId} className="bg-slate-50/50 dark:bg-slate-950/50 p-5 rounded-[24px] border border-slate-100 dark:border-white/5 flex gap-4 items-start group">
+                          <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg border border-slate-300 dark:border-slate-700">
+                            {r.userProfilePic ? <img src={r.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-slate-400" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                              <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{r.userName || 'Citizen'}</span>
+                              <span className="text-[9px] font-mono text-slate-400 tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
+                              <div className="flex gap-0.5 text-amber-400 ml-auto shrink-0 drop-shadow-[0_0_5px_#fbbf24]">
+                                {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
+                              </div>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-10 text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest border-2 border-dashed rounded-[32px]">No resonance detected.</div>
+                    )}
+                  </div>
+          
+                  {/* Review Input Section */}
+                  <div className={`p-6 md:p-8 rounded-[40px] border-2 transition-all duration-500 relative mt-8 ${
+                      currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview
+                      ? 'border-transparent bg-slate-50/50 dark:bg-slate-950/50'
+                      : 'border-dashed border-rose-500/30 bg-rose-50/10'
+                  }`}>
+                    {currentUser && product.reviews?.find((r: any) => r.userId === (currentUser.id || currentUser._id)) && !isEditingReview ? (
+                      <div className="text-center animate-fade-in">
+                        <h5 className="font-mono text-[10px] uppercase text-emerald-500 tracking-[0.3em] mb-4">Reviews</h5>
+                        <button onClick={() => setIsEditingReview(true)} className="flex items-center gap-2 mx-auto font-mono text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-all bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-md border border-slate-200 dark:border-white/5">
+                          <Edit3 className="w-3 h-3" /> Redact Review
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleReviewSubmit} className="space-y-6">
+                        <h5 className="font-mono text-[10px] font-bold uppercase text-slate-900 dark:text-rose-400 mb-6 tracking-widest flex items-center gap-2">
+                          <Terminal className="w-3 h-3" /> Comments
+                        </h5>
+                        <div className="flex items-center gap-4 bg-white/50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <button type="button" key={s} onClick={() => setReviewRating(s)}>
+                                <Star className={`w-6 h-6 ${s <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <textarea required placeholder="Enter narrative experience..." className="w-full p-5 bg-white/80 dark:bg-slate-950/80 rounded-[24px] font-mono outline-none text-xs text-slate-900 dark:text-white min-h-[100px] border border-slate-200 dark:border-white/10" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
+                        <button type="submit" className="w-full py-4 bg-slate-900 dark:bg-rose-600 text-white rounded-[20px] font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-rose-500 transition-all shadow-neon">
+                          {isEditingReview ? 'Edit Review' : 'Transmit Review'}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
       <div className="flex gap-4 p-6 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
          <button onClick={() => { onAddToCart(product); onClose(); playSwoosh(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-neon hover:bg-rose-500 transition-all active:scale-95">
