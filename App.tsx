@@ -625,23 +625,23 @@ const handleSaveProduct = (e: React.FormEvent) => {
       
        {tab === 'products' && (
          <div className="space-y-8 animate-fade-in">
-            <div className="flex justify-between items-center mb-8">
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Product Management</h3>
-               <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="px-8 py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[10px] flex items-center gap-2 shadow-neon hover:scale-105 transition-all">
-                  {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />} {showAddForm ? 'Cancel' : 'Register New Product'}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Product Management</h3>
+               <button onClick={() => { setShowAddForm(!showAddForm); setEditingProduct(null); }} className="w-full sm:w-auto px-6 md:px-8 py-3 bg-rose-600 text-white rounded-full font-black uppercase text-[9px] md:text-[10px] flex items-center justify-center gap-2 shadow-neon hover:scale-105 transition-all">
+                  {showAddForm ? <X className="w-3 h-3 md:w-4 md:h-4" /> : <Plus className="w-3 h-3 md:w-4 md:h-4" />} {showAddForm ? 'Cancel' : 'Register New Product'}
                </button>
             </div>
 
             {(showAddForm || editingProduct) && (
-              <div className="bg-white dark:bg-slate-900 p-10 rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in mb-10">
-                 <h4 className="text-xl font-bold mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
-                 <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input required className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
-                    <input required type="number" className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool (Quantity)" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
+              <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in mb-8 md:mb-10">
+                 <h4 className="text-lg md:text-xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
+                 <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <input required className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
+                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
+                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool (Quantity)" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
                     
                     <div className="relative">
-                      <select className="w-full p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-black uppercase text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
+                      <select className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
                          <optgroup label="General / Top Level">
                            <option value="Women">Women (All)</option>
                            <option value="Men">Men (All)</option>
@@ -689,26 +689,26 @@ const handleSaveProduct = (e: React.FormEvent) => {
                     </div>
 
                   
-                      <textarea required className="md:col-span-2 p-6 bg-slate-50 dark:bg-slate-800 rounded-[24px] font-bold text-slate-900 dark:text-white h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
+                      <textarea required className="md:col-span-2 p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white h-24 md:h-32" placeholder="Description" value={editingProduct ? editingProduct.description : newProduct.description} onChange={e => editingProduct ? setEditingProduct({...editingProduct, description: e.target.value}) : setNewProduct({...newProduct, description: e.target.value})} />
                     
-                    <label className={`md:col-span-2 flex items-center gap-4 p-6 rounded-[24px] font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
+                    <label className={`md:col-span-2 flex items-center gap-3 md:gap-4 p-4 md:p-6 rounded-2xl md:rounded-[24px] text-sm md:text-base font-bold cursor-pointer select-none transition-all duration-300 border-2 ${
                        (editingProduct ? editingProduct.isHot : newProduct.isHot) 
                          ? 'bg-rose-500/10 border-rose-500 text-rose-600 dark:text-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.2)]' 
                          : 'bg-slate-50 dark:bg-slate-800 border-transparent text-slate-900 dark:text-white hover:border-rose-200'
                     }`}>
-                       <div className={`w-6 h-6 rounded-md flex items-center justify-center border-2 transition-colors ${
+                       <div className={`w-5 h-5 md:w-6 md:h-6 rounded-md flex items-center justify-center border-2 transition-colors ${
                           (editingProduct ? editingProduct.isHot : newProduct.isHot) 
                           ? 'bg-rose-500 border-rose-500' 
                           : 'border-slate-300 dark:border-slate-600'
                        }`}>
-                          {(editingProduct ? editingProduct.isHot : newProduct.isHot) && <CheckCircle2 className="w-4 h-4 text-white" />}
+                          {(editingProduct ? editingProduct.isHot : newProduct.isHot) && <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4 text-white" />}
                        </div>
                        <input type="checkbox" checked={editingProduct ? editingProduct.isHot : newProduct.isHot} onChange={e => editingProduct ? setEditingProduct({...editingProduct, isHot: e.target.checked}) : setNewProduct({...newProduct, isHot: e.target.checked})} className="hidden" />
                        Mark as "Hot Deal" 🔥 
-                       <span className="text-[10px] font-mono text-slate-400 font-normal ml-auto">(Glows when active)</span>
+                       <span className="text-[8px] md:text-[10px] font-mono text-slate-400 font-normal ml-auto">(Glows when active)</span>
                     </label>
 
-                    <button disabled={isUploadingImage} className="md:col-span-2 py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] hover:shadow-neon transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button disabled={isUploadingImage} className="md:col-span-2 py-4 md:py-6 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[32px] font-black uppercase tracking-widest text-[9px] md:text-[11px] hover:shadow-neon transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                        {isUploadingImage ? 'Uploading Image...' : 'Commit Configuration'}
                     </button>
                  </form>
@@ -765,8 +765,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
 
       {tab === 'orders' && (
         <div className="space-y-8 animate-fade-in">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 font-mono">
-            <Activity className="w-6 h-6 text-rose-500" /> Active Orders
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 font-mono">
+            <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
           </h3>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -809,27 +809,27 @@ const handleSaveProduct = (e: React.FormEvent) => {
               <div className="px-6 pb-6 animate-fade-in border-t border-slate-100 dark:border-white/5 pt-6">
                 {!isDelivered && <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none"></div>}
                 
-                <div className="bg-slate-50 dark:bg-slate-950/50 p-5 rounded-2xl mb-6 relative z-10 border border-slate-100 dark:border-white/5">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="font-mono text-[10px] uppercase text-slate-500">Value Processed</span>
-                    <span className="text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
+                <div className="bg-slate-50 dark:bg-slate-950/50 p-4 md:p-5 rounded-2xl mb-4 md:mb-6 relative z-10 border border-slate-100 dark:border-white/5">
+                  <div className="flex justify-between items-center mb-3 md:mb-4">
+                    <span className="font-mono text-[8px] md:text-[10px] uppercase text-slate-500">Value Processed</span>
+                    <span className="text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white">Ksh {o.total?.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between items-center py-2 border-t border-slate-200 dark:border-white/5">
-                    <span className="font-mono text-[9px] uppercase text-slate-500">Order Placed</span>
-                    <span className="font-mono text-[10px] text-slate-900 dark:text-white font-bold">{new Date(o.date).toLocaleDateString()} at {new Date(o.date).toLocaleTimeString()}</span>
+                    <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500">Order Placed</span>
+                    <span className="font-mono text-[8px] md:text-[10px] text-slate-900 dark:text-white font-bold">{new Date(o.date).toLocaleDateString()} at {new Date(o.date).toLocaleTimeString()}</span>
                   </div>
             
                   {!isDelivered && (
-                    <div className="flex justify-between items-center py-4 border-t border-slate-200 dark:border-white/5">
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center py-3 md:py-4 border-t border-slate-200 dark:border-white/5 gap-2">
                       <div className="flex flex-col">
-                         <span className="font-mono text-[9px] uppercase text-slate-500 flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
-                          <span className="text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">
+                         <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 flex items-center gap-1.5 md:gap-2"><Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-amber-500 animate-spin-slow" /> Estimated Drop</span>
+                          <span className="text-[7px] md:text-[8px] font-black uppercase text-sky-500 tracking-widest mt-1">
                             {o.deliveryMethod || 'Standard Delivery'} - {o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3)} Days
                           </span>
                       </div>
-                      <div className="flex flex-col items-end">
-                        <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start">
+                        <span className="px-2 py-1 bg-amber-500/20 text-amber-500 rounded text-[8px] md:text-[10px] font-mono font-black border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
                           EST: {(() => {
                             const d = new Date(o.date || Date.now());
                             d.setDate(d.getDate() + daysLeft);
@@ -840,17 +840,18 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       </div>
                     </div>
                   )}
-                  <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-white/5">
-                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2"><Smartphone className="w-3 h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
-                    <p className="font-mono text-[9px] text-slate-500 flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-rose-400"/> Delivery Address: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}
+                  <div className="flex flex-col gap-2 pt-3 md:pt-4 border-t border-slate-200 dark:border-white/5">
+                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-center gap-1.5 md:gap-2"><Smartphone className="w-2.5 h-2.5 md:w-3 md:h-3 text-sky-400"/> Sync No: {o.phoneNumber}</p>
+                    <p className="font-mono text-[8px] md:text-[9px] text-slate-500 flex items-start gap-1.5 md:gap-2">
+                      <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-rose-400 mt-0.5"/> 
+                      <span className="flex-1 leading-snug">Delivery Address: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}</span>
                     </p>
                   </div>
                 </div>
             
                 {/* Admin Update Controls */}
                       {!isDelivered && (
-                        <div className="flex items-center gap-4 relative z-10">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 relative z-10">
                           <select 
                             value={o.status || 'Processing'} 
                             onChange={(e) => {
@@ -859,7 +860,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                               }
                               onUpdateOrder(o._id || o.id, { status: e.target.value });
                             }}
-                            className={`flex-1 ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-4 rounded-2xl text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
+                            className={`flex-1 ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
                           >
                             <option value="Processing">Set: Processing</option>
                             <option value="Shipped">Set: Shipped</option>
@@ -871,9 +872,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                            <button onClick={() => {
                              const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
                              audio.play().catch(() => {});
-                             // Note: Status already updates onChange of the select. This button is for sensory feedback/re-triggering sync.
-                           }} className="w-14 h-14 bg-rose-600 text-white rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
-                             <RefreshCw className="w-5 h-5" />
+                           }} className="w-full sm:w-12 sm:h-12 md:w-14 md:h-14 py-3 sm:py-0 bg-rose-600 text-white rounded-xl md:rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
+                             <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
                            </button>
                         </div>
                       )}
@@ -889,7 +889,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
 
                 {tab === 'users' && (
                   <div className="space-y-8 animate-fade-in relative">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-mono">Users Directory</h3>
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white font-mono">Users Directory</h3>
                     
                     {/* Full Screen Image Viewer Modal */}
                     {viewingImage && (
@@ -945,10 +945,10 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           
                           {u.email !== 'faith@faith' && (
 
-                          <div className="flex gap-3 relative z-10 pt-4 border-t border-slate-100 dark:border-white/5">
+                          <div className="flex gap-2 md:gap-3 relative z-10 pt-3 md:pt-4 border-t border-slate-100 dark:border-white/5">
                             <button 
                               onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
-                              className={`flex-1 py-3 rounded-xl font-mono font-bold text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              className={`flex-1 py-2 md:py-3 rounded-lg md:rounded-xl font-mono font-bold text-[8px] md:text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
                               {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                             </button>
@@ -957,9 +957,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
                                 if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); 
                                 if (window.confirm(`Are you sure you want to delete ${u.name}?`)) onDeleteUser(u._id || u.id) 
                               }} 
-                              className={`p-3 rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              className={`p-2 md:p-3 rounded-lg md:rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                             </button>
                           </div>
                           )}
@@ -1730,14 +1730,11 @@ const MainContent = () => {
         })
         .catch(e => console.log("Order sync delayed"));
 
-      if (isAdmin) {
+     if (isAdmin) {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(r => r.ok ? r.json() :
+          .then(r => r.ok ? r.json() :[])
           .then(data => {
-              setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []);
-          })
-          .catch(e => console.log("User sync delayed"));
-      }
+              setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) :
     } catch (e) {
       setIsSynced(false);
     }
