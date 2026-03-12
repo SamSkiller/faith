@@ -1704,21 +1704,28 @@ const MainContent = () => {
         .finally(() => setIsLoadingProducts(false)); 
 
       const token = localStorage.getItem('faith_token');
-      if (!token) return;
+      if (!token || token === 'undefined' || token === 'null') {
+         if (currentUser) {
+            setCurrentUser(null);
+            localStorage.removeItem('faith_session_active');
+         }
+         return;
+      }
 
       const session = localStorage.getItem('faith_session_active');
       const localUser = session ? JSON.parse(session) : null;
       
       const isAdmin = localUser?.role === 'admin' || localUser?.email === 'faith@faith';
 
-     const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
+      const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(r => {
-           if (r.status === 401) {
+           if (r.status === 401 || r.status === 403) {
               localStorage.removeItem('faith_token');
               localStorage.removeItem('faith_session_active');
               setCurrentUser(null);
               setView('home');
+              throw new Error('Auth Expired');
            }
            return r.ok ? r.json() :[];
         })
@@ -1746,6 +1753,7 @@ const MainContent = () => {
                 localStorage.removeItem('faith_session_active');
                 setCurrentUser(null);
                 setView('home');
+                throw new Error('Auth Expired');
              }
              return r.ok ? r.json() :[];
           })
