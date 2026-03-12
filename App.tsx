@@ -1730,12 +1730,11 @@ const MainContent = () => {
         })
         .catch(e => console.log("Order sync delayed"));
 
-     if (isAdmin) {
+      if (isAdmin) {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.ok ? r.json() :[])
           .then(data => {
               setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) :
-    } catch (e) {
       setIsSynced(false);
     }
   };
