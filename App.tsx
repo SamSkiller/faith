@@ -1018,7 +1018,7 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
         <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm italic mb-8 md:mb-10 font-medium">
           {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
         </p>
-        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 text-left">
           {!isLogin && <input required className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
           
           <input required type="email" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
@@ -1711,13 +1711,14 @@ const MainContent = () => {
       
       const isAdmin = localUser?.role === 'admin' || localUser?.email === 'faith@faith';
 
-      const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
+     const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(r => {
            if (r.status === 401) {
               localStorage.removeItem('faith_token');
               localStorage.removeItem('faith_session_active');
               setCurrentUser(null);
+              setView('home');
            }
            return r.ok ? r.json() :[];
         })
@@ -1744,6 +1745,7 @@ const MainContent = () => {
                 localStorage.removeItem('faith_token');
                 localStorage.removeItem('faith_session_active');
                 setCurrentUser(null);
+                setView('home');
              }
              return r.ok ? r.json() :[];
           })
