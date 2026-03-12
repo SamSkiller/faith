@@ -1734,11 +1734,14 @@ const MainContent = () => {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
           .then(r => r.ok ? r.json() :[])
           .then(data => {
-              setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) :
+              setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) :[]);
+          })
+          .catch(e => console.log("User sync delayed"));
+      }
+    } catch (e) {
       setIsSynced(false);
     }
   };
-
   const handleAuth = (user: User, token?: string) => {
     const normalizedUser = { 
       ...user, 
