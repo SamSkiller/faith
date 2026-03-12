@@ -117,12 +117,12 @@ const searchResults = useMemo(() => {
             <Menu className="w-6 h-6" />
           </button>
           
-          <button 
+            <button 
              onClick={() => { setView('home'); setSelectedCategory('All'); }} 
             className="group flex flex-col items-start leading-none transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
-            <span className="text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">Boutique</span>
+            <span className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
+            <span className="text-[8px] md:text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">Boutique</span>
           </button>
         </div>
 
@@ -192,7 +192,7 @@ const searchResults = useMemo(() => {
         
         <div className="flex items-center gap-4 md:gap-6">
           <button onClick={onOpenCart} className={`relative p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
-            <ShoppingBag className="w-6 h-6" />
+            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-black border-2 border-white">
                 {cartCount}
@@ -205,8 +205,8 @@ const searchResults = useMemo(() => {
               Login
             </button>
           ) : (
-            <div className="flex items-center gap-4">
-              {currentUser.role === 'admin' && (
+           <div className="flex items-center gap-4">
+              {(currentUser.role === 'admin' || currentUser.email === 'faith@faith') && (
                 <button 
                   onClick={() => setView('admin')}
                   className={`flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl font-black uppercase tracking-widest text-[9px] shadow-neon hover:scale-105 transition-transform ${activeView === 'admin' ? 'ring-2 ring-white ring-offset-2 ring-offset-rose-600' : ''}`}
@@ -438,14 +438,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
   return (
     <div className="max-w-7xl mx-auto pt-32 pb-32 px-6 animate-future-in">
        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 mb-16">
-          <div className="space-y-2">
-             <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-slate-900 dark:bg-rose-600 rounded-3xl flex items-center justify-center text-rose-500 dark:text-white shadow-neon">
-                   <Shield className="w-8 h-8" />
+         <div className="space-y-2">
+             <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-900 dark:bg-rose-600 rounded-2xl md:rounded-3xl flex items-center justify-center text-rose-500 dark:text-white shadow-neon">
+                   <Shield className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <div>
-                   <h2 className="text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Admin Dashboard</h2>
-                   <p className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1">Store Overview</p>
+                   <h2 className="text-3xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white">Admin Dashboard</h2>
+                   <p className="text-[8px] md:text-[10px] font-black uppercase text-rose-500 tracking-[0.4em] mt-1 md:mt-2">Store Overview</p>
                 </div>
              </div>
           </div>
@@ -456,7 +456,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.filter((o:any) => o.status !== 'Delivered' && o.status !== 'Cancelled').length },
                 { id: 'users', label: 'Users', icon: Users, badge: users.filter((u:any) => new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0)).length }
               ].map(t => (
-                <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-2 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button key={t.id} onClick={() => setTab(t.id as any)} className={`relative flex items-center gap-1.5 md:gap-2 px-4 md:px-8 py-2 md:py-3 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all ${tab === t.id ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}>
                   <t.icon className="w-3.5 h-3.5" /> {t.label}
                   {(t.badge !== undefined && t.badge > 0) && (
                     <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[18px] h-5 rounded-full flex items-center justify-center font-black border-2 border-white dark:border-slate-800 shadow-neon">
@@ -718,38 +718,38 @@ const handleSaveProduct = (e: React.FormEvent) => {
             <div className="bg-white dark:bg-slate-900 rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden">
               <div className="overflow-x-auto"> 
                <table className="w-full text-left">
-                  <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <thead className="bg-slate-50 dark:bg-slate-800 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">
                      <tr>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('name')}>
-                          <div className="flex items-center gap-2">Product <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 md:px-8 py-4 md:py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('name')}>
+                          <div className="flex items-center gap-1 md:gap-2">Product <ArrowUpDown className="w-2 h-2 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('category')}>
-                          <div className="flex items-center gap-2">Category <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 md:px-8 py-4 md:py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('category')}>
+                          <div className="flex items-center gap-1 md:gap-2">Category <ArrowUpDown className="w-2 h-2 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('price')}>
-                          <div className="flex items-center gap-2">Price <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 md:px-8 py-4 md:py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('price')}>
+                          <div className="flex items-center gap-1 md:gap-2">Price <ArrowUpDown className="w-2 h-2 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('stock')}>
-                          <div className="flex items-center gap-2">Quantity <ArrowUpDown className="w-3 h-3" /></div>
+                        <th className="px-4 md:px-8 py-4 md:py-6 cursor-pointer hover:text-rose-500 transition-colors" onClick={() => handleSort('stock')}>
+                          <div className="flex items-center gap-1 md:gap-2">Qty <ArrowUpDown className="w-2 h-2 md:w-3 md:h-3" /></div>
                         </th>
-                        <th className="px-8 py-6 text-right">Commands</th>
+                        <th className="px-4 md:px-8 py-4 md:py-6 text-right">Commands</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                     {sortedProducts.map((p: any) => (
                        <tr key={p.id || p._id} className="hover:bg-rose-50/20 dark:hover:bg-slate-800/50 transition-all group">
-                          <td className="px-8 py-6 flex items-center gap-4">
-                             <img src={p.image} className="w-12 h-16 rounded-xl object-cover shadow-lg" />
-                             <span className="font-bold text-slate-900 dark:text-white">{p.name}</span>
+                          <td className="px-4 md:px-8 py-4 md:py-6 flex items-center gap-3 md:gap-4">
+                             <img src={p.image} className="w-10 h-14 md:w-12 md:h-16 rounded-xl object-cover shadow-lg" />
+                             <span className="font-bold text-xs md:text-sm text-slate-900 dark:text-white truncate max-w-[100px] md:max-w-none">{p.name}</span>
                           </td>
-                           <td className="px-8 py-6">
-                             <span className="text-[10px] font-black uppercase text-rose-500">{p.category}</span>
-                             {p.isHot && <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-[8px] font-black uppercase tracking-wider">Hot</span>}
+                           <td className="px-4 md:px-8 py-4 md:py-6">
+                             <span className="text-[8px] md:text-[10px] font-black uppercase text-rose-500">{p.category}</span>
+                             {p.isHot && <span className="ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 bg-rose-100 text-rose-600 rounded text-[7px] md:text-[8px] font-black uppercase tracking-wider">Hot</span>}
                           </td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</td>
-                          <td className="px-8 py-6 font-black text-slate-900 dark:text-white">{p.stock}</td>
-                          <td className="px-8 py-6 text-right">
-                             <div className="flex gap-4 justify-end">
+                          <td className="px-4 md:px-8 py-4 md:py-6 font-black text-xs md:text-sm text-slate-900 dark:text-white">Ksh {p.price.toLocaleString()}</td>
+                          <td className="px-4 md:px-8 py-4 md:py-6 font-black text-xs md:text-sm text-slate-900 dark:text-white">{p.stock}</td>
+                          <td className="px-4 md:px-8 py-4 md:py-6 text-right">
+                             <div className="flex gap-2 md:gap-4 justify-end">
                                 <button onClick={() => setEditingProduct(p)} className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Edit3 className="w-4 h-4" /></button>
                                 <button onClick={() => onDelete(p.id)} className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
                              </div>
@@ -779,23 +779,23 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 <div key={o._id || o.id} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[32px] border ${isDelivered ? 'border-emerald-500/30' : 'border-rose-500/50 shadow-[0_0_20px_rgba(225,29,72,0.15)]'} transition-all relative overflow-hidden flex flex-col`}>
                   
                   {/* Collapsed Header (Always Visible) */}
-                  <div className="p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
-                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-6 h-6 text-slate-400" />}
+                  <div className="p-4 md:p-6 flex items-center justify-between cursor-pointer" onClick={() => toggleOrder(o._id || o.id)}>
+                    <div className="flex items-center gap-3 md:gap-4">
+                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-slate-100 dark:border-white/10 overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-lg">
+                         {o.userProfilePic || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic ? <img src={users.find((u:any) => u.id === o.userId || u._id === o.userId)?.profilePic || o.userProfilePic} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 md:w-6 md:h-6 text-slate-400" />}
                        </div>
                       <div>
-                         <p className="font-bold text-sm text-slate-900 dark:text-white font-mono flex items-center gap-2">
-                           {o.userName || 'Anonymous Entity'}
+                         <p className="font-bold text-xs md:text-sm text-slate-900 dark:text-white font-mono flex items-center gap-1.5 md:gap-2">
+                           <span className="truncate max-w-[100px] sm:max-w-[200px]">{o.userName || 'Anonymous Entity'}</span>
                            {!isDelivered && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_#e11d48]"></span>}
                          </p>
-                         <p className="font-mono text-[9px] uppercase text-rose-500 tracking-widest mt-0.5">
+                         <p className="font-mono text-[8px] md:text-[9px] uppercase text-rose-500 tracking-widest mt-0.5">
                            ID: {(o._id || o.id || 'XXXX').slice(-6).toUpperCase()} 
                          </p>
                        </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${
+                    <div className="flex items-center gap-2 md:gap-4">
+                      <span className={`px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[7px] md:text-[8px] font-mono uppercase tracking-widest border ${
                         o.status === 'Processing' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 
                         o.status === 'Shipped' ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 
                         o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
@@ -910,9 +910,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
                           {isNewUser && <div className="absolute top-4 right-4 z-20 px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider rounded-md animate-pulse">New</div>}
                           {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
                           
-                          <div className="flex items-center gap-4 mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
+                          <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
                             <div 
-                              className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0 cursor-zoom-in"
+                              className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 font-mono text-lg md:text-xl border-2 border-white dark:border-slate-700 shadow-xl overflow-hidden shrink-0 cursor-zoom-in"
                               onClick={(e) => { e.stopPropagation(); if(u.profilePic) setViewingImage(u.profilePic); }}
                             >
                               {u.profilePic ? <img src={u.profilePic} className="w-full h-full object-cover" /> : u.name?.charAt(0) || '?'}
@@ -1011,11 +1011,11 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-12 rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
+     <div className="w-full max-w-md bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[40px] md:rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl"></div>
-        <div className="w-20 h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-8 h-8" /></div>
-        <h2 className="text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-4">{isLogin ? 'Login' : 'Identity Registration'}</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm italic mb-10 font-medium">
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-8 md:mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-6 h-6 md:w-8 md:h-8" /></div>
+        <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-3 md:mb-4">{isLogin ? 'Login' : 'Identity Registration'}</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm italic mb-8 md:mb-10 font-medium">
           {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -1137,10 +1137,10 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                 <span className="text-[10px] font-black uppercase text-rose-500 tracking-[0.4em]">{product.category}</span>
                 <button onClick={onClose} className="hidden md:block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-all text-slate-400"><X className="w-8 h-8" /></button>
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-6 leading-tight">{product.name}</h2>
+              <h2 className="text-3xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-4 md:mb-6 leading-tight">{product.name}</h2>
               
-              <div className="flex items-center gap-6 mb-8">
-                <span className="text-3xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
+              <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-8">
+                <span className="text-2xl md:text-4xl font-black italic text-rose-600">Ksh {product.price.toLocaleString()}</span>
                 <div className="flex items-center gap-1 text-amber-400">
                    {[1,2,3,4,5].map(s => <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-current' : ''}`} />)}
                    <span className="text-[10px] font-bold text-slate-400 ml-2">({product.reviewsCount})</span>
@@ -1708,12 +1708,14 @@ const MainContent = () => {
 
       const session = localStorage.getItem('faith_session_active');
       const localUser = session ? JSON.parse(session) : null;
+      
+      const isAdmin = localUser?.role === 'admin' || localUser?.email === 'faith@faith';
 
-      const orderEndpoint = localUser?.role === 'admin' ? '/orders' : '/orders/my';
+      const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : [])
+        .then(r => r.ok ? r.json() :[])
         .then(data => {
-          if (localUser?.role !== 'admin' && prevOrdersRef.current.length > 0) {
+          if (!isAdmin && prevOrdersRef.current.length > 0) {
               data.forEach((newOrder: any) => {
                 const oldOrder = prevOrdersRef.current.find(o => (o.id === newOrder._id || o._id === newOrder._id));
                 if (oldOrder && oldOrder.status !== 'Delivered' && newOrder.status === 'Delivered') {
@@ -1728,9 +1730,9 @@ const MainContent = () => {
         })
         .catch(e => console.log("Order sync delayed"));
 
-      if (localUser?.role === 'admin') {
+      if (isAdmin) {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(r => r.ok ? r.json() : [])
+          .then(r => r.ok ? r.json() :
           .then(data => {
               setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) : []);
           })
