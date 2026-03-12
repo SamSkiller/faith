@@ -1018,17 +1018,17 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
         <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm italic mb-8 md:mb-10 font-medium">
           {isLogin ? 'Enter your details to continue.' : 'Enter your new details.'}
         </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && <input required className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+          {!isLogin && <input required className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
           
-          <input required type="email" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+          <input required type="email" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
           
-          <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+          <input required type="password" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
 
-          {!isLogin && <input required type="password" className="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
+          {!isLogin && <input required type="password" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Confirm Password" value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />}
           
-          <button type="submit" disabled={isLoading} className="w-full py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-[32px] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70">
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+          <button type="submit" disabled={isLoading} className="w-full py-4 md:py-7 bg-slate-900 dark:bg-rose-600 text-white rounded-2xl md:rounded-[32px] font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-2 md:gap-3 disabled:opacity-70">
+            {isLoading ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" /> : null}
             {isLoading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
           </button>
         </form>
@@ -1713,7 +1713,14 @@ const MainContent = () => {
 
       const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() :[])
+        .then(r => {
+           if (r.status === 401) {
+              localStorage.removeItem('faith_token');
+              localStorage.removeItem('faith_session_active');
+              setCurrentUser(null);
+           }
+           return r.ok ? r.json() :[];
+        })
         .then(data => {
           if (!isAdmin && prevOrdersRef.current.length > 0) {
               data.forEach((newOrder: any) => {
@@ -1732,7 +1739,14 @@ const MainContent = () => {
 
       if (isAdmin) {
         fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(r => r.ok ? r.json() :[])
+          .then(r => {
+             if (r.status === 401) {
+                localStorage.removeItem('faith_token');
+                localStorage.removeItem('faith_session_active');
+                setCurrentUser(null);
+             }
+             return r.ok ? r.json() :[];
+          })
           .then(data => {
               setUsers(Array.isArray(data) ? data.map((u: any) => ({ ...u, id: u._id || u.id })) :[]);
           })
