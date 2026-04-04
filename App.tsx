@@ -769,7 +769,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
             <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Active Orders
           </h3>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {orders.map((o: any) => {
               const daysLeft = o.deliveryDays || (o.deliveryMethod === 'Express Drone' ? 1 : 3); 
               const isDelivered = o.status === 'Delivered' || o.status === 'Cancelled';
@@ -865,28 +865,36 @@ const handleSaveProduct = (e: React.FormEvent) => {
                 {/* Admin Update Controls */}
                       {!isDelivered && (
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 relative z-10">
-                          <select 
-                            value={o.status || 'Processing'} 
-                            onChange={(e) => {
-                              if (e.target.value === 'Cancelled') {
-                                if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
-                              }
-                              onUpdateOrder(o._id || o.id, { status: e.target.value });
-                            }}
-                            className={`flex-1 ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
-                          >
-                            <option value="Processing">Set: Processing</option>
-                            <option value="Shipped">Set: Shipped</option>
-                            <option value="Delivered">Set: Delivered</option>
-                            <option value="Cancelled">Cancel Order</option>
-                          </select>
+                          <div className="flex-1 relative">
+                            <select 
+                              value={o.status || 'Processing'} 
+                              onChange={(e) => {
+                                if (e.target.value === 'Cancelled') {
+                                  if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+                                }
+                                onUpdateOrder(o._id || o.id, { status: e.target.value });
+                              }}
+                              className={`w-full ${o.status === 'Cancelled' ? 'bg-rose-500/10 text-rose-500 border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-white/10'} p-3 md:p-4 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer transition-colors appearance-none border`}
+                            >
+                              <option value="Processing">Set: Processing</option>
+                              <option value="Shipped">Set: Shipped</option>
+                              <option value="Delivered">Set: Delivered</option>
+                              <option value="Cancelled">Cancel Order</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                          </div>
                            
-                           {/* Modern Sync Button */}
+                           {/* Next Stage Sync Button */}
                            <button onClick={() => {
-                             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-                             audio.play().catch(() => {});
-                           }} className="w-full sm:w-12 sm:h-12 md:w-14 md:h-14 py-3 sm:py-0 bg-rose-600 text-white rounded-xl md:rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
-                             <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
+                             const stages = ['Processing', 'Shipped', 'Delivered'];
+                             const currentIdx = stages.indexOf(o.status || 'Processing');
+                             if (currentIdx > -1 && currentIdx < 2) {
+                               const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+                               audio.play().catch(() => {});
+                               onUpdateOrder(o._id || o.id, { status: stages[currentIdx + 1] });
+                             }
+                           }} className="w-full sm:w-12 sm:h-12 md:w-14 md:h-14 py-3 sm:py-0 bg-rose-600 text-white rounded-xl md:rounded-2xl flex items-center justify-center hover:bg-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0" title="Push to Next Stage">
+                             <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                            </button>
                         </div>
                       )}
@@ -912,7 +920,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                       {sortedUsers.map((u: any, index: number) => {
                         const isNewUser = new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0) - 5000;
                         const isExpanded = expandedUsers.includes(u.id || u._id);
@@ -989,7 +997,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
 const AuthView = ({ onAuthSuccess, showToast }: any) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phoneNumber: '', password: '', confirmPassword: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1034,6 +1042,8 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 text-left">
           {!isLogin && <input required className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />}
           
+          {!isLogin && <input required type="tel" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all" placeholder="Phone Number (M-Pesa)" value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} />}
+
           <input required type="email" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
           
           <input required type="password" className="w-full p-4 md:p-6 text-sm md:text-base bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none text-slate-900 dark:text-white border border-transparent focus:border-rose-300 transition-all [&:-webkit-autofill]:[Webkit-box-shadow:0_0_0_30px_#1e293b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]" placeholder="Password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
@@ -1139,7 +1149,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
             {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
             <div className="block md:hidden w-full relative h-[45vh] shrink-0">
               <img src={product.image} className="w-full h-full object-cover" />
-              <button onClick={onClose} className="absolute top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-10">
+              <button onClick={onClose} className="fixed top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-[140] shadow-lg">
                 <ArrowLeft className="w-5 h-5" />
               </button>
             </div>
@@ -1218,7 +1228,7 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
                                 {[1, 2, 3, 4, 5].map(s => <Star key={s} className={`w-3 h-3 ${s <= r.rating ? 'fill-current' : 'opacity-30'}`} />)}
                               </div>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{r.comment}"</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic break-words whitespace-pre-wrap overflow-hidden">"{r.comment}"</p>
                           </div>
                         </div>
                       )})
@@ -1855,7 +1865,7 @@ const MainContent = () => {
     checkBackendSync();
     const syncInterval = setInterval(() => {
       checkBackendSync();
-    }, 15000);
+    }, 240000);
 
     return () => {
       clearInterval(interval);
@@ -2044,14 +2054,15 @@ const MainContent = () => {
                       <div className="h-1.5 w-16 md:w-24 bg-rose-500 rounded-full shadow-lg"></div>
                     </div>
                     <div className="w-full md:w-auto flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-2 md:p-3 rounded-2xl md:rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <div className="flex flex-1 md:flex-none items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-xl md:rounded-full shadow-sm text-slate-400">
-                        <ArrowUpDown className="w-4 h-4" />
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full text-[9px] md:text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white">
+                      <div className="flex flex-1 md:flex-none items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-xl md:rounded-full shadow-sm text-slate-400 relative">
+                        <ArrowUpDown className="w-4 h-4 shrink-0" />
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full text-[9px] md:text-[10px] font-black uppercase tracking-widest outline-none bg-transparent dark:text-white appearance-none pr-6">
                           <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="default">Sort: Default</option>
                           <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-asc">Price: Low to High</option>
                           <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="price-desc">Price: High to Low</option>
                           <option className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white" value="rating">Top Rated</option>
                         </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" />
                       </div>
                     </div>
                  </div>
@@ -2235,18 +2246,21 @@ onUpdateUser={async (id: any, data: any) => {
                   // 1. Use functional state update to prevent stale data closure
                   setOrders(prev => [savedOrder, ...prev]);
                   
-                  // 2. Immediately decrement local stock so Admin analytics & Pool Value update instantly
+                  // 2. Immediately decrement local stock AND send PUT requests to database to update pool
                   setProducts(prevProducts => prevProducts.map(p => {
                     const boughtItem = o.items.find((i: any) => (i.id || i._id) === p.id);
-                    return boughtItem ? { ...p, stock: Math.max(0, p.stock - boughtItem.quantity) } : p;
+                    if (boughtItem) {
+                       const newStock = Math.max(0, p.stock - boughtItem.quantity);
+                       // Update database stock asynchronously
+                       fetch(`${API_BASE}/products/${p.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ stock: newStock })
+                       }).catch(e => console.error("Database stock sync failed"));
+                       return { ...p, stock: newStock };
+                    }
+                    return p;
                   }));
-
-                  // 3. Refresh products from DB (Fixes missing _id mapping that was breaking products)
-                  fetch(`${API_BASE}/products`)
-                    .then(r => r.json())
-                    .then(data => {
-                       if (data && Array.isArray(data)) setProducts(data.map((p: any) => ({ ...p, id: p._id })));
-                    }).catch(e => console.error("Product refetch delayed"));
                   
                   setCart([]); 
                   setView('success'); 
@@ -2365,8 +2379,9 @@ onUpdateUser={async (id: any, data: any) => {
 
 const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRemoveFromWishlist, onAddToCart, onUpdateUser, activeTab, setActiveTab }: any) => {
   const [showPicOptions, setShowPicOptions] = useState(false);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [editData, setEditData] = useState({ 
-    name: user.name, 
+    name: user.name,
     email: user.email, 
     phoneNumber: user.phoneNumber || '', 
     address: user.address || '', 
@@ -2384,7 +2399,7 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-6 lg:p-8 animate-fade-in">
       <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={onClose}></div>
       
-      <div className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl lg:max-w-5xl bg-white dark:bg-slate-900 md:rounded-[48px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10">
+      {viewingImage && (         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90" onClick={() => setViewingImage(null)}>           <button className="absolute top-6 right-6 p-2 bg-white/10 rounded-full text-white hover:bg-white/20"><X className="w-6 h-6" /></button>           <img src={viewingImage} className="max-w-full max-h-full object-contain rounded-xl" onClick={(e) => e.stopPropagation()} />         </div>       )}        <div className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl lg:max-w-5xl bg-white dark:bg-slate-900 md:rounded-[48px] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-slate-200 dark:border-white/10">
         
         <button 
           onClick={onClose} 
@@ -2407,7 +2422,7 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
               {showPicOptions && (
                 <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 overflow-hidden z-[60] animate-fade-in">
                   {user.profilePic && (
-                    <a href={user.profilePic} target="_blank" className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">View Image</a>
+                    <button onClick={() => { setShowPicOptions(false); setViewingImage(user.profilePic); }} className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">View Image</button>
                   )}
                   <label className="block w-full text-left px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                     Upload from Device
