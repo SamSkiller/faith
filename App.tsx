@@ -1306,8 +1306,8 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
 
           
           <div className="flex gap-4 p-6 border-t border-slate-100 dark:border-white/5 sticky bottom-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20">
-             <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:bg-rose-500 transition-all active:scale-95">
-               Add to Cart • Ksh {product.price.toLocaleString()}
+             <button disabled={product.stock < 1} onClick={() => { onAddToCart(product); onClose(); }} className={`flex-1 py-4 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 ${product.stock < 1 ? 'bg-slate-400 dark:bg-slate-800 cursor-not-allowed' : 'bg-rose-600 shadow-[0_0_20px_rgba(225,29,72,0.3)] hover:bg-rose-500'}`}>
+               {product.stock < 1 ? 'Out of Stock' : `Add to Cart • Ksh ${product.price.toLocaleString()}`}
              </button>
              <button onClick={() => onToggleWishlist(product.id)} className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-center active:scale-90 ${isWishlisted ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/50'}`}>
                <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -1373,7 +1373,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
                     <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm w-max border border-slate-100 dark:border-white/5">
                        <button onClick={() => setCart(cart.map((c: any) => c.id === i.id && c.quantity > 1 ? { ...c, quantity: c.quantity - 1 } : c))} className="p-1"><Minus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
                        <span className="text-xs md:text-sm font-black text-slate-900 dark:text-white min-w-[12px] text-center">{i.quantity}</span>
-                       <button onClick={() => setCart(cart.map((c: any) => c.id === i.id ? { ...c, quantity: c.quantity + 1 } : c))} className="p-1"><Plus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
+                       <button onClick={() => setCart(cart.map((c: any) => (c.id === i.id && c.quantity < (c.stock || 99)) ? { ...c, quantity: c.quantity + 1 } : c))} className="p-1"><Plus className="w-3 h-3 text-slate-400 hover:text-rose-500" /></button>
                     </div>
                     <span className="font-black italic text-sm md:text-lg text-slate-900 dark:text-white truncate">Ksh {(i.price * i.quantity).toLocaleString()}</span>
                   </div>
@@ -1460,6 +1460,19 @@ const TrackOrderView = ({ orders, currentUser, isModal = false }: any) => {
                      <div key={i} className={`h-full flex-1 transition-all duration-1000 ${order.status === 'Cancelled' ? 'bg-rose-500' : i <= currentIdx ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-transparent'}`} />
                    ))}
                 </div>
+
+                {/* Purchased Items List */}
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
+                   <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3">Payload Data</p>
+                   <div className="space-y-2">
+                     {order.items?.map((item: any, idx: number) => (
+                       <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
+                         <span className="text-slate-700 dark:text-slate-300 font-bold truncate pr-2">{item.name} <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
+                         <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
+                       </div>
+                     ))}
+                   </div>
+                </div>
                </div>
              )
            })}
@@ -1510,6 +1523,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth, showToast }: any)
       items: cart, 
       total, 
       shippingMethod: shipping.name, 
+      deliveryDays: parseInt(String(shipping.days).replace(/\D/g, '')) || (shipping.name.includes('Express') ? 1 : 3),
       status: 'Processing', 
       date: new Date().toISOString(), 
       phoneNumber 
@@ -1880,8 +1894,14 @@ const MainContent = () => {
   };
 
   const handleAddToCart = (p: Product) => {
+    if (p.stock < 1) return showToast("Out of stock.", "error");
+    
     setCart(prev => {
         const ex = prev.find(i => i.id === p.id);
+        if (ex && ex.quantity >= p.stock) {
+            showToast(`Only ${p.stock} units available in pool.`, "error");
+            return prev;
+        }
         return ex ? prev.map(i => i.id === p.id ? {...i, quantity: i.quantity + 1} : i) : [...prev, {...p, quantity: 1}];
     });
     
@@ -2188,6 +2208,7 @@ onUpdateUser={async (id: any, data: any) => {
                 total: o.total,
                 userName: currentUser.name,                 // <-- Added
                 deliveryMethod: o.shippingMethod,
+                deliveryDays: o.deliveryDays,               // <-- Added real delivery days
                 userProfilePic: currentUser.profilePic,
                 address: currentUser.address,// <-- Renamed to match schema
                 items: o.items.map((item: any) => ({
