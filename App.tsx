@@ -847,6 +847,19 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       <span className="flex-1 leading-snug">Delivery Address: {o.address || users.find((u:any) => u.id === o.userId || u._id === o.userId)?.address || 'Not specified'}</span>
                     </p>
                   </div>
+                  
+                  {/* Purchased Items List */}
+                  <div className="py-3 md:py-4 border-t border-slate-200 dark:border-white/5 mt-3">
+                    <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 mb-2 block">Payload Items</span>
+                    <div className="space-y-2 max-h-32 overflow-y-auto pr-2 scrollbar-hide">
+                      {o.items?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
+                          <span className="text-slate-900 dark:text-white font-bold truncate pr-2">{item.name} <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
+                          <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
             
                 {/* Admin Update Controls */}
@@ -2198,10 +2211,21 @@ onUpdateUser={async (id: any, data: any) => {
 
                 if (res.ok) {
                   const savedOrder = await res.json();
-                  setOrders([savedOrder, ...orders]);
-                  // Refresh products to show updated stock from DB
-                  const pRes = await fetch(`${API_BASE}/products`);
-                  if (pRes.ok) setProducts(await pRes.json());
+                  // 1. Use functional state update to prevent stale data closure
+                  setOrders(prev => [savedOrder, ...prev]);
+                  
+                  // 2. Immediately decrement local stock so Admin analytics & Pool Value update instantly
+                  setProducts(prevProducts => prevProducts.map(p => {
+                    const boughtItem = o.items.find((i: any) => (i.id || i._id) === p.id);
+                    return boughtItem ? { ...p, stock: Math.max(0, p.stock - boughtItem.quantity) } : p;
+                  }));
+
+                  // 3. Refresh products from DB (Fixes missing _id mapping that was breaking products)
+                  fetch(`${API_BASE}/products`)
+                    .then(r => r.json())
+                    .then(data => {
+                       if (data && Array.isArray(data)) setProducts(data.map((p: any) => ({ ...p, id: p._id })));
+                    }).catch(e => console.error("Product refetch delayed"));
                   
                   setCart([]); 
                   setView('success'); 
