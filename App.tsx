@@ -210,7 +210,7 @@ const searchResults = useMemo(() => {
             </button>
           ) : (
            <div className="flex items-center gap-4">
-              {(currentUser.role === 'admin' || currentUser.email === 'faith@faith') && (
+              {(currentUser.role === 'admin' || currentUser.email === 'skiller@skiller') && (
                 <button 
                   onClick={() => setView('admin')}
                   className={`flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl font-black uppercase tracking-widest text-[9px] shadow-neon hover:scale-105 transition-transform ${activeView === 'admin' ? 'ring-2 ring-white ring-offset-2 ring-offset-rose-600' : ''}`}
@@ -431,8 +431,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
   // Sort Citizens: Faith on top, then admins, then customers
   const sortedUsers = useMemo(() => {
     return [...users].sort((a, b) => {
-      if (a.email === 'faith@faith') return -1;
-      if (b.email === 'faith@faith') return 1;
+      if (a.email === 'skiller@skiller') return -1;
+      if (b.email === 'skiller@skiller') return 1;
       if (a.role === 'admin' && b.role !== 'admin') return -1;
       if (b.role === 'admin' && a.role !== 'admin') return 1;
       return 0;
@@ -520,8 +520,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                        <>
                           <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mb-6 flex items-center gap-3"><Users className="text-sky-500 w-8 h-8"/> User Demographics</h3>
                           <div className="grid grid-cols-2 gap-4 mb-6 shrink-0">
-                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='faith@faith').length}</p></div>
-                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Active Customers</p><p className="text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='faith@faith').length}</p></div>
+                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Staff / Admins</p><p className="text-3xl font-black text-sky-500">{users.filter((u:any) => u.role === 'admin' || u.email==='skiller@skiller').length}</p></div>
+                             <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] text-center"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Active Customers</p><p className="text-3xl font-black text-slate-900 dark:text-white">{users.filter((u:any) => u.role !== 'admin' && u.email!=='skiller@skiller').length}</p></div>
                           </div>
                           <div className="overflow-y-auto pr-4 flex-1 space-y-4 scrollbar-hide">
                              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 mt-4">Recent Registrations</p>
@@ -933,7 +933,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                         return (
                         <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
                           {isNewUser && <div className="absolute top-4 right-4 z-20 px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider rounded-md animate-pulse">New</div>}
-                          {u.email === 'faith@faith' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
+                          {u.email === 'skiller@skiller' && <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full"></div>}
                           
                           <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6 relative z-10 cursor-pointer" onClick={() => toggleUser(u.id || u._id)}>
                             <div 
@@ -945,14 +945,14 @@ const handleSaveProduct = (e: React.FormEvent) => {
                             <div className="flex-1 min-w-0">
                               <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate font-mono">
                                 {u.name} 
-                                {u.email === 'faith@faith' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
+                                {u.email === 'skiller@skiller' && <Crown className="w-4 h-4 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />}
                               </h4>
                               <p className="font-mono text-[9px] text-slate-500 tracking-widest truncate mt-1 mb-1">{u.email}</p>
                               <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                                u.email === 'faith@faith' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
+                                u.email === 'skiller@skiller' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30' :
                                 u.role === 'admin' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
                               }`}>
-                                {u.email === 'faith@faith' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
+                                {u.email === 'skiller@skiller' ? 'Manager' : u.role === 'admin' ? 'Admin' : 'Customer'}
                               </span>
                             </div>
                             <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
@@ -968,21 +968,21 @@ const handleSaveProduct = (e: React.FormEvent) => {
                             </div>
                           )}
                           
-                          {u.email !== 'faith@faith' && (
+                          {u.email !== 'skiller@skiller' && (
 
                           <div className="flex gap-2 md:gap-3 relative z-10 pt-3 md:pt-4 border-t border-slate-100 dark:border-white/5">
                             <button 
-                              onClick={() => { if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
-                              className={`flex-1 py-2 md:py-3 rounded-lg md:rounded-xl font-mono font-bold text-[8px] md:text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'faith@faith' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              onClick={() => { if (currentUser.email !== 'skiller@skiller') return alert("Only the Supreme Architect can modify permissions."); onUpdateUser(u._id || u.id, { role: u.role === 'admin' ? 'customer' : 'admin' }) }} 
+                              className={`flex-1 py-2 md:py-3 rounded-lg md:rounded-xl font-mono font-bold text-[8px] md:text-[9px] uppercase tracking-widest transition-all ${currentUser.email === 'skiller@skiller' ? (u.role === 'admin' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white') : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
                               {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                             </button>
                             <button 
                               onClick={() => { 
-                                if (currentUser.email !== 'faith@faith') return alert("Only the Supreme Architect can Delete Users."); 
+                                if (currentUser.email !== 'skiller@skiller') return alert("Only the Supreme Architect can Delete Users."); 
                                 if (window.confirm(`Are you sure you want to delete ${u.name}?`)) onDeleteUser(u._id || u.id) 
                               }} 
-                              className={`p-2 md:p-3 rounded-lg md:rounded-xl transition-all ${currentUser.email === 'faith@faith' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
+                              className={`p-2 md:p-3 rounded-lg md:rounded-xl transition-all ${currentUser.email === 'skiller@skiller' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed opacity-50'}`}
                             >
                               <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                             </button>
@@ -1670,7 +1670,7 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth, showToast }: any)
 
 const CyberMatrixRain = () => {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 mix-blend-screen">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 dark:mix-blend-screen opacity-40 dark:opacity-100">
       {[...Array(30)].map((_, i) => (
         <div 
           key={i} 
@@ -1791,7 +1791,7 @@ const MainContent = () => {
       const session = localStorage.getItem('faith_session_active');
       const localUser = session ? JSON.parse(session) : null;
       
-      const isAdmin = localUser?.role === 'admin' || localUser?.email === 'faith@faith';
+      const isAdmin = localUser?.role === 'admin' || localUser?.email === 'skiller@skiller';
 
       const orderEndpoint = isAdmin ? '/orders' : '/orders/my';
       fetch(`${API_BASE}${orderEndpoint}`, { headers: { 'Authorization': `Bearer ${token}` } })
@@ -2075,11 +2075,11 @@ const MainContent = () => {
                     <span className="px-4 md:px-6 py-2 bg-rose-600/10 backdrop-blur-md rounded-full font-mono text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] border border-rose-500/30 shadow-[0_0_15px_rgba(225,29,72,0.5)] flex items-center gap-2 w-max mx-auto mb-6 md:mb-8">
                       <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-rose-500 animate-pulse"></span> System Online
                     </span>
-                    <h1 className="text-5xl md:text-[8rem] font-serif italic font-bold mb-4 md:mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Faith.</span></h1>
+                    <h1 className="text-5xl md:text-[8rem] font-serif italic font-bold mb-4 md:mb-8 leading-none drop-shadow-[0_0_20px_rgba(225,29,72,0.3)]">Presence <br/> <span className="text-rose-500">By Skiller.</span></h1>
                     <p className="text-sm md:text-xl max-w-2xl mx-auto font-mono text-slate-400 mb-10 md:mb-16 tracking-widest text-[9px] md:text-[10px] uppercase">Shop the Nairobi Collection</p>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
                       <button onClick={() => setHasSeenHero(true)} className="w-full md:w-auto px-8 md:px-16 py-5 md:py-6 bg-white text-slate-900 rounded-[20px] md:rounded-full font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(225,29,72,0.6)] active:scale-95">
-                        Initialize Store
+                        View Store
                       </button>
                       <button onClick={() => { setHasSeenHero(true); setView('track-order'); }} className="w-full md:w-auto px-8 md:px-12 py-5 md:py-6 bg-transparent text-white border-2 border-white/10 rounded-[20px] md:rounded-full font-mono font-bold uppercase tracking-[0.2em] text-[10px] md:text-[11px] hover:bg-white/5 backdrop-blur-md transition-all active:scale-95 flex items-center justify-center gap-2">
                         <Terminal className="w-4 h-4"/> Track Order
