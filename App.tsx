@@ -2620,9 +2620,9 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
     
     <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 relative z-10">
       <div className="space-y-6">
-        <h2 className="text-4xl font-serif font-bold italic text-rose-600 drop-shadow-neon">Faith.</h2>
+        <h2 className="text-4xl font-serif font-bold italic text-rose-600 drop-shadow-neon">Skiller.</h2>
         <p className="text-slate-500 dark:text-slate-400 text-sm font-mono leading-relaxed">
-          Premium Nairobi fashion for the modern visionary. Initializing luxury protocols worldwide.
+          Premium Nairobi fashion for the modern visionary. Initializing luxury protocols all over Kenya.
         </p>
         <div className="flex items-center gap-2 text-emerald-500 font-mono text-[10px] uppercase">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Servers Online
@@ -2642,8 +2642,8 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
       <div>
         <h4 className="font-mono font-bold uppercase tracking-widest text-[11px] mb-6 text-slate-900 dark:text-white">Comm Channels</h4>
         <div className="space-y-4 text-sm font-mono text-slate-500 dark:text-slate-400">
-          <p className="flex items-center gap-3"><Mail className="w-4 h-4 text-rose-500"/> support@faith.com</p>
-          <p className="flex items-center gap-3"><Smartphone className="w-4 h-4 text-rose-500"/> +254 700 000 000</p>
+          <p className="flex items-center gap-3"><Mail className="w-4 h-4 text-rose-500"/> support@skiller.com</p>
+          <p className="flex items-center gap-3"><Smartphone className="w-4 h-4 text-rose-500"/> +254 757 808 788</p>
           <p className="flex items-center gap-3"><MapPin className="w-4 h-4 text-rose-500"/> Nairobi, Kenya</p>
         </div>
       </div>
@@ -2669,7 +2669,7 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
           Developed By SKILLER <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
         </span>
       </a>
-      <p className="mt-8 font-mono text-[9px] text-slate-400 uppercase tracking-widest text-center">© 2026 Faith Sanctuary. All Protocols Monitored.</p>
+      <p className="mt-8 font-mono text-[9px] text-slate-400 uppercase tracking-widest text-center">© 2026 Skiller Shop. All Protocols Monitored.</p>
     </div>
   </footer>
 );
