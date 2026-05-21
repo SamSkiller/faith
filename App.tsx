@@ -264,19 +264,19 @@ const searchResults = useMemo(() => {
                   </button>
 
                   {Object.keys(CATEGORY_HIERARCHY).map(parentCat => (
-                     <div key={parentCat} className="flex flex-col gap-4 border-t border-slate-50 dark:border-slate-800 pt-6">
+                     <div key={parentCat} className="flex flex-col gap-4 border-t border-slate-100 dark:border-slate-800 pt-6">
                         <button 
                           onClick={() => { setView('home'); setSelectedCategory(parentCat); setIsMobileMenuOpen(false); }} 
-                          className={`text-left text-sm font-black uppercase tracking-widest ${selectedCategory.startsWith(parentCat) ? 'text-rose-600' : 'text-slate-900 dark:text-white'}`}
+                          className={`w-full text-left p-4 rounded-2xl border-2 transition-all shadow-sm ${selectedCategory.startsWith(parentCat) ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-900/20 text-rose-600' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-rose-300'}`}
                         >
-                          {parentCat}
+                          <span className="text-sm font-black uppercase tracking-widest">{parentCat}</span>
                         </button>
                         <div className="grid grid-cols-2 gap-3">
                            {CATEGORY_HIERARCHY[parentCat as keyof typeof CATEGORY_HIERARCHY].map(sub => (
                               <button 
                                 key={sub} 
                                 onClick={() => { setView('home'); setSelectedCategory(`${parentCat} - ${sub}`); setIsMobileMenuOpen(false); }} 
-                                className={`text-left px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[10px] font-bold uppercase tracking-wider ${selectedCategory === `${parentCat} - ${sub}` ? 'text-rose-500 ring-1 ring-rose-200 bg-rose-50' : 'text-slate-500'}`}
+                                className={`text-left px-4 py-3 border rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all ${selectedCategory === `${parentCat} - ${sub}` ? 'text-rose-600 border-rose-300 bg-rose-50/50 dark:bg-rose-900/30' : 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 border-transparent hover:border-rose-200'}`}
                               >
                                 {sub}
                               </button>
@@ -367,24 +367,24 @@ useEffect(() => {
   }), [orders, users, products]);
 
   const salesTrend = useMemo(() => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
       const d = new Date();
-      d.setDate(d.getDate() - i);
-      days.push({
-        date: d.toLocaleDateString(),
-        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      d.setMonth(d.getMonth() - i);
+      months.push({
+        date: d.getMonth(),
+        name: d.toLocaleString('en-US', { month: 'short' }),
         sales: 0
       });
     }
 
     orders.forEach((o: any) => {
       if (o.status === 'Cancelled') return;
-      const oDate = new Date(o.date || o.createdAt).toLocaleDateString();
-      const dayObj = days.find(d => d.date === oDate);
-      if (dayObj) dayObj.sales += (o.total || 0);
+      const oDate = new Date(o.date || o.createdAt);
+      const monthObj = months.find(m => m.date === oDate.getMonth());
+      if (monthObj) monthObj.sales += (o.total || 0);
     });
-    return days;
+    return months;
   }, [orders]);
 
 const handleSaveProduct = (e: React.FormEvent) => {
@@ -598,10 +598,11 @@ const handleSaveProduct = (e: React.FormEvent) => {
               </div>
             )}
             
-            {/* Chart Container - Padding and height adjusted for mobile */}
-            <div className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full">
+            {/* Chart Container */}
+            <div onClick={() => setExpandedStat('aov')} className="bg-white dark:bg-slate-900 p-6 md:p-12 rounded-[32px] md:rounded-[64px] border border-slate-100 dark:border-slate-800 shadow-xl h-[350px] md:h-[400px] flex flex-col w-full cursor-pointer hover:shadow-2xl transition-all group relative">
+               <div className="absolute top-6 right-6 p-2 bg-slate-100 dark:bg-slate-800 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight className="w-4 h-4 text-rose-500"/></div>
                <h3 className="text-lg md:text-xl font-bold mb-6 md:mb-10 text-slate-900 dark:text-white flex items-center gap-2 md:gap-3">
-                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Weekly Revenue Trend
+                 <Activity className="w-5 h-5 md:w-6 md:h-6 text-rose-500" /> Monthly Statistics & Insights
                </h3>
                <div className="flex-1 w-full min-h-[200px]">
                  <ResponsiveContainer width="100%" height="100%">
@@ -641,8 +642,8 @@ const handleSaveProduct = (e: React.FormEvent) => {
                  <h4 className="text-lg md:text-xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
                  <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <input required className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
-                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Price (Ksh)" value={editingProduct ? editingProduct.price : newProduct.price} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
-                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Pool (Quantity)" value={editingProduct ? editingProduct.stock : newProduct.stock} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
+                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white [&::-webkit-inner-spin-button]:opacity-100" placeholder="Price (Ksh)" value={editingProduct ? (editingProduct.price || '') : (newProduct.price || '')} onChange={e => editingProduct ? setEditingProduct({...editingProduct, price: Number(e.target.value)}) : setNewProduct({...newProduct, price: Number(e.target.value)})} />
+                    <input required type="number" className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white [&::-webkit-inner-spin-button]:opacity-100" placeholder="Pool (Quantity)" value={editingProduct ? (editingProduct.stock === 0 ? '' : editingProduct.stock) : (newProduct.stock === 0 ? '' : newProduct.stock)} onChange={e => editingProduct ? setEditingProduct({...editingProduct, stock: Number(e.target.value)}) : setNewProduct({...newProduct, stock: Number(e.target.value)})} />
                     
                     <div className="relative">
                       <select className="w-full p-4 md:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-black uppercase text-[9px] md:text-[10px] text-slate-900 dark:text-white outline-none appearance-none" value={editingProduct ? editingProduct.category : newProduct.category} onChange={e => editingProduct ? setEditingProduct({...editingProduct, category: e.target.value}) : setNewProduct({...newProduct, category: e.target.value})}>
@@ -677,7 +678,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                               if (editingProduct) setEditingProduct({...editingProduct, image: url});
                               else setNewProduct({...newProduct, image: url});
                             } else {
-                              alert("Failed to sync image payload with Cloudinary.");
+                              alert("Failed to sync image with Cloudinary.");
                             }
                             setIsUploadingImage(false);
                           }
@@ -854,11 +855,11 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   
                   {/* Purchased Items List */}
                   <div className="py-3 md:py-4 border-t border-slate-200 dark:border-white/5 mt-3">
-                    <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 mb-2 block">Payload Items</span>
+                    <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 mb-2 block">Cart Items</span>
                     <div className="space-y-2 max-h-32 overflow-y-auto pr-2 scrollbar-hide">
                       {o.items?.map((item: any, idx: number) => (
                         <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
-                          <span className="text-slate-900 dark:text-white font-bold truncate pr-2">{item.name} <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
+                          <span className="text-slate-900 dark:text-white font-bold truncate pr-2">{item.name} <img src={item.image} className="w-6 h-8 rounded object-cover" /> <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
                           <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                       ))}
@@ -1153,8 +1154,8 @@ const ProductModal = ({ product, isWishlisted, onToggleWishlist, onClose, onAddT
             {/* MOBILE Image (Scrolls with text, hidden on desktop) */}
             <div className="block md:hidden w-full relative h-[45vh] shrink-0">
               <img src={product.image} className="w-full h-full object-cover" />
-              <button onClick={onClose} className="fixed top-4 left-4 p-3 bg-slate-900/40 backdrop-blur-xl text-white rounded-full hover:bg-slate-900/60 z-[140] shadow-lg">
-                <ArrowLeft className="w-5 h-5" />
+              <button onClick={onClose} className="fixed top-6 right-6 p-3 bg-white/20 backdrop-blur-xl border border-white/40 text-white rounded-full hover:bg-rose-500 hover:border-rose-500 transition-all z-[140] shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1448,10 +1449,10 @@ const TrackOrderView = ({ orders, currentUser, isModal = false }: any) => {
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                      <div className="min-w-0 flex-1">
                         <span className="px-4 py-1.5 bg-rose-600 text-white text-[9px] md:text-[10px] font-black uppercase rounded-full shadow-md tracking-widest">
-                          Protocol #{(order._id || order.id).slice(-6)}
+                          Order #{(order._id || order.id).slice(-6)}
                         </span>
                         <h4 className="text-lg sm:text-xl md:text-2xl font-bold mt-4 text-slate-900 dark:text-white truncate">
-                          {order.items.length} Payload(s)
+                          {order.items.length} Item(s)
                         </h4>
                      </div>
                      <div className="sm:text-right shrink-0">
@@ -1477,11 +1478,11 @@ const TrackOrderView = ({ orders, currentUser, isModal = false }: any) => {
 
                 {/* Purchased Items List */}
                 <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5">
-                   <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3">Payload Data</p>
+                   <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3">Cart Data</p>
                    <div className="space-y-2">
                      {order.items?.map((item: any, idx: number) => (
                        <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
-                         <span className="text-slate-700 dark:text-slate-300 font-bold truncate pr-2">{item.name} <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
+                         <span className="text-slate-700 dark:text-slate-300 font-bold truncate pr-2">{item.name} <img src={item.image} className="w-6 h-8 rounded object-cover" /> <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
                          <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
                        </div>
                      ))}
@@ -1986,7 +1987,7 @@ const MainContent = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('faith_token')}`
         },
-        body: JSON.stringify({ rating: review.rating, comment: review.comment })
+        body: JSON.stringify({ rating: review.rating, comment: review.comment, userName: review.userName, userProfilePic: review.userProfilePic })
       });
       
       if (res.ok) {
@@ -2268,6 +2269,7 @@ onUpdateUser={async (id: any, data: any) => {
                   name: item.name,
                   quantity: item.quantity,
                   price: item.price,
+                  image: item.image, // Saving image to database
                 })),
               };
 
@@ -2503,9 +2505,11 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
         {/* MAIN CONTENT AREA */}
         <main className={`flex-1 p-6 md:p-8 lg:p-12 overflow-y-auto scrollbar-hide relative min-w-0 ${!showMenuOnMobile ? 'block' : 'hidden md:block'}`}>
           {!showMenuOnMobile && (
-             <button onClick={() => setShowMenuOnMobile(true)} className="md:hidden flex items-center gap-2 text-rose-500 font-mono text-[10px] font-bold uppercase mb-6 bg-rose-500/10 px-4 py-2 rounded-full w-max">
-               <ArrowLeft className="w-4 h-4"/> Back to Menu
-             </button>
+             <div className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md pb-4 pt-2 -mt-2 -mx-2 px-2">
+               <button onClick={() => setShowMenuOnMobile(true)} className="md:hidden flex items-center gap-2 text-rose-500 font-mono text-[10px] font-bold uppercase bg-rose-500/10 px-4 py-2 rounded-full w-max shadow-sm">
+                 <ArrowLeft className="w-4 h-4"/> Back to Menu
+               </button>
+             </div>
           )}
           
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-8 md:mb-12 pr-16 md:pr-20 mt-2 md:mt-0 truncate">
@@ -2519,10 +2523,12 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
             <div className="space-y-6 md:space-y-10 animate-fade-in">
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                   <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
-                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">Faith Points</p>
+                    <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">My Spend</p>
                     <div className="flex items-center gap-2 md:gap-3">
-                       <Gem className="w-8 h-8 md:w-10 md:h-10 text-rose-500" />
-                       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white">{user.faithPoints}</span>
+                       <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-emerald-500" />
+                       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate max-w-full">
+                         Ksh {orders.filter((o:any) => o.userId === (user.id || user._id) && o.status !== 'Cancelled').reduce((sum:number, o:any) => sum + (o.total || 0), 0).toLocaleString()}
+                       </span>
                     </div>
                   </div>
                   <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
@@ -2553,19 +2559,23 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Phone Number</label>
-                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Email Address</label>
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} />
                   </div>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
-                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Change Password</label>
-                     <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
+                     <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Phone Number</label>
+                     <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="07XX XXX XXX" value={editData.phoneNumber} onChange={e => setEditData({...editData, phoneNumber: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Profile Photo Link</label>
                      <input className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="URL to Image" value={editData.profilePic} onChange={e => setEditData({...editData, profilePic: e.target.value})} />
                   </div>
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Change Password</label>
+                  <input type="password" className="w-full p-4 md:p-6 bg-slate-100 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold outline-none border-2 border-transparent focus:border-rose-300 text-slate-900 dark:text-white transition-all placeholder:text-slate-400" placeholder="Leave blank to keep current password" value={editData.password} onChange={e => setEditData({...editData, password: e.target.value})} />
                </div>
                <div className="space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 ml-4">Delivery Address</label>
