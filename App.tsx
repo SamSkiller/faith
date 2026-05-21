@@ -108,7 +108,7 @@ const searchResults = useMemo(() => {
     <header className="sticky top-0 z-[60] w-full">
 <div className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 text-white py-1.5 px-4 flex items-center justify-center gap-3 text-[9px] font-mono font-bold uppercase tracking-[0.4em] animate-gradient-x relative shadow-[0_0_20px_rgba(225,29,72,0.4)] border-b border-white/20">
   {isSynced ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]" />}
- Faith Boutique Active • Same-Day  Delivery
+ SKILLER SHOP Active • Same-Day  Delivery
 </div>
       
       <nav className="bg-white/90 dark:bg-slate-900/90 glass border-b border-rose-100 dark:border-slate-800 px-4 md:px-12 h-20 flex items-center justify-between shadow-xl transition-colors">
@@ -121,8 +121,8 @@ const searchResults = useMemo(() => {
              onClick={() => { setView('home'); setSelectedCategory('All'); }} 
             className="group flex flex-col items-start leading-none transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">Faith</span>
-            <span className="text-[8px] md:text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">Boutique</span>
+            <span className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">SKILLER</span>
+            <span className="text-[8px] md:text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">SHOP</span>
           </button>
         </div>
 
@@ -235,7 +235,7 @@ const searchResults = useMemo(() => {
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
             <div className="relative w-72 bg-white dark:bg-slate-900 h-full overflow-y-auto p-6 flex flex-col border-r border-slate-100 dark:border-slate-800">
                <div className="flex justify-between items-center mb-10">
-                  <span className="text-3xl font-serif font-bold text-rose-600 italic">Faith</span>
+                  <span className="text-3xl font-serif font-bold text-rose-600 italic">SKILLER</span>
                   <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
                     <X className="w-6 h-6 text-slate-500" />
                   </button>
