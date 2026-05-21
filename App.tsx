@@ -83,7 +83,7 @@ const ProductSkeleton = () => (
   </div>
 );
 
-const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced }: any) => {
+const Navbar = ({ cartCount, onOpenCart, setView, activeView, selectedCategory, setSelectedCategory, currentUser, onOpenProfile, searchQuery, setSearchQuery, products, isSynced, isDarkMode, toggleTheme }: any) => {
 const [showSearch, setShowSearch] = useState(false);
   const [isAnimate, setIsAnimate] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -191,6 +191,10 @@ const searchResults = useMemo(() => {
         </div>
         
         <div className="flex items-center gap-4 md:gap-6">
+          <button onClick={toggleTheme} className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 transition-transform active:scale-90 hover:rotate-12">
+            {isDarkMode ? <Sun className="w-5 h-5 md:w-6 md:h-6" /> : <Moon className="w-5 h-5 md:w-6 md:h-6" />}
+          </button>
+          
           <button onClick={onOpenCart} className={`relative p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
             <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" />
             {cartCount > 0 && (
@@ -1664,7 +1668,42 @@ const CheckoutView = ({ cart, currentUser, onComplete, onAuth, showToast }: any)
 
 // --- Main App Controller ---
 
+const CyberMatrixRain = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 mix-blend-screen">
+      {[...Array(30)].map((_, i) => (
+        <div 
+          key={i} 
+          className="absolute w-1 rounded-full bg-gradient-to-b from-transparent via-rose-500 to-rose-600 shadow-[0_0_20px_#e11d48]"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `-${Math.random() * 50 + 10}%`,
+            height: `${Math.random() * 30 + 10}%`,
+            animation: `cyber-fall ${Math.random() * 2 + 1.5}s linear infinite`,
+            animationDelay: `${Math.random() * 2}s`
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes cyber-fall {
+          0% { transform: translateY(0); opacity: 1; }
+          100% { transform: translateY(120vh); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 const MainContent = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('faith_theme');
+    return saved ? saved === 'dark' : true; // Default to dark theme
+  });
+
+  useEffect(() => {
+    localStorage.setItem('faith_theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1991,8 +2030,10 @@ const MainContent = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen transition-colors dark text-slate-100 bg-slate-950">
+    <div className={`flex flex-col min-h-screen transition-colors duration-500 ${isDarkMode ? 'dark text-slate-100 bg-slate-950' : 'text-slate-900 bg-slate-50'}`}>
       <Navbar 
+        isDarkMode={isDarkMode}
+        toggleTheme={() => setIsDarkMode(!isDarkMode)}
         cartCount={cart.reduce((s, i) => s + i.quantity, 0)} 
         onOpenCart={() => setIsCartOpen(true)}
         setView={(v) => {
@@ -2283,8 +2324,9 @@ onUpdateUser={async (id: any, data: any) => {
 
         {/* --- SUCCESS STATE (FIXED CONTRAST) --- */}
         {view === 'success' && (
-          <div className="pt-64 pb-64 text-center animate-future-in bg-white dark:bg-slate-950">
-             <div className="rotating-border-container mx-auto w-40 h-40 mb-14 flex items-center justify-center relative">
+          <div className="pt-64 pb-64 text-center animate-future-in bg-white dark:bg-slate-950 relative overflow-hidden flex flex-col items-center justify-center min-h-[85vh]">
+             <CyberMatrixRain />
+             <div className="rotating-border-container mx-auto w-40 h-40 mb-14 flex items-center justify-center relative z-10">
                 <CheckCircle2 className="w-20 h-20 text-emerald-500 relative z-10 drop-shadow-neon" />
              </div>
              <h1 className="text-8xl font-serif italic font-bold mb-8 text-rose-600">Sync Success.</h1>
