@@ -121,8 +121,8 @@ const searchResults = useMemo(() => {
              onClick={() => { setView('home'); setSelectedCategory('All'); }} 
             className="group flex flex-col items-start leading-none transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="text-2xl md:text-3xl font-serif font-bold tracking-tighter text-rose-600 italic">SKILLER</span>
-            <span className="text-[8px] md:text-[10px] font-black tracking-[0.4em] text-slate-400 mt-1 uppercase">SHOP</span>
+            <span className="text-xl md:text-2xl font-serif font-bold tracking-tighter text-rose-600 italic">SKILLER</span>
+            <span className="text-[7px] md:text-[9px] font-black tracking-[0.4em] text-slate-400 mt-0.5 uppercase">SHOP</span>
           </button>
         </div>
 
@@ -197,12 +197,12 @@ const searchResults = useMemo(() => {
           </div>
         </div>
         
-        <div className="flex items-center gap-4 md:gap-6">
-          <button onClick={toggleTheme} className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 transition-transform active:scale-90 hover:rotate-12">
+        <div className="flex items-center gap-2 md:gap-6">
+          <button onClick={toggleTheme} className="relative p-1.5 md:p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 transition-transform active:scale-90 hover:rotate-12 shrink-0">
             {isDarkMode ? <Sun className="w-5 h-5 md:w-6 md:h-6" /> : <Moon className="w-5 h-5 md:w-6 md:h-6" />}
           </button>
           
-          <button onClick={onOpenCart} className={`relative p-2 text-slate-600 hover:text-rose-500 transition-all ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
+          <button onClick={onOpenCart} className={`relative p-1.5 md:p-2 text-slate-600 hover:text-rose-500 transition-all shrink-0 ${isAnimate ? 'scale-125 text-rose-600' : ''}`}>
             <ShoppingBag className="w-5 h-5 md:w-6 md:h-6" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-black border-2 border-white">
@@ -226,8 +226,8 @@ const searchResults = useMemo(() => {
                   <span className="hidden sm:block">Admin Vault</span>
                 </button>
               )}
-              <div onClick={onOpenProfile} className="rotating-border-container cursor-pointer p-0.5 active:scale-95 shrink-0">
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800 relative z-10 shadow-lg">
+              <div onClick={onOpenProfile} className="rotating-border-container cursor-pointer p-0.5 active:scale-95 shrink-0 ml-1">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800 relative z-10 shadow-lg">
                   {currentUser.profilePic ? (
                     <img src={currentUser.profilePic} className="w-full h-full object-cover" />
                   ) : (
@@ -874,7 +874,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <div className="py-3 md:py-4 border-t border-slate-200 dark:border-white/5 mt-3">
                     <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 mb-2 block">Cart Items</span>
                     <div className="space-y-2 max-h-32 overflow-y-auto pr-2 scrollbar-hide">
-                      {order.items?.map((item: any, idx: number) => (
+                      {o.items?.map((item: any, idx: number) => (
                         <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl">
                           <div className="flex items-center gap-3 min-w-0 pr-2">
                             <img src={item.image} className="w-8 h-10 md:w-10 md:h-12 rounded shadow-sm object-cover shrink-0" />
