@@ -49,7 +49,7 @@ mongoose
 /* =========================
    SCHEMAS
 ========================= */
-// Add address to user
+// Add address & OTP to user
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true, required: true },
@@ -59,11 +59,13 @@ const userSchema = new mongoose.Schema({
   wishlist: [String],
   profilePic: { type: String, default: "" },
   address: { type: String, default: "" },
-   phoneNumber: { type: String, default: "" },
+  phoneNumber: { type: String, default: "" },
+  resetOtp: String,
+  resetOtpExpiry: Date,
   joinedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-// Add userId to reviews (to enforce 1 review per user)
+// Add userProfilePic to reviews
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
@@ -75,15 +77,16 @@ const productSchema = new mongoose.Schema({
   stock: { type: Number, default: 0 },
   isHot: Boolean,
   reviews: [{
-    userId: String, // NEW: Track who commented
+    userId: String, 
     userName: String,
+    userProfilePic: String, // Fixed: Added Profile Pic to DB
     rating: Number,
-    comment: String, // Changed from 'reflection'
+    comment: String, 
     date: { type: Date, default: Date.now },
   }],
 }, { timestamps: true });
 
-// Add delivery data to orders
+// Add image to order items
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   userName: String,
@@ -92,6 +95,7 @@ const orderSchema = new mongoose.Schema({
     name: String,
     quantity: Number,
     price: Number,
+    image: String, // Fixed: Added Image to DB
   }],
   total: Number,
   status: { type: String, default: "Processing" },
@@ -164,7 +168,7 @@ app.delete("/api/products/:id", authenticate, async (req, res) => {
 // --- AUTH ---
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phoneNumber } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
@@ -173,9 +177,9 @@ app.post("/api/auth/register", async (req, res) => {
       email, 
       password: hashedPassword, 
       name,
-      role: email === "faith@faith" ? "admin" : "customer" // Auto-admin for your email
+      phoneNumber, // Fixed: Save Phone Number
+      role: email === "skiller@skiller" ? "admin" : "customer"
     });
-    await user.save();
 
     const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
     res.status(201).json({ user, token });
@@ -206,6 +210,44 @@ app.get("/api/auth/me", authenticate, async (req, res) => {
     res.json(user);
   } catch {
     res.status(500).json({ message: "Failed to fetch user" });
+  }
+});
+
+// FORGOT PASSWORD / OTP Logic
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Account not found." });
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+    user.resetOtp = otp;
+    user.resetOtpExpiry = Date.now() + 15 * 60 * 1000; // 15 mins expiry
+    await user.save();
+
+    // Since you don't have an email server setup yet, we will return the OTP in the response for development testing!
+    console.log(`[SIMULATED EMAIL] OTP for ${email} is: ${otp}`);
+    res.json({ message: "OTP sent successfully! (Check console/alert for testing)", mockOtp: otp });
+  } catch {
+    res.status(500).json({ message: "Failed to process request." });
+  }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ email, resetOtp: otp, resetOtpExpiry: { $gt: Date.now() } });
+    
+    if (!user) return res.status(400).json({ message: "Invalid or expired OTP." });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetOtp = undefined;
+    user.resetOtpExpiry = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful! You can now log in." });
+  } catch {
+    res.status(500).json({ message: "Failed to reset password." });
   }
 });
 
@@ -303,19 +345,17 @@ app.put("/api/orders/:id", authenticate, async (req, res) => {
 
 app.post("/api/products/:id/reviews", authenticate, async (req, res) => {
   try {
-    const { rating, comment } = req.body;
+    const { rating, comment, userName, userProfilePic } = req.body;
     const product = await Product.findById(req.params.id);
     
-    // Check if user already reviewed
     const existingReview = product.reviews.find(r => r.userId === req.user.id);
     
     if (existingReview) {
-      // Edit existing review
       existingReview.rating = rating;
       existingReview.comment = comment;
+      existingReview.userProfilePic = userProfilePic; // Update pic if changed
     } else {
-      // Add new review
-      product.reviews.push({ userId: req.user.id, userName: req.user.name, rating, comment });
+      product.reviews.push({ userId: req.user.id, userName, userProfilePic, rating, comment });
     }
     
     // Recalculate average rating
