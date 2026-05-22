@@ -164,6 +164,13 @@ const searchResults = useMemo(() => {
               <input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    setView('search');
+                    setShowSearch(false);
+                    e.currentTarget.blur();
+                  }
+                }}
                 onFocus={() => setShowSearch(true)}
                 onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                 placeholder="Search sanctuary..." 
@@ -219,7 +226,7 @@ const searchResults = useMemo(() => {
                   <span className="hidden sm:block">Admin Vault</span>
                 </button>
               )}
-              <div onClick={onOpenProfile} className="rotating-border-container cursor-pointer p-0.5 active:scale-95">
+              <div onClick={onOpenProfile} className="rotating-border-container cursor-pointer p-0.5 active:scale-95 shrink-0">
                 <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 overflow-hidden flex items-center justify-center border-2 border-white dark:border-slate-800 relative z-10 shadow-lg">
                   {currentUser.profilePic ? (
                     <img src={currentUser.profilePic} className="w-full h-full object-cover" />
@@ -249,18 +256,25 @@ const searchResults = useMemo(() => {
                  <input 
                    value={searchQuery}
                    onChange={(e) => setSearchQuery(e.target.value)}
-                   placeholder="Search sanctuary..." 
-                   className="w-full bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border-none outline-none text-xs font-bold text-slate-900 dark:text-white"
+                   onKeyDown={(e) => {
+                     if (e.key === 'Enter' && searchQuery.trim()) {
+                       setView('search');
+                       setIsMobileMenuOpen(false);
+                       e.currentTarget.blur();
+                     }
+                   }}
+                   placeholder="Search products..." 
+                   className="w-full bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-xl border-none outline-none text-xs font-bold text-slate-900 dark:text-white pr-10"
                  />
-                 <Search className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
+                 <Search onClick={() => { if(searchQuery.trim()) { setView('search'); setIsMobileMenuOpen(false); } }} className="w-5 h-5 text-rose-500 absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform" />
                </div>
 
                <div className="flex flex-col gap-6 flex-1">
                   <button 
                     onClick={() => { setView('home'); setSelectedCategory('All'); setIsMobileMenuOpen(false); }} 
-                    className={`text-left text-xs font-black uppercase tracking-widest ${selectedCategory === 'All' ? 'text-rose-600' : 'text-slate-500 hover:text-rose-500'}`}
+                    className={`w-full text-left p-4 rounded-2xl border-2 transition-all shadow-sm ${selectedCategory === 'All' ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-900/20 text-rose-600' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-rose-300'}`}
                   >
-                    All Collection
+                    <span className="text-sm font-black uppercase tracking-widest">All Collection</span>
                   </button>
 
                   {Object.keys(CATEGORY_HIERARCHY).map(parentCat => (
@@ -638,7 +652,9 @@ const handleSaveProduct = (e: React.FormEvent) => {
             </div>
 
             {(showAddForm || editingProduct) && (
-              <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[56px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in mb-8 md:mb-10">
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" onClick={() => { setShowAddForm(false); setEditingProduct(null); }}>
+                <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-50 dark:border-slate-800 shadow-2xl animate-future-in max-w-4xl w-full max-h-[90vh] overflow-y-auto relative scrollbar-hide" onClick={e => e.stopPropagation()}>
+                 <button type="button" onClick={() => { setShowAddForm(false); setEditingProduct(null); }} className="absolute top-6 right-6 p-3 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-rose-500 hover:text-white transition-colors z-10"><X className="w-5 h-5" /></button>
                  <h4 className="text-lg md:text-xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-white">{editingProduct ? 'Adjusting Product Details' : 'New Product Details'}</h4>
                  <form onSubmit={handleSaveProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <input required className="p-4 md:p-6 text-sm md:text-base bg-slate-50 dark:bg-slate-800 rounded-2xl md:rounded-[24px] font-bold text-slate-900 dark:text-white" placeholder="Name" value={editingProduct ? editingProduct.name : newProduct.name} onChange={e => editingProduct ? setEditingProduct({...editingProduct, name: e.target.value}) : setNewProduct({...newProduct, name: e.target.value})} />
@@ -717,6 +733,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                        {isUploadingImage ? 'Uploading Image...' : 'Commit Configuration'}
                     </button>
                  </form>
+                </div>
               </div>
             )}
 
@@ -857,10 +874,13 @@ const handleSaveProduct = (e: React.FormEvent) => {
                   <div className="py-3 md:py-4 border-t border-slate-200 dark:border-white/5 mt-3">
                     <span className="font-mono text-[8px] md:text-[9px] uppercase text-slate-500 mb-2 block">Cart Items</span>
                     <div className="space-y-2 max-h-32 overflow-y-auto pr-2 scrollbar-hide">
-                      {o.items?.map((item: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
-                          <span className="text-slate-900 dark:text-white font-bold truncate pr-2">{item.name} <img src={item.image} className="w-6 h-8 rounded object-cover" /> <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
-                          <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
+                      {order.items?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl">
+                          <div className="flex items-center gap-3 min-w-0 pr-2">
+                            <img src={item.image} className="w-8 h-10 md:w-10 md:h-12 rounded shadow-sm object-cover shrink-0" />
+                            <span className="text-slate-700 dark:text-slate-300 font-bold truncate flex-1">{item.name} <span className="text-rose-500 ml-1 font-black">x{item.quantity}</span></span>
+                          </div>
+                          <span className="text-slate-500 font-mono font-bold shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -929,7 +949,7 @@ const handleSaveProduct = (e: React.FormEvent) => {
                       {sortedUsers.map((u: any, index: number) => {
                         const isNewUser = new Date(u.joinedAt).getTime() > (Number(localStorage.getItem('admin_users_viewed')) || 0) - 5000;
                         const isExpanded = expandedUsers.includes(u.id || u._id);
-                        const userTotal = orders.filter((o:any) => o.userId === (u.id || u._id)).reduce((sum:number, o:any) => sum + o.total, 0);
+                        const userTotal = orders.filter((o:any) => o.userId === (u.id || u._id) && o.status !== 'Cancelled').reduce((sum:number, o:any) => sum + o.total, 0);
 
                         return (
                         <div key={u.id || u._id} style={{animationDelay: `${index * 100}ms`}} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-lg relative overflow-hidden group animate-fade-in-up">
@@ -1036,8 +1056,8 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6">
-     <div className="w-full max-w-md bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[40px] md:rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center px-6 py-12 md:py-20 overflow-y-auto">
+     <div className="w-full max-w-md bg-white dark:bg-slate-900 p-8 md:p-12 rounded-[40px] md:rounded-[64px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-future-in text-center relative overflow-hidden mt-auto mb-auto">
         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl"></div>
         <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-8 md:mb-10 text-rose-500 shadow-xl border-4 border-white dark:border-slate-900"><Lock className="w-6 h-6 md:w-8 md:h-8" /></div>
         <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-slate-900 dark:text-white mb-3 md:mb-4">{isLogin ? 'Login' : 'Identity Registration'}</h2>
@@ -1060,8 +1080,9 @@ const AuthView = ({ onAuthSuccess, showToast }: any) => {
             {isLoading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
           </button>
         </form>
-        <button onClick={() => {setIsLogin(!isLogin); setFormData({name:'', email:'', password:'', confirmPassword:''});}} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors tracking-widest">
-          {isLogin ? "Don't have an account? Signup" : "Already have an account? Log in."}
+        <button onClick={() => {setIsLogin(!isLogin); setFormData({name:'', email:'', password:'', confirmPassword:''});}} className="mt-10 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 transition-colors tracking-widest flex items-center justify-center gap-1 mx-auto">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}
+          <span className="text-rose-600 underline decoration-rose-500 underline-offset-4 hover:text-rose-400 p-2">{isLogin ? "Register" : "Log In"}</span>
         </button>
       </div>
     </div>
@@ -1363,7 +1384,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
   return (
   <div className="fixed inset-0 z-[110] flex animate-fade-in justify-end">
     <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={onClose}></div>
-    <div className="relative w-[90vw] sm:w-[400px] md:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-full flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
+    <div className="relative w-[90vw] sm:w-[400px] md:max-w-md bg-white dark:bg-slate-900 shadow-2xl h-[100dvh] max-h-[100dvh] flex flex-col transform transition-transform duration-500 ease-out border-l border-rose-100 dark:border-slate-800">
        <div className="p-6 md:p-10 border-b border-rose-50 dark:border-slate-800 flex justify-between items-center bg-rose-50/20 dark:bg-slate-800/20 shrink-0">
           <div>
             <h2 className="text-3xl md:text-4xl font-serif italic font-bold text-rose-600 mb-1">My Cart</h2>
@@ -1399,7 +1420,7 @@ const CartDrawer = ({ cart, setCart, onClose, onCheckout }: any) => {
        </div>
        
        {cart.length > 0 && (
-         <div className="p-6 md:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
+         <div className="p-6 md:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0 mt-auto sticky bottom-0 z-10">
             <div className="flex justify-between items-center text-xl md:text-3xl font-black mb-6 md:mb-8 italic text-slate-900 dark:text-white">
                <span>Total</span>
                <span className="text-rose-600 truncate max-w-[60%] text-right">Ksh {cart.reduce((s: any, i: any) => s + (i.price * i.quantity), 0).toLocaleString()}</span>
@@ -1481,11 +1502,14 @@ const TrackOrderView = ({ orders, currentUser, isModal = false }: any) => {
                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3">Cart Data</p>
                    <div className="space-y-2">
                      {order.items?.map((item: any, idx: number) => (
-                       <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs">
-                         <span className="text-slate-700 dark:text-slate-300 font-bold truncate pr-2">{item.name} <img src={item.image} className="w-6 h-8 rounded object-cover" /> <span className="text-rose-500 ml-1">x{item.quantity}</span></span>
-                         <span className="text-slate-500 font-mono shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
-                       </div>
-                     ))}
+                        <div key={idx} className="flex justify-between items-center text-[10px] md:text-xs bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl">
+                          <div className="flex items-center gap-3 min-w-0 pr-2">
+                            <img src={item.image} className="w-8 h-10 md:w-10 md:h-12 rounded shadow-sm object-cover shrink-0" />
+                            <span className="text-slate-700 dark:text-slate-300 font-bold truncate flex-1">{item.name} <span className="text-rose-500 ml-1 font-black">x{item.quantity}</span></span>
+                          </div>
+                          <span className="text-slate-500 font-mono font-bold shrink-0">Ksh {(item.price * item.quantity).toLocaleString()}</span>
+                        </div>
+                      ))}
                    </div>
                 </div>
                </div>
@@ -1718,6 +1742,7 @@ const MainContent = () => {
   const [heroIdx, setHeroIdx] = useState(0);
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'rating' | 'default'>('default');
   const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 200000 });
   
   // NEW: Track if they have passed the Hero section
   const [hasSeenHero, setHasSeenHero] = useState(false);
@@ -1858,11 +1883,17 @@ const MainContent = () => {
   const filteredProducts = useMemo(() => {
     let result = [...(products || [])];
 
-    if (debouncedSearch)
+    if (debouncedSearch) {
       result = result.filter(p =>
         p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         p.category.toLowerCase().includes(debouncedSearch.toLowerCase())
       );
+    }
+    
+    // Apply Price Range for Search View
+    if (view === 'search') {
+      result = result.filter(p => p.price >= priceRange.min && p.price <= priceRange.max);
+    }
 
     if (selectedCategory !== 'All') {
       if (selectedCategory === 'Hot Deals') {
@@ -2125,8 +2156,8 @@ const MainContent = () => {
                                   </div>
                                 )}
                                 {p.isHot && (
-                                  <div className="px-2 md:px-4 py-1 md:py-2 bg-rose-600/90 backdrop-blur-md text-white font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(225,29,72,0.6)] flex items-center gap-1 md:gap-2">
-                                      <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:block">Hot</span>
+                                  <div className="px-2 md:px-4 py-1 md:py-2 bg-gradient-to-r from-orange-500 to-rose-600 text-white font-mono text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_20px_rgba(249,115,22,0.8)] flex items-center gap-1 md:gap-2 animate-pulse border border-orange-300/50">
+                                      <span className="text-xs md:text-sm drop-shadow-md">🔥</span> <span className="hidden sm:block drop-shadow-md">Hot Deal</span>
                                   </div>
                                 )}
                               </div>
@@ -2169,6 +2200,96 @@ const MainContent = () => {
           </div>
         )}
 
+        {/* --- DEDICATED SEARCH VIEW --- */}
+        {view === 'search' && (
+          <section className="max-w-7xl mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-20 space-y-8 animate-fade-in min-h-[80vh]">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              
+              {/* Filter Sidebar */}
+              <div className="w-full lg:w-80 bg-white dark:bg-slate-900 p-6 rounded-[32px] shadow-xl border border-slate-100 dark:border-slate-800 shrink-0 lg:sticky lg:top-28">
+                <div className="flex items-center justify-between mb-8 border-b border-slate-100 dark:border-white/5 pb-4">
+                   <button onClick={() => { setSearchQuery(''); setView('home'); }} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center gap-2 text-rose-500 text-[10px] font-black uppercase tracking-widest"><ArrowLeft className="w-4 h-4"/> Back</button>
+                   <span className="font-mono text-[10px] font-black uppercase tracking-widest text-slate-400">Filters</span>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 block">Price Range (Ksh)</label>
+                    <div className="flex items-center gap-4 mb-4">
+                      <input type="number" value={priceRange.min} onChange={(e) => setPriceRange(prev => ({...prev, min: Number(e.target.value)}))} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none border border-transparent focus:border-rose-300" placeholder="Min" />
+                      <span className="text-slate-400">-</span>
+                      <input type="number" value={priceRange.max} onChange={(e) => setPriceRange(prev => ({...prev, max: Number(e.target.value)}))} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none border border-transparent focus:border-rose-300" placeholder="Max" />
+                    </div>
+                    {/* Visual Slider */}
+                    <input 
+                      type="range" min="0" max="200000" step="1000" 
+                      value={priceRange.max} 
+                      onChange={(e) => setPriceRange(prev => ({...prev, max: Number(e.target.value)}))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                    />
+                  </div>
+                  
+                  <div className="pt-6 border-t border-slate-100 dark:border-white/5">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 block">Sort Options</label>
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="w-full p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-900 dark:text-white outline-none appearance-none border border-transparent focus:border-rose-300 cursor-pointer">
+                      <option value="default">Relevance</option>
+                      <option value="price-asc">Price: Low to High</option>
+                      <option value="price-desc">Price: High to Low</option>
+                      <option value="rating">Top Rated</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Results Area */}
+              <div className="flex-1 w-full">
+                <div className="mb-8">
+                  <h2 className="text-3xl md:text-5xl font-serif italic font-bold text-slate-900 dark:text-white mb-2">
+                    Search Results for "{searchQuery}"
+                  </h2>
+                  <p className="font-mono text-xs text-rose-500 font-bold uppercase tracking-widest">{filteredProducts.length} Items Found</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+                    {filteredProducts.map(p => (
+                        <div key={p.id} className="group relative bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[24px] md:rounded-[48px] border border-slate-100/50 dark:border-white/5 shadow-sm hover:shadow-[0_0_30px_rgba(225,29,72,0.15)] transition-all duration-300 flex flex-col cursor-pointer p-3 md:p-5 overflow-hidden" onClick={() => setSelectedProduct(p)}>
+                           <div className="aspect-[3/4] rounded-[16px] md:rounded-[40px] overflow-hidden mb-4 md:mb-8 relative shadow-sm md:shadow-lg">
+                              <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 flex flex-col gap-1 md:gap-2 items-start">
+                                {p.isHot && (
+                                  <div className="px-2 md:px-4 py-1 md:py-2 bg-gradient-to-r from-orange-500 to-rose-600 text-white font-mono text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_20px_rgba(249,115,22,0.8)] flex items-center gap-1 md:gap-2 animate-pulse border border-orange-300/50">
+                                      <span className="text-xs md:text-sm drop-shadow-md">🔥</span> <span className="hidden sm:block drop-shadow-md">Hot Deal</span>
+                                  </div>
+                                )}
+                              </div>
+                              <img src={p.image} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ willChange: 'transform' }} />
+                              <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center">
+                                 <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }} className="px-8 py-3 bg-white/90 backdrop-blur text-slate-900 rounded-full font-mono font-bold uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.4)] active-scale flex items-center gap-2">
+                                   <Terminal className="w-4 h-4" /> Quick View
+                                 </button>
+                              </div>
+                            </div>
+                            <div className="px-2 md:px-4 pb-2 md:pb-4 flex-1 flex flex-col text-center">
+                              <p className="font-mono text-[8px] md:text-[9px] uppercase tracking-[0.2em] md:tracking-[0.4em] text-rose-500 mb-2 md:mb-3 truncate">{p.category}</p>
+                              <h3 className="text-xs md:text-xl font-bold text-slate-900 dark:text-white mb-3 md:mb-6 line-clamp-2 md:line-clamp-1 h-8 md:h-auto leading-tight">{p.name}</h3>
+                              <div className="mt-auto flex justify-between items-center border-t border-slate-100 dark:border-white/5 pt-3 md:pt-6">
+                                <span className="text-sm md:text-xl font-mono font-bold text-slate-900 dark:text-white truncate pr-2">Ksh {p.price.toLocaleString()}</span>
+                                <button onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }} className="w-8 h-8 md:w-14 md:h-14 bg-slate-900 dark:bg-rose-600 text-white rounded-[12px] md:rounded-[24px] flex items-center justify-center hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all active:scale-90 shrink-0">
+                                  <Plus className="w-4 h-4 md:w-6 md:h-6" />
+                                </button>
+                              </div>
+                            </div>
+                        </div>
+                    ))}
+                    {filteredProducts.length === 0 && (
+                      <div className="col-span-2 md:col-span-3 text-center py-20 bg-slate-50 dark:bg-slate-800/50 rounded-[32px] italic text-slate-500 border border-slate-100 dark:border-white/5">
+                        No matches found for your filter configuration.
+                      </div>
+                    )}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
 {/* --- ADMIN VIEW --- */}
         {view === 'admin' && (
@@ -2522,11 +2643,11 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
           {activeTab === 'profile' && (
             <div className="space-y-6 md:space-y-10 animate-fade-in">
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                  <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+                 <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center overflow-hidden">
                     <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">My Spend</p>
-                    <div className="flex items-center gap-2 md:gap-3">
-                       <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-emerald-500" />
-                       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate max-w-full">
+                    <div className="flex items-center gap-2 md:gap-3 max-w-full">
+                       <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-emerald-500 shrink-0" />
+                       <span className="text-xl sm:text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white truncate min-w-0" title={`Ksh ${orders.filter((o:any) => o.userId === (user.id || user._id) && o.status !== 'Cancelled').reduce((sum:number, o:any) => sum + (o.total || 0), 0).toLocaleString()}`}>
                          Ksh {orders.filter((o:any) => o.userId === (user.id || user._id) && o.status !== 'Cancelled').reduce((sum:number, o:any) => sum + (o.total || 0), 0).toLocaleString()}
                        </span>
                     </div>
