@@ -1817,7 +1817,14 @@ const MainContent = () => {
   }, [isDarkMode]);
 
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS || []);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+  const savedCart = localStorage.getItem('skiller_cart');
+  return savedCart ? JSON.parse(savedCart) : [];
+});
+
+useEffect(() => {
+  localStorage.setItem('skiller_cart', JSON.stringify(cart));
+}, [cart]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -2729,8 +2736,20 @@ const ProfileModal = ({ user, orders, onClose, onLogout, wishlistProducts, onRem
           
           {activeTab === 'profile' && (
             <div className="space-y-6 md:space-y-10 animate-fade-in">
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-                 <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center overflow-hidden">
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+  {/* NEW: VIP Status Card */}
+  <div className="bg-gradient-to-br from-amber-500/10 to-orange-600/20 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-amber-500/30 flex flex-col items-center justify-center text-center relative overflow-hidden">
+    <Crown className="absolute top-4 right-4 w-6 h-6 text-amber-500/30" />
+    <p className="text-[9px] md:text-[10px] font-black uppercase text-amber-600 dark:text-amber-500 mb-2 md:mb-4 tracking-widest">Skiller Points</p>
+    <div className="flex items-center gap-2 md:gap-3">
+       <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-amber-500 shrink-0" />
+       <span className="text-2xl md:text-3xl font-black italic text-slate-900 dark:text-white drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+         {user.faithPoints || 0}
+       </span>
+    </div>
+  </div>
+
+  <div className="bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[32px] md:rounded-[48px] border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center overflow-hidden">
                     <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2 md:mb-4 tracking-widest">My Spend</p>
                     <div className="flex items-center gap-1 md:gap-3 max-w-full">
                        <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-emerald-500 shrink-0" />
